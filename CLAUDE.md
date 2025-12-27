@@ -61,6 +61,7 @@ npm run db:studio    # Open Drizzle Studio
 - Urssaf routes: `/api/urssaf/payments`, `/api/urssaf/payments/:id`, `/api/urssaf/summary`, `/api/urssaf/calculate`
 - Dashboard routes: `/api/dashboard/summary`
 - Account routes: `/api/account/balance`, `/api/account/summary`
+- Income Tax routes: `/api/income-tax/payments`, `/api/income-tax/payments/:id`, `/api/income-tax/summary`
 - Use Zod for input validation with `.issues[0].message` for error messages
 
 ### Frontend
@@ -96,8 +97,9 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - **Phase 5**: Complete - Expense Management (UI)
 - **Phase 6**: Complete - Tax & Contributions (TVA, Urssaf)
 - **Phase 7**: Complete - Financial Overview (Dashboard, Business Account)
-- **Phase 8**: Next - Income Tax (tax brackets, estimation, tracking)
-- **Phase 9-10**: Pending - Calculator Tool, Polish & Deployment
+- **Phase 8**: Complete - Income Tax (tax brackets, estimation, tracking)
+- **Phase 9**: Next - Calculator Tool
+- **Phase 10**: Pending - Polish & Deployment
 
 ## Notes
 

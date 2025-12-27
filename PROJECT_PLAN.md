@@ -438,11 +438,38 @@ business-finance/
 - Available funds calculation (Balance - Obligations - Reserved Salary)
 - Color-coded indicators for positive/negative available funds
 
-### Phase 8: Income Tax
-1. French tax bracket integration (official 2024/2025 rates)
-2. Custom bracket override
-3. Tax estimation calculator
-4. Annual tax tracking
+### Phase 8: Income Tax [COMPLETE]
+1. ~~French tax bracket integration (official 2024/2025 rates)~~
+2. ~~Custom bracket override~~
+3. ~~Tax estimation calculator~~
+4. ~~Annual tax tracking~~
+
+**Files created in Phase 8:**
+- `src/server/routes/income-tax.ts` - Income tax payment CRUD and summary API routes
+- `src/client/hooks/useIncomeTax.ts` - Income tax CRUD hooks with TanStack Query
+- `src/client/pages/IncomeTax.tsx` - Full income tax management UI (updated from stub)
+
+**Types added to shared/types.ts:**
+- `CreateIncomeTaxPaymentInput` - Input type for creating income tax payments
+- `UpdateIncomeTaxPaymentInput` - Input type for updating income tax payments
+- `IncomeTaxSummary` - Annual income tax summary with bracket breakdown
+- `TaxBracketBreakdown` - Individual bracket calculation details
+
+**API Endpoints added:**
+- `GET/POST /api/income-tax/payments` - List/create income tax payments
+- `GET/PUT/DELETE /api/income-tax/payments/:id` - Get/update/delete income tax payment
+- `GET /api/income-tax/summary?year=YYYY` - Annual income tax summary with progressive calculation
+
+**Features implemented:**
+- Annual income tax summary with CA, taxable income, estimated tax, remaining
+- Progressive tax calculation using French tax brackets (2024 defaults)
+- Breakdown table showing tax per bracket with rates
+- Payment progress visualization with progress bar
+- Payment tracking (pending/paid) with CRUD via modal form
+- Custom tax bracket support (via existing settings routes)
+- Automatic abattement forfaitaire application (configurable deduction rate)
+- Integration with account summary for pending obligations
+- Year selector for viewing historical data
 
 ### Phase 9: Calculator Tool
 1. Quick prestation calculator

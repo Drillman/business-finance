@@ -13,6 +13,7 @@ import { tvaRoutes } from './routes/tva'
 import { urssafRoutes } from './routes/urssaf'
 import { dashboardRoutes } from './routes/dashboard'
 import { accountRoutes } from './routes/account'
+import { incomeTaxRoutes } from './routes/income-tax'
 
 const fastify = Fastify({
   logger: true,
@@ -75,6 +76,7 @@ async function start() {
   await fastify.register(urssafRoutes)
   await fastify.register(dashboardRoutes)
   await fastify.register(accountRoutes)
+  await fastify.register(incomeTaxRoutes)
 
   // Start server
   const port = parseInt(process.env.PORT || '3000')

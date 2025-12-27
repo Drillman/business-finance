@@ -135,6 +135,38 @@ export interface IncomeTaxPayment {
   createdAt: string
 }
 
+export interface CreateIncomeTaxPaymentInput {
+  year: number
+  amount: number
+  status?: 'pending' | 'paid'
+  paymentDate?: string
+  reference?: string
+  note?: string
+}
+
+export type UpdateIncomeTaxPaymentInput = Partial<CreateIncomeTaxPaymentInput>
+
+// Income tax summary types
+export interface IncomeTaxSummary {
+  year: number
+  estimatedTax: string
+  taxableIncome: string
+  totalRevenue: string
+  deductionRate: string
+  totalPaid: string
+  totalPending: string
+  remaining: string
+  brackets: TaxBracketBreakdown[]
+}
+
+export interface TaxBracketBreakdown {
+  minIncome: string
+  maxIncome: string | null
+  rate: string
+  taxableAmount: string
+  taxAmount: string
+}
+
 // Settings types
 export interface Settings {
   id: string
