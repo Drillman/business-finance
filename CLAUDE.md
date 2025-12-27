@@ -98,8 +98,8 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - **Phase 6**: Complete - Tax & Contributions (TVA, Urssaf)
 - **Phase 7**: Complete - Financial Overview (Dashboard, Business Account)
 - **Phase 8**: Complete - Income Tax (tax brackets, estimation, tracking)
-- **Phase 9**: Next - Calculator Tool
-- **Phase 10**: Pending - Polish & Deployment
+- **Phase 9**: Complete - Calculator Tool (HT/TTC conversion, deductions, net calculation)
+- **Phase 10**: Next - Polish & Deployment
 
 ## Notes
 

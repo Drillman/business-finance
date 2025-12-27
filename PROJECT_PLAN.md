@@ -471,10 +471,24 @@ business-finance/
 - Integration with account summary for pending obligations
 - Year selector for viewing historical data
 
-### Phase 9: Calculator Tool
-1. Quick prestation calculator
-2. HT/TTC conversion
-3. Net amount after deductions
+### Phase 9: Calculator Tool [COMPLETE]
+1. ~~Quick prestation calculator~~
+2. ~~HT/TTC conversion~~
+3. ~~Net amount after deductions~~
+
+**Files created/modified in Phase 9:**
+- `src/client/pages/Calculator.tsx` - Full calculator UI implementation
+
+**Features implemented:**
+- Quick prestation calculator for client quotes
+- HT/TTC input mode toggle with automatic conversion
+- TVA rate selection (0%, 5.5%, 10%, 20%)
+- Urssaf deduction calculation using configured rate
+- Estimated income tax calculation using configured rate
+- Net remaining amount with percentage display
+- Info card showing configured rates
+- Reset functionality
+- Real-time calculations as user types
 
 ### Phase 10: Polish & Deployment
 1. French translations (UI labels)
