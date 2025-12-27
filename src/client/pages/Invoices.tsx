@@ -268,16 +268,6 @@ export default function Invoices() {
           <div className="stat-desc">{settings ? parseFloat(settings.estimatedTaxRate) : 0}%</div>
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">CA TTC</div>
-          <div className="stat-value text-lg">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.totalTtc || 0)
-            )}
-          </div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Restant</div>
           <div className="stat-value text-lg text-success">
             {isLoadingSummary ? (

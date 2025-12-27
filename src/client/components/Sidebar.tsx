@@ -56,13 +56,13 @@ export default function Sidebar() {
         </button>
       </div>
       <nav className="p-2 flex-1 overflow-hidden">
-        <ul className="menu menu-compact gap-1">
+        <ul className={`menu menu-compact gap-1 w-full ${isCollapsed ? 'items-center' : ''}`}>
           {navItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0' : ''}`
+                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
                 }
                 end={item.to === '/'}
                 title={isCollapsed ? item.label : undefined}
@@ -74,13 +74,13 @@ export default function Sidebar() {
           ))}
         </ul>
         <div className="divider my-2"></div>
-        <ul className="menu menu-compact gap-1">
+        <ul className={`menu menu-compact gap-1 w-full ${isCollapsed ? 'items-center' : ''}`}>
           {settingsItems.map((item) => (
             <li key={item.to}>
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0' : ''}`
+                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
                 }
                 title={isCollapsed ? item.label : undefined}
               >
