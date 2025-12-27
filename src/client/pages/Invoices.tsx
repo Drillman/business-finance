@@ -4,7 +4,7 @@ import {
   useCreateInvoice,
   useUpdateInvoice,
   useDeleteInvoice,
-  useInvoiceMonthlySummary,
+  useInvoiceYearlySummary,
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
@@ -33,10 +33,14 @@ function generateInvoiceNumber(): string {
   return `FAC-${year}${month}-${random}`
 }
 
-function getCurrentMonth(): string {
-  const now = new Date()
-  return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
+function getCurrentYear(): number {
+  return new Date().getFullYear()
 }
+
+const monthNames = [
+  'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
+  'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+]
 
 interface InvoiceFormData {
   client: string
@@ -61,7 +65,7 @@ const defaultFormData: InvoiceFormData = {
 }
 
 export default function Invoices() {
-  const [selectedMonth, setSelectedMonth] = useState(getCurrentMonth())
+  const [selectedYear, setSelectedYear] = useState(getCurrentYear())
   const [clientFilter, setClientFilter] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
@@ -69,14 +73,12 @@ export default function Invoices() {
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
-  const [year, month] = selectedMonth.split('-').map(Number)
-
   const { data: invoicesData, isLoading: isLoadingInvoices } = useInvoices({
-    month: selectedMonth,
+    year: selectedYear,
     client: clientFilter || undefined,
   })
 
-  const { data: summary, isLoading: isLoadingSummary } = useInvoiceMonthlySummary(year, month)
+  const { data: summary, isLoading: isLoadingSummary } = useInvoiceYearlySummary(selectedYear)
   const { data: settings } = useSettings()
 
   const createMutation = useCreateInvoice()
@@ -104,6 +106,24 @@ export default function Invoices() {
       count: summary.count,
     }
   }, [summary, settings])
+
+  // Group invoices by month
+  const invoicesByMonth = useMemo(() => {
+    if (!invoicesData?.data) return new Map<number, Invoice[]>()
+
+    const grouped = new Map<number, Invoice[]>()
+
+    invoicesData.data.forEach(invoice => {
+      const month = new Date(invoice.invoiceDate).getMonth()
+      if (!grouped.has(month)) {
+        grouped.set(month, [])
+      }
+      grouped.get(month)!.push(invoice)
+    })
+
+    // Sort months in descending order (most recent first)
+    return new Map([...grouped.entries()].sort((a, b) => b[0] - a[0]))
+  }, [invoicesData])
 
   const openCreateModal = () => {
     setEditingInvoice(null)
@@ -184,31 +204,28 @@ export default function Invoices() {
     return ht * (1 + rate / 100)
   }, [formData.amountHt, formData.taxRate])
 
-  const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = []
-    const now = new Date()
-    for (let i = 0; i < 24; i++) {
-      const date = new Date(now.getFullYear(), now.getMonth() - i, 1)
-      const value = `${date.getFullYear()}-${(date.getMonth() + 1).toString().padStart(2, '0')}`
-      const label = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
-      options.push({ value, label })
+  const yearOptions = useMemo(() => {
+    const currentYear = new Date().getFullYear()
+    const years = []
+    for (let i = 0; i < 5; i++) {
+      years.push(currentYear - i)
     }
-    return options
+    return years
   }, [])
 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Chiffre d'affaire</h1>
+        <h1 className="text-2xl font-bold">Factures</h1>
         <button className="btn btn-primary" onClick={openCreateModal}>
           Ajouter une facture
         </button>
       </div>
 
-      {/* Monthly Summary */}
+      {/* Yearly Summary */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
         <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">CA HT</div>
+          <div className="stat-title">CA HT {selectedYear}</div>
           <div className="stat-value text-lg">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
@@ -276,16 +293,16 @@ export default function Invoices() {
       <div className="flex flex-wrap gap-4 mb-6">
         <div className="form-control">
           <label className="label">
-            <span className="label-text">Mois</span>
+            <span className="label-text">Année</span>
           </label>
           <select
             className="select select-bordered"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(e.target.value)}
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
           >
-            {monthOptions.map((option) => (
-              <option key={option.value} value={option.value}>
-                {option.label}
+            {yearOptions.map((year) => (
+              <option key={year} value={year}>
+                {year}
               </option>
             ))}
           </select>
@@ -304,105 +321,134 @@ export default function Invoices() {
         </div>
       </div>
 
-      {/* Invoice List */}
-      <div className="card bg-base-100 shadow">
-        <div className="card-body">
-          {isLoadingInvoices ? (
-            <div className="flex justify-center py-8">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          ) : !invoicesData?.data.length ? (
-            <p className="text-base-content/60">Aucune facture pour cette période.</p>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="table">
-                <thead>
-                  <tr>
-                    <th>N° Facture</th>
-                    <th>Client</th>
-                    <th>Date</th>
-                    <th>Date paiement</th>
-                    <th className="text-right">Montant HT</th>
-                    <th className="text-right">TVA</th>
-                    <th className="text-right">Montant TTC</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {invoicesData.data.map((invoice) => (
-                    <tr key={invoice.id} className="hover">
-                      <td className="font-mono text-sm">
-                        {invoice.invoiceNumber || '-'}
-                      </td>
-                      <td>
-                        <div className="font-medium">{invoice.client}</div>
-                        {invoice.description && (
-                          <div className="text-sm text-base-content/60 truncate max-w-xs">
-                            {invoice.description}
-                          </div>
-                        )}
-                      </td>
-                      <td>{formatDate(invoice.invoiceDate)}</td>
-                      <td>
-                        {invoice.paymentDate ? (
-                          <span className="badge badge-success badge-sm">
-                            {formatDate(invoice.paymentDate)}
-                          </span>
-                        ) : (
-                          <span className="badge badge-warning badge-sm">En attente</span>
-                        )}
-                      </td>
-                      <td className="text-right font-mono">
-                        {formatCurrency(invoice.amountHt)}
-                      </td>
-                      <td className="text-right font-mono text-base-content/60">
-                        {parseFloat(invoice.taxRate)}%
-                      </td>
-                      <td className="text-right font-mono font-medium">
-                        {formatCurrency(invoice.amountTtc)}
-                      </td>
-                      <td>
-                        <div className="flex gap-2">
-                          <button
-                            className="btn btn-sm btn-ghost"
-                            onClick={() => openEditModal(invoice)}
-                          >
-                            Modifier
-                          </button>
-                          {deleteConfirmId === invoice.id ? (
-                            <div className="flex gap-1">
-                              <button
-                                className="btn btn-sm btn-error"
-                                onClick={() => handleDelete(invoice.id)}
-                                disabled={deleteMutation.isPending}
-                              >
-                                Oui
-                              </button>
-                              <button
-                                className="btn btn-sm btn-ghost"
-                                onClick={() => setDeleteConfirmId(null)}
-                              >
-                                Non
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              className="btn btn-sm btn-ghost text-error"
-                              onClick={() => setDeleteConfirmId(invoice.id)}
-                            >
-                              Supprimer
-                            </button>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {/* Invoice Timeline */}
+      {isLoadingInvoices ? (
+        <div className="flex justify-center py-8">
+          <span className="loading loading-spinner loading-lg"></span>
         </div>
-      </div>
+      ) : invoicesByMonth.size === 0 ? (
+        <div className="card bg-base-100 shadow">
+          <div className="card-body">
+            <p className="text-base-content/60">Aucune facture pour {selectedYear}.</p>
+          </div>
+        </div>
+      ) : (
+        <div className="space-y-6">
+          {Array.from(invoicesByMonth.entries()).map(([month, monthInvoices]) => {
+            const monthTotal = monthInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountHt), 0)
+            const monthTotalTtc = monthInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountTtc), 0)
+
+            return (
+              <div key={month} className="card bg-base-100 shadow">
+                <div className="card-body">
+                  <div className="flex justify-between items-center mb-4">
+                    <h2 className="card-title">
+                      {monthNames[month]} {selectedYear}
+                    </h2>
+                    <div className="text-right">
+                      <div className="font-bold">{formatCurrency(monthTotal)} HT</div>
+                      <div className="text-sm text-base-content/60">{formatCurrency(monthTotalTtc)} TTC</div>
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    <table className="table">
+                      <thead>
+                        <tr>
+                          <th>N° Facture</th>
+                          <th>Client</th>
+                          <th>Date</th>
+                          <th>Paiement</th>
+                          <th className="text-right">Montant HT</th>
+                          <th className="text-right">TVA</th>
+                          <th className="text-right">Montant TTC</th>
+                          <th>Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {monthInvoices.map((invoice) => (
+                          <tr key={invoice.id} className="hover">
+                            <td className="font-mono text-sm">
+                              {invoice.invoiceNumber || '-'}
+                            </td>
+                            <td>
+                              <div className="font-medium">{invoice.client}</div>
+                              {invoice.description && (
+                                <div className="text-sm text-base-content/60 truncate max-w-xs">
+                                  {invoice.description}
+                                </div>
+                              )}
+                            </td>
+                            <td>{formatDate(invoice.invoiceDate)}</td>
+                            <td>
+                              {invoice.paymentDate ? (
+                                <span className="badge badge-success badge-sm">
+                                  {formatDate(invoice.paymentDate)}
+                                </span>
+                              ) : (
+                                <span className="badge badge-warning badge-sm">En attente</span>
+                              )}
+                            </td>
+                            <td className="text-right font-mono">
+                              {formatCurrency(invoice.amountHt)}
+                            </td>
+                            <td className="text-right font-mono text-base-content/60">
+                              {parseFloat(invoice.taxRate)}%
+                            </td>
+                            <td className="text-right font-mono font-medium">
+                              {formatCurrency(invoice.amountTtc)}
+                            </td>
+                            <td>
+                              <div className="flex gap-1">
+                                <button
+                                  className="btn btn-sm btn-ghost btn-square"
+                                  onClick={() => openEditModal(invoice)}
+                                  title="Modifier"
+                                >
+                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                  </svg>
+                                </button>
+                                {deleteConfirmId === invoice.id ? (
+                                  <div className="flex gap-1">
+                                    <button
+                                      className="btn btn-sm btn-error"
+                                      onClick={() => handleDelete(invoice.id)}
+                                      disabled={deleteMutation.isPending}
+                                    >
+                                      Oui
+                                    </button>
+                                    <button
+                                      className="btn btn-sm btn-ghost"
+                                      onClick={() => setDeleteConfirmId(null)}
+                                    >
+                                      Non
+                                    </button>
+                                  </div>
+                                ) : (
+                                  <button
+                                    className="btn btn-sm btn-ghost btn-square text-error"
+                                    onClick={() => setDeleteConfirmId(invoice.id)}
+                                    title="Supprimer"
+                                  >
+                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+        </div>
+      )}
 
       {/* Create/Edit Modal */}
       {isModalOpen && (

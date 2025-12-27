@@ -20,8 +20,9 @@ const updateInvoiceSchema = createInvoiceSchema.partial()
 
 const listQuerySchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)').optional(),
+  year: z.coerce.number().min(2000).max(2100).optional(),
   client: z.string().optional(),
-  limit: z.coerce.number().min(1).max(100).default(50),
+  limit: z.coerce.number().min(1).max(500).default(100),
   offset: z.coerce.number().min(0).default(0),
 })
 
@@ -43,7 +44,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
         })
       }
 
-      const { month, client, limit, offset } = parseResult.data
+      const { month, year, client, limit, offset } = parseResult.data
       const userId = request.authUser.userId
 
       // Build conditions array
@@ -51,9 +52,14 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
 
       if (month) {
         const startDate = `${month}-01`
-        const [year, monthNum] = month.split('-').map(Number)
-        const lastDay = new Date(year, monthNum, 0).getDate()
+        const [yearNum, monthNum] = month.split('-').map(Number)
+        const lastDay = new Date(yearNum, monthNum, 0).getDate()
         const endDate = `${month}-${lastDay.toString().padStart(2, '0')}`
+        conditions.push(gte(invoices.invoiceDate, startDate))
+        conditions.push(lte(invoices.invoiceDate, endDate))
+      } else if (year) {
+        const startDate = `${year}-01-01`
+        const endDate = `${year}-12-31`
         conditions.push(gte(invoices.invoiceDate, startDate))
         conditions.push(lte(invoices.invoiceDate, endDate))
       }
@@ -264,6 +270,57 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
       return {
         year,
         month,
+        totalHt: totalHt.toFixed(2),
+        totalTtc: totalTtc.toFixed(2),
+        taxTotal: taxTotal.toFixed(2),
+        count: Number(result[0].count),
+      }
+    }
+  )
+
+  // Get yearly summary
+  fastify.get(
+    '/api/invoices/summary/yearly',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const querySchema = z.object({
+        year: z.coerce.number().min(2000).max(2100),
+      })
+
+      const parseResult = querySchema.safeParse(request.query)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { year } = parseResult.data
+      const userId = request.authUser.userId
+
+      const startDate = `${year}-01-01`
+      const endDate = `${year}-12-31`
+
+      const result = await db
+        .select({
+          totalHt: sql<string>`COALESCE(SUM(${invoices.amountHt}::numeric), 0)`,
+          totalTtc: sql<string>`COALESCE(SUM(${invoices.amountTtc}::numeric), 0)`,
+          count: sql<number>`count(*)`,
+        })
+        .from(invoices)
+        .where(
+          and(
+            eq(invoices.userId, userId),
+            gte(invoices.invoiceDate, startDate),
+            lte(invoices.invoiceDate, endDate)
+          )
+        )
+
+      const totalHt = parseFloat(result[0].totalHt)
+      const totalTtc = parseFloat(result[0].totalTtc)
+      const taxTotal = totalTtc - totalHt
+
+      return {
+        year,
         totalHt: totalHt.toFixed(2),
         totalTtc: totalTtc.toFixed(2),
         taxTotal: taxTotal.toFixed(2),

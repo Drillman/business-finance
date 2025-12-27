@@ -11,6 +11,7 @@ interface InvoiceListResponse {
 
 interface InvoiceListParams {
   month?: string
+  year?: number
   client?: string
   limit?: number
   offset?: number
@@ -25,9 +26,18 @@ interface MonthlySummary {
   count: number
 }
 
+interface YearlySummary {
+  year: number
+  totalHt: string
+  totalTtc: string
+  taxTotal: string
+  count: number
+}
+
 export function useInvoices(params: InvoiceListParams = {}) {
   const queryString = new URLSearchParams()
   if (params.month) queryString.set('month', params.month)
+  if (params.year) queryString.set('year', params.year.toString())
   if (params.client) queryString.set('client', params.client)
   if (params.limit) queryString.set('limit', params.limit.toString())
   if (params.offset) queryString.set('offset', params.offset.toString())
@@ -95,6 +105,15 @@ export function useInvoiceMonthlySummary(year: number, month: number) {
     queryKey: ['invoiceSummary', year, month],
     queryFn: () =>
       api.get<MonthlySummary>(`/invoices/summary/monthly?year=${year}&month=${month}`),
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+export function useInvoiceYearlySummary(year: number) {
+  return useQuery({
+    queryKey: ['invoiceSummary', 'yearly', year],
+    queryFn: () =>
+      api.get<YearlySummary>(`/invoices/summary/yearly?year=${year}`),
     staleTime: 1000 * 60 * 2,
   })
 }
