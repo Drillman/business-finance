@@ -333,11 +333,24 @@ business-finance/
 - `GET/POST/DELETE /api/settings/tax-brackets` - Manage tax brackets
 - `POST /api/settings/calculate-tax` - Calculate estimated income tax
 
-### Phase 4: Invoice Management
-1. Invoice list page with filters
-2. Add/edit invoice form
-3. Monthly summary calculations
-4. Invoice number generation
+### Phase 4: Invoice Management [COMPLETE]
+1. ~~Invoice list page with filters (by month and client)~~
+2. ~~Add/edit invoice form (modal with full CRUD)~~
+3. ~~Monthly summary calculations (CA HT, TVA, Urssaf, Impôts estimés, Restant)~~
+4. ~~Invoice number auto-generation (FAC-YYYYMM-XXX format)~~
+
+**Files created in Phase 4:**
+- `src/client/hooks/useInvoices.ts` - Invoice CRUD hooks with TanStack Query
+- `src/client/hooks/useSettings.ts` - Settings hooks for Urssaf/tax rates
+- `src/client/pages/Invoices.tsx` - Full invoice management UI
+
+**Features implemented:**
+- Invoice list with month and client filtering
+- Create/Edit/Delete invoices via modal form
+- Monthly summary with CA HT, CA TTC, TVA collected, Urssaf, estimated taxes, remaining amount
+- Auto-generation of invoice numbers (FAC-YYYYMM-XXX format)
+- Real-time TTC calculation in form
+- Payment status tracking (paid/pending)
 
 ### Phase 5: Expense Management
 1. Unified expense interface

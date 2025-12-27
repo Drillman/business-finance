@@ -88,8 +88,9 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - **Phase 1**: Complete - Project setup, Fastify, React, Drizzle, security middleware
 - **Phase 2**: Complete - Full authentication (email/password + passkeys)
 - **Phase 3**: Complete - Core data models and CRUD APIs (invoices, expenses, settings)
-- **Phase 4**: Next - Invoice Management (UI)
-- **Phase 5-10**: Pending - Feature implementation
+- **Phase 4**: Complete - Invoice Management (UI)
+- **Phase 5**: Next - Expense Management (UI)
+- **Phase 6-10**: Pending - Feature implementation
 
 ## Notes
 
