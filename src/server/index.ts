@@ -2,7 +2,10 @@ import Fastify from 'fastify'
 import cors from '@fastify/cors'
 import helmet from '@fastify/helmet'
 import cookie from '@fastify/cookie'
+import jwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
+import { authRoutes } from './routes/auth'
+import { passkeyRoutes } from './routes/passkeys'
 
 const fastify = Fastify({
   logger: true,
@@ -32,7 +35,19 @@ async function start() {
     secret: process.env.COOKIE_SECRET || 'dev-cookie-secret-change-in-production',
   })
 
-  // Security: Rate limiting
+  // JWT plugin
+  await fastify.register(jwt, {
+    secret: process.env.JWT_SECRET || 'dev-jwt-secret-change-in-production',
+    sign: {
+      expiresIn: '15m',
+    },
+    cookie: {
+      cookieName: 'accessToken',
+      signed: false,
+    },
+  })
+
+  // Security: Global rate limiting
   await fastify.register(rateLimit, {
     max: parseInt(process.env.RATE_LIMIT_MAX || '100'),
     timeWindow: parseInt(process.env.RATE_LIMIT_WINDOW_MS || '60000'),
@@ -42,6 +57,10 @@ async function start() {
   fastify.get('/api/health', async () => {
     return { status: 'ok', timestamp: new Date().toISOString() }
   })
+
+  // Register routes
+  await fastify.register(authRoutes)
+  await fastify.register(passkeyRoutes)
 
   // Start server
   const port = parseInt(process.env.PORT || '3000')

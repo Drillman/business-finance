@@ -150,6 +150,14 @@ export interface RegisterInput {
   password: string
 }
 
+// Passkey types
+export interface Passkey {
+  id: string
+  deviceName: string | null
+  createdAt: string
+  lastUsedAt: string | null
+}
+
 // API response types
 export interface ApiError {
   message: string

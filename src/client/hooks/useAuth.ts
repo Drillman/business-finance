@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import type { User, LoginInput, RegisterInput, AuthResponse } from '@shared/types'
+import type { User, LoginInput, RegisterInput, AuthResponse, Passkey } from '@shared/types'
 
 export function useUser() {
   return useQuery({
@@ -43,6 +43,49 @@ export function useLogout() {
     onSuccess: () => {
       queryClient.setQueryData(['user'], null)
       queryClient.clear()
+    },
+  })
+}
+
+export function useRefreshToken() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: () => api.post<AuthResponse>('/auth/refresh'),
+    onSuccess: (data) => {
+      queryClient.setQueryData(['user'], data.user)
+    },
+  })
+}
+
+// Passkey hooks
+export function usePasskeys() {
+  return useQuery({
+    queryKey: ['passkeys'],
+    queryFn: () => api.get<Passkey[]>('/passkeys'),
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useDeletePasskey() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: (id: string) => api.delete<void>(`/passkeys/${id}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passkeys'] })
+    },
+  })
+}
+
+export function useRenamePasskey() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: ({ id, deviceName }: { id: string; deviceName: string }) =>
+      api.patch<{ success: boolean }>(`/passkeys/${id}`, { deviceName }),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['passkeys'] })
     },
   })
 }

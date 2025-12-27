@@ -1,31 +1,39 @@
 import { useState, type FormEvent } from 'react'
-import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { useLogin } from '../hooks/useAuth'
-import { loginWithPasskey, isPasskeySupported } from '../utils/passkey'
+import { useNavigate, Link } from 'react-router-dom'
+import { useRegister } from '../hooks/useAuth'
+import { signupWithPasskey, isPasskeySupported } from '../utils/passkey'
 import { useQueryClient } from '@tanstack/react-query'
 
-export default function Login() {
+export default function Register() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
   const [error, setError] = useState('')
   const [isPasskeyLoading, setIsPasskeyLoading] = useState(false)
 
   const navigate = useNavigate()
-  const location = useLocation()
   const queryClient = useQueryClient()
-  const loginMutation = useLogin()
-
-  const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
+  const registerMutation = useRegister()
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
     setError('')
 
-    loginMutation.mutate(
+    if (password !== confirmPassword) {
+      setError('Les mots de passe ne correspondent pas')
+      return
+    }
+
+    if (password.length < 8) {
+      setError('Le mot de passe doit contenir au moins 8 caractères')
+      return
+    }
+
+    registerMutation.mutate(
       { email, password },
       {
         onSuccess: () => {
-          navigate(from, { replace: true })
+          navigate('/', { replace: true })
         },
         onError: (err) => {
           setError(err.message)
@@ -34,16 +42,21 @@ export default function Login() {
     )
   }
 
-  const handlePasskeyLogin = async () => {
+  const handlePasskeySignup = async () => {
+    if (!email) {
+      setError('Veuillez entrer votre email')
+      return
+    }
+
     setError('')
     setIsPasskeyLoading(true)
 
     try {
-      const result = await loginWithPasskey(email || undefined)
+      const result = await signupWithPasskey(email)
       queryClient.setQueryData(['user'], result.user)
-      navigate(from, { replace: true })
+      navigate('/', { replace: true })
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Échec de la connexion avec Passkey')
+      setError(err instanceof Error ? err.message : 'Échec de la création du compte avec Passkey')
     } finally {
       setIsPasskeyLoading(false)
     }
@@ -55,7 +68,7 @@ export default function Login() {
     <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
       <div className="card w-full max-w-md bg-base-100 shadow-xl">
         <div className="card-body">
-          <h2 className="card-title text-2xl justify-center mb-4">Connexion</h2>
+          <h2 className="card-title text-2xl justify-center mb-4">Créer un compte</h2>
 
           {error && (
             <div className="alert alert-error mb-4">
@@ -103,7 +116,25 @@ export default function Login() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                autoComplete="current-password"
+                autoComplete="new-password"
+              />
+              <label className="label">
+                <span className="label-text-alt">Minimum 8 caractères</span>
+              </label>
+            </div>
+
+            <div className="form-control mt-2">
+              <label className="label">
+                <span className="label-text">Confirmer le mot de passe</span>
+              </label>
+              <input
+                type="password"
+                placeholder="••••••••"
+                className="input input-bordered"
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                required
+                autoComplete="new-password"
               />
             </div>
 
@@ -111,12 +142,12 @@ export default function Login() {
               <button
                 type="submit"
                 className="btn btn-primary"
-                disabled={loginMutation.isPending}
+                disabled={registerMutation.isPending}
               >
-                {loginMutation.isPending ? (
+                {registerMutation.isPending ? (
                   <span className="loading loading-spinner loading-sm"></span>
                 ) : (
-                  'Se connecter'
+                  "S'inscrire"
                 )}
               </button>
             </div>
@@ -129,7 +160,7 @@ export default function Login() {
               <button
                 type="button"
                 className="btn btn-outline gap-2"
-                onClick={handlePasskeyLogin}
+                onClick={handlePasskeySignup}
                 disabled={isPasskeyLoading}
               >
                 {isPasskeyLoading ? (
@@ -148,18 +179,21 @@ export default function Login() {
                       <path d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                       <circle cx="12" cy="7" r="1" />
                     </svg>
-                    Connexion avec Passkey
+                    S'inscrire avec Passkey
                   </>
                 )}
               </button>
+              <p className="text-sm text-base-content/70 text-center mt-2">
+                Inscription sans mot de passe avec votre appareil
+              </p>
             </>
           )}
 
           <div className="text-center mt-4">
             <span className="text-sm text-base-content/70">
-              Pas encore de compte ?{' '}
-              <Link to="/register" className="link link-primary">
-                S'inscrire
+              Déjà un compte ?{' '}
+              <Link to="/login" className="link link-primary">
+                Se connecter
               </Link>
             </span>
           </div>
