@@ -372,11 +372,39 @@ business-finance/
 - Real-time TTC and recoverable TVA calculation in form
 - 5 expense categories: Fixed monthly, One-time, Recurring, Professional, Other
 
-### Phase 6: Tax & Contributions
-1. TVA calculation and tracking
-2. Urssaf quarterly management
-3. Payment status tracking
-4. Auto-calculations based on settings
+### Phase 6: Tax & Contributions [COMPLETE]
+1. ~~TVA calculation and tracking~~
+2. ~~Urssaf quarterly management~~
+3. ~~Payment status tracking~~
+4. ~~Auto-calculations based on settings~~
+
+**Files created in Phase 6:**
+- `src/server/routes/tva.ts` - TVA payment CRUD and summary API routes
+- `src/server/routes/urssaf.ts` - Urssaf payment CRUD and summary API routes
+- `src/client/hooks/useTva.ts` - TVA CRUD hooks with TanStack Query
+- `src/client/hooks/useUrssaf.ts` - Urssaf CRUD hooks with TanStack Query
+- `src/client/pages/TVA.tsx` - Full TVA management UI
+- `src/client/pages/Urssaf.tsx` - Full Urssaf management UI
+
+**API Endpoints added:**
+- `GET/POST /api/tva/payments` - List/create TVA payments
+- `GET/PUT/DELETE /api/tva/payments/:id` - Get/update/delete TVA payment
+- `GET /api/tva/summary` - TVA summary for a period (collected, recoverable, net, paid)
+- `GET /api/tva/monthly` - Monthly TVA breakdown for a year
+- `GET/POST /api/urssaf/payments` - List/create Urssaf payments
+- `GET/PUT/DELETE /api/urssaf/payments/:id` - Get/update/delete Urssaf payment
+- `GET /api/urssaf/summary` - Annual Urssaf summary with quarterly breakdown
+- `POST /api/urssaf/calculate` - Calculate Urssaf amount for given revenue
+
+**Features implemented:**
+- TVA page with annual summary (collected, recoverable, net, balance)
+- Monthly TVA breakdown table showing collected/recoverable/net per month
+- TVA payment list with CRUD operations via modal form
+- Urssaf page with annual summary (declared CA, dues, paid, remaining)
+- Quarterly breakdown with actual revenue and estimated vs declared amounts
+- Auto-calculation of Urssaf amounts based on user's configured rate
+- Payment status tracking (pending/paid) with payment date and reference
+- Year selector for viewing historical data
 
 ### Phase 7: Financial Overview
 1. Dashboard with key metrics

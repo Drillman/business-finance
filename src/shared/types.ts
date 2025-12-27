@@ -82,6 +82,18 @@ export interface TaxPayment {
   createdAt: string
 }
 
+export interface CreateTaxPaymentInput {
+  amount: number
+  periodStart: string
+  periodEnd: string
+  status?: 'pending' | 'paid'
+  paymentDate?: string
+  reference?: string
+  note?: string
+}
+
+export type UpdateTaxPaymentInput = Partial<CreateTaxPaymentInput>
+
 // URSSAF payment types
 export interface UrssafPayment {
   id: string
@@ -96,6 +108,19 @@ export interface UrssafPayment {
   note: string | null
   createdAt: string
 }
+
+export interface CreateUrssafPaymentInput {
+  trimester: number
+  year: number
+  revenue: number
+  amount: number
+  status?: 'pending' | 'paid'
+  paymentDate?: string
+  reference?: string
+  note?: string
+}
+
+export type UpdateUrssafPaymentInput = Partial<CreateUrssafPaymentInput>
 
 // Income tax payment types
 export interface IncomeTaxPayment {

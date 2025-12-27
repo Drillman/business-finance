@@ -57,6 +57,8 @@ npm run db:studio    # Open Drizzle Studio
 - Invoice routes: `/api/invoices`, `/api/invoices/:id`, `/api/invoices/summary/monthly`
 - Expense routes: `/api/expenses`, `/api/expenses/:id`, `/api/expenses/summary/monthly`, `/api/expenses/recurring`
 - Settings routes: `/api/settings`, `/api/settings/tax-brackets`, `/api/settings/calculate-tax`
+- TVA routes: `/api/tva/payments`, `/api/tva/payments/:id`, `/api/tva/summary`, `/api/tva/monthly`
+- Urssaf routes: `/api/urssaf/payments`, `/api/urssaf/payments/:id`, `/api/urssaf/summary`, `/api/urssaf/calculate`
 - Use Zod for input validation with `.issues[0].message` for error messages
 
 ### Frontend
@@ -90,8 +92,9 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - **Phase 3**: Complete - Core data models and CRUD APIs (invoices, expenses, settings)
 - **Phase 4**: Complete - Invoice Management (UI)
 - **Phase 5**: Complete - Expense Management (UI)
-- **Phase 6**: Next - Tax & Contributions (TVA, Urssaf)
-- **Phase 7-10**: Pending - Feature implementation
+- **Phase 6**: Complete - Tax & Contributions (TVA, Urssaf)
+- **Phase 7**: Next - Financial Overview (Dashboard, Business Account)
+- **Phase 8-10**: Pending - Feature implementation
 
 ## Notes
 
