@@ -352,11 +352,25 @@ business-finance/
 - Real-time TTC calculation in form
 - Payment status tracking (paid/pending)
 
-### Phase 5: Expense Management
-1. Unified expense interface
-2. Recurring expense support
-3. Tax recovery tracking
-4. Category management
+### Phase 5: Expense Management [COMPLETE]
+1. ~~Unified expense interface~~
+2. ~~Recurring expense support~~
+3. ~~Tax recovery tracking~~
+4. ~~Category management~~
+
+**Files created in Phase 5:**
+- `src/client/hooks/useExpenses.ts` - Expense CRUD hooks with TanStack Query
+- `src/client/pages/Expenses.tsx` - Full expense management UI
+
+**Features implemented:**
+- Expense list with month, category, and recurring filters
+- Create/Edit/Delete expenses via modal form
+- Monthly summary with Total HT, TVA paid, TVA recoverable, Total TTC
+- Category breakdown display with color-coded badges
+- Recurring expense support (monthly, quarterly, yearly)
+- Tax recovery rate tracking (100%, 80%, 0%)
+- Real-time TTC and recoverable TVA calculation in form
+- 5 expense categories: Fixed monthly, One-time, Recurring, Professional, Other
 
 ### Phase 6: Tax & Contributions
 1. TVA calculation and tracking

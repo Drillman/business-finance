@@ -89,8 +89,9 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - **Phase 2**: Complete - Full authentication (email/password + passkeys)
 - **Phase 3**: Complete - Core data models and CRUD APIs (invoices, expenses, settings)
 - **Phase 4**: Complete - Invoice Management (UI)
-- **Phase 5**: Next - Expense Management (UI)
-- **Phase 6-10**: Pending - Feature implementation
+- **Phase 5**: Complete - Expense Management (UI)
+- **Phase 6**: Next - Tax & Contributions (TVA, Urssaf)
+- **Phase 7-10**: Pending - Feature implementation
 
 ## Notes
 
