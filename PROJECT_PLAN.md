@@ -306,15 +306,32 @@ business-finance/
 - `src/client/pages/Register.tsx` - Registration page
 - `src/client/pages/ManagePasskeys.tsx` - Passkey management
 
-### Phase 3: Core Data Models [NEXT]
-1. Create all Drizzle schemas (already done in Phase 1)
-2. Setup database migrations
-3. Implement CRUD API routes for:
-   - Invoices
-   - Expenses
-   - Settings
-4. Frontend API client setup (already done)
-5. **Security**: Input validation with Zod, user_id filtering on all queries
+### Phase 3: Core Data Models [COMPLETE]
+1. ~~Create all Drizzle schemas (already done in Phase 1)~~
+2. ~~Setup database migrations~~
+3. ~~Implement CRUD API routes for:~~
+   - ~~Invoices (CRUD + monthly summary)~~
+   - ~~Expenses (CRUD + monthly summary + recurring expenses)~~
+   - ~~Settings (user settings + tax brackets + tax calculation)~~
+4. ~~Frontend API client setup (already done)~~
+5. ~~**Security**: Input validation with Zod, user_id filtering on all queries~~
+
+**Files created in Phase 3:**
+- `src/server/routes/invoices.ts` - Invoice CRUD API routes
+- `src/server/routes/expenses.ts` - Expense CRUD API routes
+- `src/server/routes/settings.ts` - Settings and tax bracket API routes
+
+**API Endpoints added:**
+- `GET/POST /api/invoices` - List/create invoices
+- `GET/PUT/DELETE /api/invoices/:id` - Get/update/delete invoice
+- `GET /api/invoices/summary/monthly` - Monthly invoice summary
+- `GET/POST /api/expenses` - List/create expenses
+- `GET/PUT/DELETE /api/expenses/:id` - Get/update/delete expense
+- `GET /api/expenses/summary/monthly` - Monthly expense summary
+- `GET /api/expenses/recurring` - List recurring expenses
+- `GET/PUT /api/settings` - Get/update user settings
+- `GET/POST/DELETE /api/settings/tax-brackets` - Manage tax brackets
+- `POST /api/settings/calculate-tax` - Calculate estimated income tax
 
 ### Phase 4: Invoice Management
 1. Invoice list page with filters

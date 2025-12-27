@@ -54,6 +54,9 @@ npm run db:studio    # Open Drizzle Studio
 - All routes prefixed with `/api/`
 - Auth routes: `/api/auth/register`, `/api/auth/login`, `/api/auth/logout`, `/api/auth/refresh`, `/api/auth/me`
 - Passkey routes: `/api/passkeys/*`
+- Invoice routes: `/api/invoices`, `/api/invoices/:id`, `/api/invoices/summary/monthly`
+- Expense routes: `/api/expenses`, `/api/expenses/:id`, `/api/expenses/summary/monthly`, `/api/expenses/recurring`
+- Settings routes: `/api/settings`, `/api/settings/tax-brackets`, `/api/settings/calculate-tax`
 - Use Zod for input validation with `.issues[0].message` for error messages
 
 ### Frontend
@@ -84,8 +87,9 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 
 - **Phase 1**: Complete - Project setup, Fastify, React, Drizzle, security middleware
 - **Phase 2**: Complete - Full authentication (email/password + passkeys)
-- **Phase 3**: Pending - Core data models and CRUD APIs
-- **Phase 4-10**: Pending - Feature implementation
+- **Phase 3**: Complete - Core data models and CRUD APIs (invoices, expenses, settings)
+- **Phase 4**: Next - Invoice Management (UI)
+- **Phase 5-10**: Pending - Feature implementation
 
 ## Notes
 

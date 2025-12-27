@@ -33,6 +33,8 @@ export interface CreateInvoiceInput {
   note?: string
 }
 
+export type UpdateInvoiceInput = Partial<CreateInvoiceInput>
+
 // Expense types
 export interface Expense {
   id: string
@@ -49,17 +51,22 @@ export interface Expense {
   createdAt: string
 }
 
+export type ExpenseCategory = 'fixed' | 'one-time' | 'recurring' | 'professional' | 'other'
+export type RecurrencePeriod = 'monthly' | 'quarterly' | 'yearly'
+
 export interface CreateExpenseInput {
   description: string
   date: string
   amountHt: number
   taxAmount?: number
   taxRecoveryRate?: number
-  category: string
+  category: ExpenseCategory
   isRecurring?: boolean
-  recurrencePeriod?: string
+  recurrencePeriod?: RecurrencePeriod
   note?: string
 }
+
+export type UpdateExpenseInput = Partial<CreateExpenseInput>
 
 // Tax payment types
 export interface TaxPayment {

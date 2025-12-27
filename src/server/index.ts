@@ -6,6 +6,9 @@ import jwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
 import { authRoutes } from './routes/auth'
 import { passkeyRoutes } from './routes/passkeys'
+import { invoiceRoutes } from './routes/invoices'
+import { expenseRoutes } from './routes/expenses'
+import { settingsRoutes } from './routes/settings'
 
 const fastify = Fastify({
   logger: true,
@@ -61,6 +64,9 @@ async function start() {
   // Register routes
   await fastify.register(authRoutes)
   await fastify.register(passkeyRoutes)
+  await fastify.register(invoiceRoutes)
+  await fastify.register(expenseRoutes)
+  await fastify.register(settingsRoutes)
 
   // Start server
   const port = parseInt(process.env.PORT || '3000')
