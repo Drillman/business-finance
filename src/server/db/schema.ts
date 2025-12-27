@@ -139,6 +139,14 @@ export const taxBrackets = pgTable('tax_brackets', {
   index('tax_brackets_year_idx').on(table.year),
 ])
 
+// Business account balance
+export const accountBalances = pgTable('account_balances', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().unique().references(() => users.id, { onDelete: 'cascade' }),
+  balance: decimal('balance', { precision: 12, scale: 2 }).notNull().default('0'),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+})
+
 // Refresh tokens for JWT auth
 export const refreshTokens = pgTable('refresh_tokens', {
   id: uuid('id').primaryKey().defaultRandom(),

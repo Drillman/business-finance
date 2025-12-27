@@ -406,11 +406,37 @@ business-finance/
 - Payment status tracking (pending/paid) with payment date and reference
 - Year selector for viewing historical data
 
-### Phase 7: Financial Overview
-1. Dashboard with key metrics
-2. Business account overview
-3. Available funds calculation
-4. Pending obligations display
+### Phase 7: Financial Overview [COMPLETE]
+1. ~~Dashboard with key metrics~~
+2. ~~Business account overview~~
+3. ~~Available funds calculation~~
+4. ~~Pending obligations display~~
+
+**Files created in Phase 7:**
+- `src/server/routes/dashboard.ts` - Dashboard summary API endpoint
+- `src/server/routes/account.ts` - Business account balance and summary API endpoints
+- `src/client/hooks/useDashboard.ts` - Dashboard data hook with TanStack Query
+- `src/client/hooks/useAccount.ts` - Account balance and summary hooks with TanStack Query
+
+**Database changes:**
+- Added `account_balances` table for storing user's business account balance
+
+**API Endpoints added:**
+- `GET /api/dashboard/summary` - Monthly summary with revenue, TVA, Urssaf, expenses, and upcoming payments
+- `GET /api/account/balance` - Get current account balance
+- `PUT /api/account/balance` - Update account balance
+- `GET /api/account/summary` - Account summary with all pending obligations and available funds
+
+**Features implemented:**
+- Dashboard with month/year selector for historical data
+- Monthly summary cards showing CA HT/TTC, TVA net, Urssaf estimate, net remaining
+- Account overview section with current balance, obligations, salary reserve, available funds
+- Upcoming payments table showing pending TVA and Urssaf payments
+- Quick access links to other sections
+- Business Account page with balance input and update functionality
+- Obligations breakdown (pending TVA, Urssaf, Income Tax)
+- Available funds calculation (Balance - Obligations - Reserved Salary)
+- Color-coded indicators for positive/negative available funds
 
 ### Phase 8: Income Tax
 1. French tax bracket integration (official 2024/2025 rates)

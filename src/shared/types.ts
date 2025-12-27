@@ -206,3 +206,46 @@ export interface MonthlySummary {
   estimatedIncomeTax: number
   remaining: number
 }
+
+// Business account types
+export interface AccountBalance {
+  id: string
+  userId: string
+  balance: string
+  updatedAt: string
+}
+
+export interface AccountSummary {
+  currentBalance: string
+  pendingTva: string
+  pendingUrssaf: string
+  pendingIncomeTax: string
+  totalObligations: string
+  nextMonthSalary: string
+  availableFunds: string
+}
+
+// Dashboard types
+export interface DashboardSummary {
+  month: number
+  year: number
+  revenueHt: string
+  revenueTtc: string
+  tvaCollected: string
+  tvaRecoverable: string
+  netTva: string
+  urssafEstimate: string
+  incomeTaxEstimate: string
+  expensesHt: string
+  netRemaining: string
+  pendingTva: string
+  pendingUrssaf: string
+  upcomingPayments: UpcomingPayment[]
+}
+
+export interface UpcomingPayment {
+  type: 'tva' | 'urssaf' | 'income_tax'
+  amount: string
+  dueDate?: string
+  description: string
+}
