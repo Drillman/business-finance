@@ -4,6 +4,9 @@ import helmet from '@fastify/helmet'
 import cookie from '@fastify/cookie'
 import jwt from '@fastify/jwt'
 import rateLimit from '@fastify/rate-limit'
+import fastifyStatic from '@fastify/static'
+import path from 'path'
+import { fileURLToPath } from 'url'
 import { authRoutes } from './routes/auth'
 import { passkeyRoutes } from './routes/passkeys'
 import { invoiceRoutes } from './routes/invoices'
@@ -14,6 +17,10 @@ import { urssafRoutes } from './routes/urssaf'
 import { dashboardRoutes } from './routes/dashboard'
 import { accountRoutes } from './routes/account'
 import { incomeTaxRoutes } from './routes/income-tax'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
+const isProduction = process.env.NODE_ENV === 'production'
 
 const fastify = Fastify({
   logger: true,
@@ -77,6 +84,24 @@ async function start() {
   await fastify.register(dashboardRoutes)
   await fastify.register(accountRoutes)
   await fastify.register(incomeTaxRoutes)
+
+  // Serve static files in production
+  if (isProduction) {
+    const clientPath = path.join(__dirname, '../client')
+
+    await fastify.register(fastifyStatic, {
+      root: clientPath,
+      prefix: '/',
+    })
+
+    // SPA fallback: serve index.html for non-API routes
+    fastify.setNotFoundHandler((request, reply) => {
+      if (!request.url.startsWith('/api')) {
+        return reply.sendFile('index.html')
+      }
+      return reply.status(404).send({ error: 'Not found' })
+    })
+  }
 
   // Start server
   const port = parseInt(process.env.PORT || '3000')
