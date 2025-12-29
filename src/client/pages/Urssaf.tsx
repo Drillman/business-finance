@@ -7,6 +7,8 @@ import {
 } from '../hooks/useUrssaf'
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -62,6 +64,8 @@ export default function Urssaf() {
   const [formData, setFormData] = useState<UrssafFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const { showSuccess, showError } = useSnackbar()
 
   const { data: summary, isLoading: isLoadingSummary } = useUrssafSummary(selectedYear)
 
@@ -129,12 +133,14 @@ export default function Urssaf() {
     try {
       if (editingPayment) {
         await updateMutation.mutateAsync({ id: editingPayment.id, data })
+        showSuccess('Cotisation Urssaf modifiée avec succès')
       } else {
         await createMutation.mutateAsync(data)
+        showSuccess('Cotisation Urssaf créée avec succès')
       }
       closeModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -142,8 +148,9 @@ export default function Urssaf() {
     try {
       await deleteMutation.mutateAsync(id)
       setDeleteConfirmId(null)
+      showSuccess('Cotisation Urssaf supprimée avec succès')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -199,7 +206,7 @@ export default function Urssaf() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Cotisations dues</div>
-          <div className="stat-value text-lg text-warning">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -210,7 +217,7 @@ export default function Urssaf() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Cotisations payées</div>
-          <div className="stat-value text-lg text-success">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -224,9 +231,7 @@ export default function Urssaf() {
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
-              <span className={parseFloat(summary?.totals.totalPending || '0') > 0 ? 'text-error' : 'text-success'}>
-                {formatCurrency(summary?.totals.totalPending || '0')}
-              </span>
+              formatCurrency(summary?.totals.totalPending || '0')
             )}
           </div>
         </div>
@@ -303,31 +308,13 @@ export default function Urssaf() {
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </button>
-                                {deleteConfirmId === t.payment!.id ? (
-                                  <div className="flex gap-1">
-                                    <button
-                                      className="btn btn-sm btn-error"
-                                      onClick={() => handleDelete(t.payment!.id)}
-                                      disabled={deleteMutation.isPending}
-                                    >
-                                      Oui
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-ghost"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                    >
-                                      Non
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    className="btn btn-sm btn-ghost btn-square text-error"
-                                    onClick={() => setDeleteConfirmId(t.payment!.id)}
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                )}
+                                <button
+                                  className="btn btn-sm btn-ghost btn-square text-error"
+                                  onClick={() => setDeleteConfirmId(t.payment!.id)}
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </>
                             ) : (
                               <button
@@ -547,6 +534,19 @@ export default function Urssaf() {
           <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title="Supprimer la cotisation Urssaf"
+        message="Êtes-vous sûr de vouloir supprimer cette cotisation ? Cette action est irréversible."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </div>
   )
 }

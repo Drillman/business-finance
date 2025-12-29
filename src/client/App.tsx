@@ -3,6 +3,7 @@ import Layout from './components/Layout'
 import ProtectedRoute from './components/ProtectedRoute'
 import Dashboard from './pages/Dashboard'
 import Invoices from './pages/Invoices'
+import InvoiceSettings from './pages/InvoiceSettings'
 import Expenses from './pages/Expenses'
 import TVA from './pages/TVA'
 import Urssaf from './pages/Urssaf'
@@ -29,6 +30,7 @@ function App() {
       >
         <Route index element={<Dashboard />} />
         <Route path="invoices" element={<Invoices />} />
+        <Route path="invoices/settings" element={<InvoiceSettings />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="tva" element={<TVA />} />
         <Route path="urssaf" element={<Urssaf />} />

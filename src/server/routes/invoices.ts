@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { eq, and, desc, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../db'
-import { invoices } from '../db/schema'
+import { invoices, invoiceClients, invoiceDescriptions } from '../db/schema'
 import { requireAuth } from '../auth/middleware'
 
 const createInvoiceSchema = z.object({
@@ -111,45 +111,163 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // Get unique clients
+  // Get unique clients (from saved list + invoice history)
   fastify.get(
     '/api/invoices/clients',
     { preHandler: [requireAuth] },
     async (request: FastifyRequest) => {
       const userId = request.authUser.userId
 
-      const result = await db
+      // Get saved clients
+      const savedClients = await db
+        .select({ name: invoiceClients.name })
+        .from(invoiceClients)
+        .where(eq(invoiceClients.userId, userId))
+        .orderBy(invoiceClients.name)
+
+      // Get clients from invoices
+      const invoiceClientsList = await db
         .selectDistinct({ client: invoices.client })
         .from(invoices)
         .where(eq(invoices.userId, userId))
         .orderBy(invoices.client)
 
+      // Merge and deduplicate
+      const allClients = new Set([
+        ...savedClients.map((r) => r.name),
+        ...invoiceClientsList.map((r) => r.client),
+      ])
+
       return {
-        clients: result.map((r) => r.client),
+        clients: Array.from(allClients).sort(),
       }
     }
   )
 
-  // Get unique descriptions
+  // Get unique descriptions (from saved list + invoice history)
   fastify.get(
     '/api/invoices/descriptions',
     { preHandler: [requireAuth] },
     async (request: FastifyRequest) => {
       const userId = request.authUser.userId
 
-      const result = await db
+      // Get saved descriptions
+      const savedDescriptions = await db
+        .select({ description: invoiceDescriptions.description })
+        .from(invoiceDescriptions)
+        .where(eq(invoiceDescriptions.userId, userId))
+        .orderBy(invoiceDescriptions.description)
+
+      // Get descriptions from invoices
+      const invoiceDescriptionsList = await db
         .selectDistinct({ description: invoices.description })
         .from(invoices)
         .where(and(eq(invoices.userId, userId), sql`${invoices.description} IS NOT NULL AND ${invoices.description} != ''`))
         .orderBy(invoices.description)
 
+      // Merge and deduplicate
+      const allDescriptions = new Set([
+        ...savedDescriptions.map((r) => r.description),
+        ...invoiceDescriptionsList.map((r) => r.description).filter(Boolean) as string[],
+      ])
+
       return {
-        descriptions: result.map((r) => r.description).filter(Boolean) as string[],
+        descriptions: Array.from(allDescriptions).sort(),
       }
     }
   )
 
+  // Add a client to saved list
+  fastify.post(
+    '/api/invoices/settings/clients',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const schema = z.object({ client: z.string().min(1) })
+      const parseResult = schema.safeParse(request.body)
+      if (!parseResult.success) {
+        return reply.status(400).send({ message: parseResult.error.issues[0].message })
+      }
+
+      const userId = request.authUser.userId
+      const { client } = parseResult.data
+
+      // Check if already exists
+      const existing = await db.query.invoiceClients.findFirst({
+        where: and(eq(invoiceClients.userId, userId), eq(invoiceClients.name, client)),
+      })
+
+      if (existing) {
+        return reply.status(409).send({ message: 'Ce client existe déjà' })
+      }
+
+      await db.insert(invoiceClients).values({ userId, name: client })
+      return reply.status(201).send({ success: true })
+    }
+  )
+
+  // Delete a client from saved list
+  fastify.delete(
+    '/api/invoices/settings/clients/:name',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const { name } = request.params as { name: string }
+      const userId = request.authUser.userId
+
+      await db
+        .delete(invoiceClients)
+        .where(and(eq(invoiceClients.userId, userId), eq(invoiceClients.name, decodeURIComponent(name))))
+
+      return reply.status(204).send()
+    }
+  )
+
+  // Add a description to saved list
+  fastify.post(
+    '/api/invoices/settings/descriptions',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const schema = z.object({ description: z.string().min(1) })
+      const parseResult = schema.safeParse(request.body)
+      if (!parseResult.success) {
+        return reply.status(400).send({ message: parseResult.error.issues[0].message })
+      }
+
+      const userId = request.authUser.userId
+      const { description } = parseResult.data
+
+      // Check if already exists
+      const existing = await db.query.invoiceDescriptions.findFirst({
+        where: and(eq(invoiceDescriptions.userId, userId), eq(invoiceDescriptions.description, description)),
+      })
+
+      if (existing) {
+        return reply.status(409).send({ message: 'Cette description existe déjà' })
+      }
+
+      await db.insert(invoiceDescriptions).values({ userId, description })
+      return reply.status(201).send({ success: true })
+    }
+  )
+
+  // Delete a description from saved list
+  fastify.delete(
+    '/api/invoices/settings/descriptions/:description',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const { description } = request.params as { description: string }
+      const userId = request.authUser.userId
+
+      await db
+        .delete(invoiceDescriptions)
+        .where(and(eq(invoiceDescriptions.userId, userId), eq(invoiceDescriptions.description, decodeURIComponent(description))))
+
+      return reply.status(204).send()
+    }
+  )
+
   // Get next invoice number
+  // Format: yyyymmxx where yyyy=year, mm=invoice creation month, xx=yearly invoice count
+  // Example: 20250102 = 2nd invoice of January 2025, 20251128 = 28th invoice of the year in November 2025
   fastify.get(
     '/api/invoices/next-number',
     { preHandler: [requireAuth] },
@@ -158,32 +276,25 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
       const now = new Date()
       const year = now.getFullYear()
       const month = (now.getMonth() + 1).toString().padStart(2, '0')
-      const prefix = `FAC-${year}${month}-`
+      const yearPrefix = year.toString()
 
-      // Find the highest invoice number with this prefix for this user
-      const result = await db
-        .select({ invoiceNumber: invoices.invoiceNumber })
+      // Count how many invoices exist for this year (regardless of month)
+      // to get the next yearly sequential number
+      const countResult = await db
+        .select({ count: sql<number>`count(*)` })
         .from(invoices)
         .where(
           and(
             eq(invoices.userId, userId),
-            sql`${invoices.invoiceNumber} LIKE ${prefix + '%'}`
+            sql`${invoices.invoiceNumber} LIKE ${yearPrefix + '%'}`,
+            sql`LENGTH(${invoices.invoiceNumber}) = 8`
           )
         )
-        .orderBy(desc(invoices.invoiceNumber))
-        .limit(1)
 
-      let nextNumber = 1
-      if (result.length > 0 && result[0].invoiceNumber) {
-        const lastNumber = result[0].invoiceNumber.replace(prefix, '')
-        const parsed = parseInt(lastNumber, 10)
-        if (!isNaN(parsed)) {
-          nextNumber = parsed + 1
-        }
-      }
+      const yearlyCount = Number(countResult[0].count) + 1
 
       return {
-        invoiceNumber: `${prefix}${nextNumber.toString().padStart(3, '0')}`,
+        invoiceNumber: `${year}${month}${yearlyCount.toString().padStart(2, '0')}`,
       }
     }
   )

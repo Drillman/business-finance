@@ -158,3 +158,23 @@ export const refreshTokens = pgTable('refresh_tokens', {
   index('refresh_tokens_user_id_idx').on(table.userId),
   index('refresh_tokens_token_idx').on(table.token),
 ])
+
+// Invoice clients (for autocomplete)
+export const invoiceClients = pgTable('invoice_clients', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  name: varchar('name', { length: 255 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('invoice_clients_user_id_idx').on(table.userId),
+])
+
+// Invoice descriptions (for autocomplete)
+export const invoiceDescriptions = pgTable('invoice_descriptions', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  description: text('description').notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+}, (table) => [
+  index('invoice_descriptions_user_id_idx').on(table.userId),
+])

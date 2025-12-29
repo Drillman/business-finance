@@ -11,7 +11,10 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, CreditCard } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useSnackbar } from '../contexts/SnackbarContext'
+import { ComboSelect } from '../components/ComboSelect'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -67,7 +70,12 @@ export default function Invoices() {
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
   const [formData, setFormData] = useState<InvoiceFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+  const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null)
+  const [paymentDate, setPaymentDate] = useState('')
   const [error, setError] = useState('')
+
+  const { showSuccess, showError } = useSnackbar()
 
   const { data: invoicesData, isLoading: isLoadingInvoices } = useInvoices({
     year: selectedYear,
@@ -176,12 +184,14 @@ export default function Invoices() {
     try {
       if (editingInvoice) {
         await updateMutation.mutateAsync({ id: editingInvoice.id, data })
+        showSuccess('Facture modifiée avec succès')
       } else {
         await createMutation.mutateAsync(data)
+        showSuccess('Facture créée avec succès')
       }
       closeModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -189,22 +199,35 @@ export default function Invoices() {
     try {
       await deleteMutation.mutateAsync(id)
       setDeleteConfirmId(null)
+      showSuccess('Facture supprimée avec succès')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
-  const handleTogglePayment = async (invoice: Invoice) => {
+  const openPaymentModal = (invoice: Invoice) => {
+    setPaymentInvoice(invoice)
+    setPaymentDate(new Date().toISOString().split('T')[0])
+    setIsPaymentModalOpen(true)
+  }
+
+  const closePaymentModal = () => {
+    setIsPaymentModalOpen(false)
+    setPaymentInvoice(null)
+    setPaymentDate('')
+  }
+
+  const handleConfirmPayment = async () => {
+    if (!paymentInvoice) return
     try {
-      const newPaymentDate = invoice.paymentDate
-        ? undefined
-        : new Date().toISOString().split('T')[0]
       await updateMutation.mutateAsync({
-        id: invoice.id,
-        data: { paymentDate: newPaymentDate },
+        id: paymentInvoice.id,
+        data: { paymentDate },
       })
+      showSuccess('Paiement enregistré avec succès')
+      closePaymentModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -251,7 +274,7 @@ export default function Invoices() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA collectée</div>
-          <div className="stat-value text-lg text-info">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -261,7 +284,7 @@ export default function Invoices() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Urssaf</div>
-          <div className="stat-value text-lg text-warning">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -272,7 +295,7 @@ export default function Invoices() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Impôts (estimé)</div>
-          <div className="stat-value text-lg text-error">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -283,7 +306,7 @@ export default function Invoices() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">Restant</div>
-          <div className="stat-value text-lg text-success">
+          <div className="stat-value text-lg">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -385,16 +408,21 @@ export default function Invoices() {
                             </td>
                             <td>{formatDate(invoice.invoiceDate)}</td>
                             <td>
-                              <button
-                                onClick={() => handleTogglePayment(invoice)}
-                                className={`badge badge-sm cursor-pointer hover:opacity-80 ${
-                                  invoice.paymentDate ? 'badge-success' : 'badge-warning'
-                                }`}
-                                title={invoice.paymentDate ? 'Cliquer pour marquer non payé' : 'Cliquer pour marquer payé'}
-                                disabled={updateMutation.isPending}
-                              >
-                                {invoice.paymentDate ? formatDate(invoice.paymentDate) : 'En attente'}
-                              </button>
+                              {invoice.paymentDate ? (
+                                <span className="badge badge-sm badge-success">
+                                  {formatDate(invoice.paymentDate)}
+                                </span>
+                              ) : (
+                                <button
+                                  onClick={() => openPaymentModal(invoice)}
+                                  className="btn btn-xs btn-warning gap-1"
+                                  title="Enregistrer le paiement"
+                                  disabled={updateMutation.isPending}
+                                >
+                                  <CreditCard className="h-3 w-3" />
+                                  En attente
+                                </button>
+                              )}
                             </td>
                             <td className="text-right font-mono">
                               {formatCurrency(invoice.amountHt)}
@@ -414,31 +442,13 @@ export default function Invoices() {
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </button>
-                                {deleteConfirmId === invoice.id ? (
-                                  <div className="flex gap-1">
-                                    <button
-                                      className="btn btn-sm btn-error"
-                                      onClick={() => handleDelete(invoice.id)}
-                                      disabled={deleteMutation.isPending}
-                                    >
-                                      Oui
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-ghost"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                    >
-                                      Non
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    className="btn btn-sm btn-ghost btn-square text-error"
-                                    onClick={() => setDeleteConfirmId(invoice.id)}
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                )}
+                                <button
+                                  className="btn btn-sm btn-ghost btn-square text-error"
+                                  onClick={() => setDeleteConfirmId(invoice.id)}
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -473,19 +483,13 @@ export default function Invoices() {
                   <label className="label">
                     <span className="label-text">Client *</span>
                   </label>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
+                  <ComboSelect
                     value={formData.client}
-                    onChange={(e) => updateFormField('client', e.target.value)}
-                    list="client-list"
+                    options={clientsData?.clients || []}
+                    onChange={(value) => updateFormField('client', value)}
+                    placeholder="Sélectionner un client..."
                     required
                   />
-                  <datalist id="client-list">
-                    {clientsData?.clients.map((client) => (
-                      <option key={client} value={client} />
-                    ))}
-                  </datalist>
                 </div>
 
                 <div className="form-control">
@@ -520,19 +524,12 @@ export default function Invoices() {
                   <label className="label">
                     <span className="label-text">Description</span>
                   </label>
-                  <input
-                    type="text"
-                    className="input input-bordered w-full"
+                  <ComboSelect
                     value={formData.description}
-                    onChange={(e) => updateFormField('description', e.target.value)}
-                    placeholder="Description de la prestation..."
-                    list="description-list"
+                    options={descriptionsData?.descriptions || []}
+                    onChange={(value) => updateFormField('description', value)}
+                    placeholder="Sélectionner une description..."
                   />
-                  <datalist id="description-list">
-                    {descriptionsData?.descriptions.map((desc) => (
-                      <option key={desc} value={desc} />
-                    ))}
-                  </datalist>
                 </div>
 
                 <div className="form-control">
@@ -638,6 +635,61 @@ export default function Invoices() {
           <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
+
+      {/* Payment Modal */}
+      {isPaymentModalOpen && paymentInvoice && (
+        <div className="modal modal-open">
+          <div className="modal-box max-w-sm">
+            <h3 className="font-bold text-lg mb-4">Enregistrer le paiement</h3>
+            <p className="text-base-content/70 mb-4">
+              Facture <span className="font-mono">{paymentInvoice.invoiceNumber || '-'}</span> pour{' '}
+              <span className="font-medium">{paymentInvoice.client}</span>
+            </p>
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Date de paiement</span>
+              </label>
+              <input
+                type="date"
+                className="input input-bordered w-full"
+                value={paymentDate}
+                onChange={(e) => setPaymentDate(e.target.value)}
+              />
+            </div>
+            <div className="modal-action">
+              <button type="button" className="btn" onClick={closePaymentModal}>
+                Annuler
+              </button>
+              <button
+                type="button"
+                className="btn btn-success"
+                onClick={handleConfirmPayment}
+                disabled={updateMutation.isPending}
+              >
+                {updateMutation.isPending ? (
+                  <span className="loading loading-spinner loading-sm"></span>
+                ) : (
+                  'Confirmer'
+                )}
+              </button>
+            </div>
+          </div>
+          <div className="modal-backdrop bg-black/50" onClick={closePaymentModal}></div>
+        </div>
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title="Supprimer la facture"
+        message="Êtes-vous sûr de vouloir supprimer cette facture ? Cette action est irréversible."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </div>
   )
 }

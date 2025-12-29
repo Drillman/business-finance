@@ -4,6 +4,7 @@ import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard,
   FileText,
+  FileText as FileTextSettings,
   Wallet,
   Receipt,
   Landmark,
@@ -37,6 +38,7 @@ const navItems: NavItem[] = [
 
 const settingsItems: NavItem[] = [
   { to: '/settings', label: 'Configuration', icon: Settings },
+  { to: '/invoices/settings', label: 'Param. factures', icon: FileTextSettings },
   { to: '/passkeys', label: 'Passkeys', icon: KeyRound },
 ]
 

@@ -9,6 +9,8 @@ import {
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -93,6 +95,8 @@ export default function Expenses() {
   const [formData, setFormData] = useState<ExpenseFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const { showSuccess, showError } = useSnackbar()
 
   const [year, month] = selectedMonth.split('-').map(Number)
 
@@ -224,12 +228,14 @@ export default function Expenses() {
     try {
       if (editingExpense) {
         await updateMutation.mutateAsync({ id: editingExpense.id, data })
+        showSuccess('Dépense modifiée avec succès')
       } else {
         await createMutation.mutateAsync(data)
+        showSuccess('Dépense créée avec succès')
       }
       closeModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -237,8 +243,9 @@ export default function Expenses() {
     try {
       await deleteMutation.mutateAsync(id)
       setDeleteConfirmId(null)
+      showSuccess('Dépense supprimée avec succès')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -321,7 +328,7 @@ export default function Expenses() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA payée</div>
-          <div className="stat-value text-lg text-warning">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -331,7 +338,7 @@ export default function Expenses() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA récupérable</div>
-          <div className="stat-value text-lg text-success">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -350,20 +357,6 @@ export default function Expenses() {
           </div>
         </div>
       </div>
-
-      {/* Category Breakdown */}
-      {calculatedSummary && calculatedSummary.byCategory.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-6">
-          {calculatedSummary.byCategory.map((cat) => (
-            <div key={cat.category} className="badge badge-lg gap-2">
-              <span className={`badge badge-sm ${categoryColors[cat.category as ExpenseCategory]}`}>
-                {categoryLabels[cat.category as ExpenseCategory]}
-              </span>
-              {formatCurrency(cat.total)} ({cat.count})
-            </div>
-          ))}
-        </div>
-      )}
 
       {/* Filters */}
       <div className="flex flex-wrap gap-4 mb-6">
@@ -483,31 +476,13 @@ export default function Expenses() {
                             >
                               <Pencil className="h-4 w-4" />
                             </button>
-                            {deleteConfirmId === expense.id ? (
-                              <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-error"
-                                  onClick={() => handleDelete(expense.id)}
-                                  disabled={deleteMutation.isPending}
-                                >
-                                  Oui
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-ghost"
-                                  onClick={() => setDeleteConfirmId(null)}
-                                >
-                                  Non
-                                </button>
-                              </div>
-                            ) : (
-                              <button
-                                className="btn btn-sm btn-ghost btn-square text-error"
-                                onClick={() => setDeleteConfirmId(expense.id)}
-                                title="Supprimer"
-                              >
-                                <Trash2 className="h-4 w-4" />
-                              </button>
-                            )}
+                            <button
+                              className="btn btn-sm btn-ghost btn-square text-error"
+                              onClick={() => setDeleteConfirmId(expense.id)}
+                              title="Supprimer"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </button>
                           </div>
                         </td>
                       </tr>
@@ -519,6 +494,42 @@ export default function Expenses() {
           )}
         </div>
       </div>
+
+      {/* Fixed Expenses List */}
+      {recurringData && recurringData.data.length > 0 && (
+        <div className="card bg-base-100 shadow mt-6">
+          <div className="card-body">
+            <h2 className="card-title text-base">Charges fixes</h2>
+            <div className="overflow-x-auto">
+              <table className="table table-sm">
+                <thead>
+                  <tr>
+                    <th>Description</th>
+                    <th>Périodicité</th>
+                    <th className="text-right">Montant TTC</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recurringData.data.map((expense) => {
+                    const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
+                    return (
+                      <tr key={expense.id}>
+                        <td>{expense.description}</td>
+                        <td>
+                          <span className="badge badge-sm badge-ghost">
+                            {recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
+                          </span>
+                        </td>
+                        <td className="text-right font-mono">{formatCurrency(ttc)}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
         </>
       )}
 
@@ -538,7 +549,7 @@ export default function Expenses() {
             </div>
             <div className="stat bg-base-100 rounded-box shadow">
               <div className="stat-title">Coût mensuel estimé</div>
-              <div className="stat-value text-lg text-warning">
+              <div className="stat-value text-lg text-base-content/70">
                 {isLoadingRecurring ? (
                   <span className="loading loading-spinner loading-sm"></span>
                 ) : (
@@ -549,7 +560,7 @@ export default function Expenses() {
             </div>
             <div className="stat bg-base-100 rounded-box shadow">
               <div className="stat-title">Coût annuel estimé</div>
-              <div className="stat-value text-lg text-error">
+              <div className="stat-value text-lg text-base-content/70">
                 {isLoadingRecurring ? (
                   <span className="loading loading-spinner loading-sm"></span>
                 ) : (
@@ -642,31 +653,13 @@ export default function Expenses() {
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </button>
-                                {deleteConfirmId === expense.id ? (
-                                  <div className="flex gap-1">
-                                    <button
-                                      className="btn btn-sm btn-error"
-                                      onClick={() => handleDelete(expense.id)}
-                                      disabled={deleteMutation.isPending}
-                                    >
-                                      Oui
-                                    </button>
-                                    <button
-                                      className="btn btn-sm btn-ghost"
-                                      onClick={() => setDeleteConfirmId(null)}
-                                    >
-                                      Non
-                                    </button>
-                                  </div>
-                                ) : (
-                                  <button
-                                    className="btn btn-sm btn-ghost btn-square text-error"
-                                    onClick={() => setDeleteConfirmId(expense.id)}
-                                    title="Supprimer"
-                                  >
-                                    <Trash2 className="h-4 w-4" />
-                                  </button>
-                                )}
+                                <button
+                                  className="btn btn-sm btn-ghost btn-square text-error"
+                                  onClick={() => setDeleteConfirmId(expense.id)}
+                                  title="Supprimer"
+                                >
+                                  <Trash2 className="h-4 w-4" />
+                                </button>
                               </div>
                             </td>
                           </tr>
@@ -938,6 +931,19 @@ export default function Expenses() {
           <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title="Supprimer la dépense"
+        message="Êtes-vous sûr de vouloir supprimer cette dépense ? Cette action est irréversible."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </div>
   )
 }

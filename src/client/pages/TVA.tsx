@@ -9,6 +9,8 @@ import {
 } from '../hooks/useTva'
 import type { TaxPayment, CreateTaxPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
+import { ConfirmDialog } from '../components/ConfirmDialog'
+import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -60,6 +62,8 @@ export default function TVA() {
   const [formData, setFormData] = useState<TaxPaymentFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
+
+  const { showSuccess, showError } = useSnackbar()
 
   // Dates for the full year summary
   const startDate = `${selectedYear}-01-01`
@@ -131,12 +135,14 @@ export default function TVA() {
     try {
       if (editingPayment) {
         await updateMutation.mutateAsync({ id: editingPayment.id, data })
+        showSuccess('Paiement TVA modifié avec succès')
       } else {
         await createMutation.mutateAsync(data)
+        showSuccess('Paiement TVA créé avec succès')
       }
       closeModal()
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -144,8 +150,9 @@ export default function TVA() {
     try {
       await deleteMutation.mutateAsync(id)
       setDeleteConfirmId(null)
+      showSuccess('Paiement TVA supprimé avec succès')
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
   }
 
@@ -179,7 +186,7 @@ export default function TVA() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA collectée</div>
-          <div className="stat-value text-lg text-primary">
+          <div className="stat-value text-lg">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -190,7 +197,7 @@ export default function TVA() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA récupérable</div>
-          <div className="stat-value text-lg text-success">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -201,7 +208,7 @@ export default function TVA() {
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
           <div className="stat-title">TVA nette à payer</div>
-          <div className="stat-value text-lg text-warning">
+          <div className="stat-value text-lg text-base-content/70">
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
@@ -216,9 +223,7 @@ export default function TVA() {
             {isLoadingSummary ? (
               <span className="loading loading-spinner loading-sm"></span>
             ) : (
-              <span className={parseFloat(summary?.balance || '0') > 0 ? 'text-error' : 'text-success'}>
-                {formatCurrency(summary?.balance || '0')}
-              </span>
+              formatCurrency(summary?.balance || '0')
             )}
           </div>
           <div className="stat-desc">
@@ -358,31 +363,13 @@ export default function TVA() {
                           >
                             <Pencil className="h-4 w-4" />
                           </button>
-                          {deleteConfirmId === payment.id ? (
-                            <div className="flex gap-1">
-                              <button
-                                className="btn btn-sm btn-error"
-                                onClick={() => handleDelete(payment.id)}
-                                disabled={deleteMutation.isPending}
-                              >
-                                Oui
-                              </button>
-                              <button
-                                className="btn btn-sm btn-ghost"
-                                onClick={() => setDeleteConfirmId(null)}
-                              >
-                                Non
-                              </button>
-                            </div>
-                          ) : (
-                            <button
-                              className="btn btn-sm btn-ghost btn-square text-error"
-                              onClick={() => setDeleteConfirmId(payment.id)}
-                              title="Supprimer"
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </button>
-                          )}
+                          <button
+                            className="btn btn-sm btn-ghost btn-square text-error"
+                            onClick={() => setDeleteConfirmId(payment.id)}
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -529,6 +516,19 @@ export default function TVA() {
           <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
+
+      {/* Delete Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={deleteConfirmId !== null}
+        title="Supprimer le paiement TVA"
+        message="Êtes-vous sûr de vouloir supprimer ce paiement ? Cette action est irréversible."
+        confirmLabel="Supprimer"
+        cancelLabel="Annuler"
+        variant="danger"
+        isLoading={deleteMutation.isPending}
+        onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
+        onCancel={() => setDeleteConfirmId(null)}
+      />
     </div>
   )
 }
