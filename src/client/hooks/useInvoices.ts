@@ -117,3 +117,27 @@ export function useInvoiceYearlySummary(year: number) {
     staleTime: 1000 * 60 * 2,
   })
 }
+
+export function useNextInvoiceNumber() {
+  return useQuery({
+    queryKey: ['invoices', 'nextNumber'],
+    queryFn: () => api.get<{ invoiceNumber: string }>('/invoices/next-number'),
+    staleTime: 0,
+  })
+}
+
+export function useInvoiceClients() {
+  return useQuery({
+    queryKey: ['invoices', 'clients'],
+    queryFn: () => api.get<{ clients: string[] }>('/invoices/clients'),
+    staleTime: 1000 * 60 * 5,
+  })
+}
+
+export function useInvoiceDescriptions() {
+  return useQuery({
+    queryKey: ['invoices', 'descriptions'],
+    queryFn: () => api.get<{ descriptions: string[] }>('/invoices/descriptions'),
+    staleTime: 1000 * 60 * 5,
+  })
+}

@@ -111,6 +111,83 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     }
   )
 
+  // Get unique clients
+  fastify.get(
+    '/api/invoices/clients',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest) => {
+      const userId = request.authUser.userId
+
+      const result = await db
+        .selectDistinct({ client: invoices.client })
+        .from(invoices)
+        .where(eq(invoices.userId, userId))
+        .orderBy(invoices.client)
+
+      return {
+        clients: result.map((r) => r.client),
+      }
+    }
+  )
+
+  // Get unique descriptions
+  fastify.get(
+    '/api/invoices/descriptions',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest) => {
+      const userId = request.authUser.userId
+
+      const result = await db
+        .selectDistinct({ description: invoices.description })
+        .from(invoices)
+        .where(and(eq(invoices.userId, userId), sql`${invoices.description} IS NOT NULL AND ${invoices.description} != ''`))
+        .orderBy(invoices.description)
+
+      return {
+        descriptions: result.map((r) => r.description).filter(Boolean) as string[],
+      }
+    }
+  )
+
+  // Get next invoice number
+  fastify.get(
+    '/api/invoices/next-number',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest) => {
+      const userId = request.authUser.userId
+      const now = new Date()
+      const year = now.getFullYear()
+      const month = (now.getMonth() + 1).toString().padStart(2, '0')
+      const prefix = `FAC-${year}${month}-`
+
+      // Find the highest invoice number with this prefix for this user
+      const result = await db
+        .select({ invoiceNumber: invoices.invoiceNumber })
+        .from(invoices)
+        .where(
+          and(
+            eq(invoices.userId, userId),
+            sql`${invoices.invoiceNumber} LIKE ${prefix + '%'}`
+          )
+        )
+        .orderBy(desc(invoices.invoiceNumber))
+        .limit(1)
+
+      let nextNumber = 1
+      if (result.length > 0 && result[0].invoiceNumber) {
+        const lastNumber = result[0].invoiceNumber.replace(prefix, '')
+        const parsed = parseInt(lastNumber, 10)
+        if (!isNaN(parsed)) {
+          nextNumber = parsed + 1
+        }
+      }
+
+      return {
+        invoiceNumber: `${prefix}${nextNumber.toString().padStart(3, '0')}`,
+      }
+    }
+  )
+
   // Create invoice
   fastify.post(
     '/api/invoices',

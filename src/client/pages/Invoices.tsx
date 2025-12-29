@@ -5,6 +5,9 @@ import {
   useUpdateInvoice,
   useDeleteInvoice,
   useInvoiceYearlySummary,
+  useNextInvoiceNumber,
+  useInvoiceClients,
+  useInvoiceDescriptions,
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
@@ -23,14 +26,6 @@ function formatCurrency(amount: string | number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(num)
-}
-
-function generateInvoiceNumber(): string {
-  const now = new Date()
-  const year = now.getFullYear()
-  const month = (now.getMonth() + 1).toString().padStart(2, '0')
-  const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0')
-  return `FAC-${year}${month}-${random}`
 }
 
 function getCurrentYear(): number {
@@ -84,6 +79,9 @@ export default function Invoices() {
   const createMutation = useCreateInvoice()
   const updateMutation = useUpdateInvoice()
   const deleteMutation = useDeleteInvoice()
+  const { refetch: refetchNextNumber } = useNextInvoiceNumber()
+  const { data: clientsData } = useInvoiceClients()
+  const { data: descriptionsData } = useInvoiceDescriptions()
 
   const calculatedSummary = useMemo(() => {
     if (!summary || !settings) return null
@@ -125,11 +123,12 @@ export default function Invoices() {
     return new Map([...grouped.entries()].sort((a, b) => b[0] - a[0]))
   }, [invoicesData])
 
-  const openCreateModal = () => {
+  const openCreateModal = async () => {
     setEditingInvoice(null)
+    const { data } = await refetchNextNumber()
     setFormData({
       ...defaultFormData,
-      invoiceNumber: generateInvoiceNumber(),
+      invoiceNumber: data?.invoiceNumber || '',
     })
     setError('')
     setIsModalOpen(true)
@@ -189,6 +188,20 @@ export default function Invoices() {
     try {
       await deleteMutation.mutateAsync(id)
       setDeleteConfirmId(null)
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Une erreur est survenue')
+    }
+  }
+
+  const handleTogglePayment = async (invoice: Invoice) => {
+    try {
+      const newPaymentDate = invoice.paymentDate
+        ? undefined
+        : new Date().toISOString().split('T')[0]
+      await updateMutation.mutateAsync({
+        id: invoice.id,
+        data: { paymentDate: newPaymentDate },
+      })
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
@@ -371,13 +384,16 @@ export default function Invoices() {
                             </td>
                             <td>{formatDate(invoice.invoiceDate)}</td>
                             <td>
-                              {invoice.paymentDate ? (
-                                <span className="badge badge-success badge-sm">
-                                  {formatDate(invoice.paymentDate)}
-                                </span>
-                              ) : (
-                                <span className="badge badge-warning badge-sm">En attente</span>
-                              )}
+                              <button
+                                onClick={() => handleTogglePayment(invoice)}
+                                className={`badge badge-sm cursor-pointer hover:opacity-80 ${
+                                  invoice.paymentDate ? 'badge-success' : 'badge-warning'
+                                }`}
+                                title={invoice.paymentDate ? 'Cliquer pour marquer non payé' : 'Cliquer pour marquer payé'}
+                                disabled={updateMutation.isPending}
+                              >
+                                {invoice.paymentDate ? formatDate(invoice.paymentDate) : 'En attente'}
+                              </button>
                             </td>
                             <td className="text-right font-mono">
                               {formatCurrency(invoice.amountHt)}
@@ -465,8 +481,14 @@ export default function Invoices() {
                     className="input input-bordered"
                     value={formData.client}
                     onChange={(e) => updateFormField('client', e.target.value)}
+                    list="client-list"
                     required
                   />
+                  <datalist id="client-list">
+                    {clientsData?.clients.map((client) => (
+                      <option key={client} value={client} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="form-control">
@@ -484,7 +506,12 @@ export default function Invoices() {
                     <button
                       type="button"
                       className="btn join-item"
-                      onClick={() => updateFormField('invoiceNumber', generateInvoiceNumber())}
+                      onClick={async () => {
+                        const { data } = await refetchNextNumber()
+                        if (data?.invoiceNumber) {
+                          updateFormField('invoiceNumber', data.invoiceNumber)
+                        }
+                      }}
                       title="Générer automatiquement"
                     >
                       Auto
@@ -502,7 +529,13 @@ export default function Invoices() {
                     value={formData.description}
                     onChange={(e) => updateFormField('description', e.target.value)}
                     placeholder="Description de la prestation..."
+                    list="description-list"
                   />
+                  <datalist id="description-list">
+                    {descriptionsData?.descriptions.map((desc) => (
+                      <option key={desc} value={desc} />
+                    ))}
+                  </datalist>
                 </div>
 
                 <div className="form-control">
