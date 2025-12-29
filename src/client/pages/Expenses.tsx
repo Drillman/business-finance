@@ -8,6 +8,7 @@ import {
   useRecurringExpenses,
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
+import { Pencil, Trash2 } from 'lucide-react'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -480,9 +481,7 @@ export default function Expenses() {
                               onClick={() => openEditModal(expense)}
                               title="Modifier"
                             >
-                              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                              </svg>
+                              <Pencil className="h-4 w-4" />
                             </button>
                             {deleteConfirmId === expense.id ? (
                               <div className="flex gap-1">
@@ -506,9 +505,7 @@ export default function Expenses() {
                                 onClick={() => setDeleteConfirmId(expense.id)}
                                 title="Supprimer"
                               >
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                </svg>
+                                <Trash2 className="h-4 w-4" />
                               </button>
                             )}
                           </div>
@@ -643,9 +640,7 @@ export default function Expenses() {
                                   onClick={() => openEditModal(expense)}
                                   title="Modifier"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                  </svg>
+                                  <Pencil className="h-4 w-4" />
                                 </button>
                                 {deleteConfirmId === expense.id ? (
                                   <div className="flex gap-1">
@@ -669,9 +664,7 @@ export default function Expenses() {
                                     onClick={() => setDeleteConfirmId(expense.id)}
                                     title="Supprimer"
                                   >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                    <Trash2 className="h-4 w-4" />
                                   </button>
                                 )}
                               </div>
@@ -710,7 +703,7 @@ export default function Expenses() {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered"
+                    className="input input-bordered w-full"
                     value={formData.description}
                     onChange={(e) => updateFormField('description', e.target.value)}
                     placeholder="Description de la dépense..."
@@ -724,7 +717,7 @@ export default function Expenses() {
                   </label>
                   <input
                     type="date"
-                    className="input input-bordered"
+                    className="input input-bordered w-full"
                     value={formData.date}
                     onChange={(e) => updateFormField('date', e.target.value)}
                     required
@@ -736,7 +729,7 @@ export default function Expenses() {
                     <span className="label-text">Catégorie *</span>
                   </label>
                   <select
-                    className="select select-bordered"
+                    className="select select-bordered w-full"
                     value={formData.category}
                     onChange={(e) => updateFormField('category', e.target.value)}
                   >
@@ -780,7 +773,7 @@ export default function Expenses() {
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered"
+                        className="input input-bordered w-full"
                         value={formData.amountTtc}
                         onChange={(e) => updateFormField('amountTtc', e.target.value)}
                         required
@@ -792,7 +785,7 @@ export default function Expenses() {
                         <span className="label-text">Taux TVA (%)</span>
                       </label>
                       <select
-                        className="select select-bordered"
+                        className="select select-bordered w-full"
                         value={formData.taxRate}
                         onChange={(e) => updateFormField('taxRate', e.target.value)}
                       >
@@ -813,7 +806,7 @@ export default function Expenses() {
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered"
+                        className="input input-bordered w-full"
                         value={formData.amountHt}
                         onChange={(e) => updateFormField('amountHt', e.target.value)}
                         required
@@ -828,7 +821,7 @@ export default function Expenses() {
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered"
+                        className="input input-bordered w-full"
                         value={formData.taxAmount}
                         onChange={(e) => updateFormField('taxAmount', e.target.value)}
                       />
@@ -841,7 +834,7 @@ export default function Expenses() {
                     <span className="label-text">Taux de récupération TVA (%)</span>
                   </label>
                   <select
-                    className="select select-bordered"
+                    className="select select-bordered w-full"
                     value={formData.taxRecoveryRate}
                     onChange={(e) => updateFormField('taxRecoveryRate', e.target.value)}
                   >
@@ -869,7 +862,7 @@ export default function Expenses() {
                       <span className="label-text">Période de récurrence *</span>
                     </label>
                     <select
-                      className="select select-bordered"
+                      className="select select-bordered w-full"
                       value={formData.recurrencePeriod}
                       onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
                       required={formData.isRecurring}
@@ -889,7 +882,7 @@ export default function Expenses() {
                     <span className="label-text">Note</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered"
+                    className="textarea textarea-bordered w-full"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
                     placeholder="Notes supplémentaires..."

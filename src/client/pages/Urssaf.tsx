@@ -6,6 +6,7 @@ import {
   useDeleteUrssafPayment,
 } from '../hooks/useUrssaf'
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
+import { Pencil, Trash2 } from 'lucide-react'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -300,9 +301,7 @@ export default function Urssaf() {
                                   onClick={() => openEditModal(t.payment!)}
                                   title="Modifier"
                                 >
-                                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                  </svg>
+                                  <Pencil className="h-4 w-4" />
                                 </button>
                                 {deleteConfirmId === t.payment!.id ? (
                                   <div className="flex gap-1">
@@ -326,9 +325,7 @@ export default function Urssaf() {
                                     onClick={() => setDeleteConfirmId(t.payment!.id)}
                                     title="Supprimer"
                                   >
-                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
+                                    <Trash2 className="h-4 w-4" />
                                   </button>
                                 )}
                               </>
@@ -404,7 +401,7 @@ export default function Urssaf() {
                     <span className="label-text">Trimestre *</span>
                   </label>
                   <select
-                    className="select select-bordered"
+                    className="select select-bordered w-full"
                     value={formData.trimester}
                     onChange={(e) => updateFormField('trimester', e.target.value)}
                     disabled={!!editingPayment}
@@ -422,7 +419,7 @@ export default function Urssaf() {
                     <span className="label-text">Année *</span>
                   </label>
                   <select
-                    className="select select-bordered"
+                    className="select select-bordered w-full"
                     value={formData.year}
                     onChange={(e) => updateFormField('year', e.target.value)}
                     disabled={!!editingPayment}
@@ -443,7 +440,7 @@ export default function Urssaf() {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="input input-bordered"
+                    className="input input-bordered w-full"
                     value={formData.revenue}
                     onChange={(e) => updateFormField('revenue', e.target.value)}
                     required
@@ -458,7 +455,7 @@ export default function Urssaf() {
                     type="number"
                     step="0.01"
                     min="0"
-                    className="input input-bordered"
+                    className="input input-bordered w-full"
                     value={formData.amount}
                     onChange={(e) => updateFormField('amount', e.target.value)}
                     required
@@ -477,7 +474,7 @@ export default function Urssaf() {
                     <span className="label-text">Statut *</span>
                   </label>
                   <select
-                    className="select select-bordered"
+                    className="select select-bordered w-full"
                     value={formData.status}
                     onChange={(e) => updateFormField('status', e.target.value)}
                   >
@@ -493,7 +490,7 @@ export default function Urssaf() {
                     </label>
                     <input
                       type="date"
-                      className="input input-bordered"
+                      className="input input-bordered w-full"
                       value={formData.paymentDate}
                       onChange={(e) => updateFormField('paymentDate', e.target.value)}
                     />
@@ -506,7 +503,7 @@ export default function Urssaf() {
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered"
+                    className="input input-bordered w-full"
                     value={formData.reference}
                     onChange={(e) => updateFormField('reference', e.target.value)}
                     placeholder="Numéro de déclaration..."
@@ -518,7 +515,7 @@ export default function Urssaf() {
                     <span className="label-text">Note</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered"
+                    className="textarea textarea-bordered w-full"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
                     placeholder="Notes supplémentaires..."

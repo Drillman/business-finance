@@ -141,7 +141,7 @@ export default function Calculator() {
                 step="0.01"
                 min="0"
                 placeholder="0.00"
-                className="input input-bordered input-lg text-xl"
+                className="input input-bordered input-lg text-xl w-full"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
@@ -154,7 +154,7 @@ export default function Calculator() {
                 <span className="label-text">Taux TVA</span>
               </label>
               <select
-                className="select select-bordered"
+                className="select select-bordered w-full"
                 value={taxRate}
                 onChange={(e) => setTaxRate(e.target.value)}
               >

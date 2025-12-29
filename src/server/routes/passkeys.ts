@@ -119,7 +119,7 @@ export async function passkeyRoutes(fastify: FastifyInstance) {
 
   // Generate authentication options (for login)
   fastify.post('/api/passkeys/authenticate/options', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as { email?: string }
+    const body = (request.body || {}) as { email?: string }
 
     let allowCredentials: StoredPasskey[] | undefined
 
@@ -158,7 +158,7 @@ export async function passkeyRoutes(fastify: FastifyInstance) {
 
   // Verify authentication (login with passkey)
   fastify.post('/api/passkeys/authenticate/verify', async (request: FastifyRequest, reply: FastifyReply) => {
-    const body = request.body as { response: unknown; email?: string }
+    const body = (request.body || {}) as { response: unknown; email?: string }
 
     // Extract credential ID from response
     const response = body.response as { id: string; rawId: string }

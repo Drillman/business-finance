@@ -1,21 +1,43 @@
 import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
+import {
+  LayoutDashboard,
+  FileText,
+  Wallet,
+  Receipt,
+  Landmark,
+  Building2,
+  ClipboardList,
+  Calculator,
+  Settings,
+  KeyRound,
+  ChevronsRight,
+  ChevronsLeft,
+  LogOut,
+  type LucideIcon,
+} from 'lucide-react'
 
-const navItems = [
-  { to: '/', label: 'Tableau de bord', icon: '📊' },
-  { to: '/invoices', label: 'Factures', icon: '📄' },
-  { to: '/expenses', label: 'Dépenses', icon: '💰' },
-  { to: '/tva', label: 'TVA', icon: '🧾' },
-  { to: '/urssaf', label: 'Urssaf', icon: '🏛️' },
-  { to: '/account', label: 'Compte entreprise', icon: '🏦' },
-  { to: '/income-tax', label: 'Impôts', icon: '📋' },
-  { to: '/calculator', label: 'Calculateur', icon: '🔢' },
+interface NavItem {
+  to: string
+  label: string
+  icon: LucideIcon
+}
+
+const navItems: NavItem[] = [
+  { to: '/', label: 'Tableau de bord', icon: LayoutDashboard },
+  { to: '/invoices', label: 'Factures', icon: FileText },
+  { to: '/expenses', label: 'Dépenses', icon: Wallet },
+  { to: '/tva', label: 'TVA', icon: Receipt },
+  { to: '/urssaf', label: 'Urssaf', icon: Landmark },
+  { to: '/account', label: 'Compte entreprise', icon: Building2 },
+  { to: '/income-tax', label: 'Impôts', icon: ClipboardList },
+  { to: '/calculator', label: 'Calculateur', icon: Calculator },
 ]
 
-const settingsItems = [
-  { to: '/settings', label: 'Configuration', icon: '⚙️' },
-  { to: '/passkeys', label: 'Passkeys', icon: '🔐' },
+const settingsItems: NavItem[] = [
+  { to: '/settings', label: 'Configuration', icon: Settings },
+  { to: '/passkeys', label: 'Passkeys', icon: KeyRound },
 ]
 
 const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
@@ -45,13 +67,9 @@ export default function Sidebar() {
           title={isCollapsed ? 'Agrandir' : 'Réduire'}
         >
           {isCollapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 5l7 7-7 7M5 5l7 7-7 7" />
-            </svg>
+            <ChevronsRight className="h-5 w-5" />
           ) : (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 19l-7-7 7-7m8 14l-7-7 7-7" />
-            </svg>
+            <ChevronsLeft className="h-5 w-5" />
           )}
         </button>
       </div>
@@ -67,7 +85,7 @@ export default function Sidebar() {
                 end={item.to === '/'}
                 title={isCollapsed ? item.label : undefined}
               >
-                <span className="text-lg">{item.icon}</span>
+                <item.icon className="h-5 w-5" />
                 {!isCollapsed && <span className="truncate">{item.label}</span>}
               </NavLink>
             </li>
@@ -84,7 +102,7 @@ export default function Sidebar() {
                 }
                 title={isCollapsed ? item.label : undefined}
               >
-                <span className="text-lg">{item.icon}</span>
+                <item.icon className="h-5 w-5" />
                 {!isCollapsed && <span className="truncate">{item.label}</span>}
               </NavLink>
             </li>
@@ -106,9 +124,7 @@ export default function Sidebar() {
           {isLoggingOut ? (
             <span className="loading loading-spinner loading-sm"></span>
           ) : isCollapsed ? (
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-            </svg>
+            <LogOut className="h-4 w-4" />
           ) : (
             'Déconnexion'
           )}

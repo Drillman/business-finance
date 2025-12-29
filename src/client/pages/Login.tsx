@@ -3,6 +3,7 @@ import { useNavigate, useLocation, Link } from 'react-router-dom'
 import { useLogin } from '../hooks/useAuth'
 import { loginWithPasskey, isPasskeySupported } from '../utils/passkey'
 import { useQueryClient } from '@tanstack/react-query'
+import { XCircle, Fingerprint } from 'lucide-react'
 
 export default function Login() {
   const [email, setEmail] = useState('')
@@ -59,19 +60,7 @@ export default function Login() {
 
           {error && (
             <div className="alert alert-error mb-4">
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                className="stroke-current shrink-0 h-6 w-6"
-                fill="none"
-                viewBox="0 0 24 24"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth="2"
-                  d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"
-                />
-              </svg>
+              <XCircle className="h-6 w-6 shrink-0" />
               <span>{error}</span>
             </div>
           )}
@@ -84,7 +73,7 @@ export default function Login() {
               <input
                 type="email"
                 placeholder="email@exemple.com"
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -99,7 +88,7 @@ export default function Login() {
               <input
                 type="password"
                 placeholder="••••••••"
-                className="input input-bordered"
+                className="input input-bordered w-full"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
@@ -136,18 +125,7 @@ export default function Login() {
                   <span className="loading loading-spinner loading-sm"></span>
                 ) : (
                   <>
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2"
-                    >
-                      <path d="M12 10v4m0 0l-2-2m2 2l2-2" />
-                      <path d="M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                      <circle cx="12" cy="7" r="1" />
-                    </svg>
+                    <Fingerprint className="h-5 w-5" />
                     Connexion avec Passkey
                   </>
                 )}
