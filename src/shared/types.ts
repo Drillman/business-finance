@@ -290,3 +290,35 @@ export interface UpcomingPayment {
   dueDate?: string
   description: string
 }
+
+// Yearly dashboard types
+export interface YearlyDashboardKpis {
+  totalRevenue: string
+  totalUrssafPaid: string
+  totalUrssafEstimated: string
+  totalUrssaf: string
+  totalIncomeTaxPaid: string
+  totalIncomeTaxEstimated: string
+  totalTvaPaid: string
+  totalTvaEstimated: string
+  totalRemaining: string
+}
+
+export interface MonthlyBreakdown {
+  month: number
+  revenue: string
+  expensesHt: string
+  urssaf: string
+  urssafIsPaid: boolean
+  incomeTax: string
+  tva: string
+  tvaIsPaid: boolean
+  remaining: string
+}
+
+export interface YearlyDashboard {
+  year: number
+  currentMonth: number | null
+  kpis: YearlyDashboardKpis
+  months: MonthlyBreakdown[]
+}

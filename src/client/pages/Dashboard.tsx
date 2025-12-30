@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useDashboardSummary } from '../hooks/useDashboard'
+import { useYearlyDashboard } from '../hooks/useDashboard'
 import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
 
@@ -11,52 +11,50 @@ function formatCurrency(amount: string | number): string {
   }).format(num)
 }
 
-function getCurrentMonthYear() {
-  const now = new Date()
-  return { month: now.getMonth() + 1, year: now.getFullYear() }
-}
-
 const MONTHS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
 ]
 
 export default function Dashboard() {
-  const { month: currentMonth, year: currentYear } = getCurrentMonthYear()
-  const [selectedMonth, setSelectedMonth] = useState(currentMonth)
+  const currentYear = new Date().getFullYear()
   const [selectedYear, setSelectedYear] = useState(currentYear)
 
-  const { data: summary, isLoading: summaryLoading } = useDashboardSummary(selectedYear, selectedMonth)
+  const { data: yearlyData, isLoading: yearlyLoading } = useYearlyDashboard(selectedYear)
   const { data: accountSummary, isLoading: accountLoading } = useAccountSummary()
 
-  const years = [2025, 2026]
+  const years = [2024, 2025, 2026]
 
-  const isLoading = summaryLoading || accountLoading
+  const isLoading = yearlyLoading || accountLoading
+
+  // Sort months with current month first, then descending
+  const sortedMonths = yearlyData?.months ? [...yearlyData.months].sort((a, b) => {
+    const currentMonth = yearlyData.currentMonth
+    if (currentMonth) {
+      if (a.month === currentMonth) return -1
+      if (b.month === currentMonth) return 1
+    }
+    return b.month - a.month
+  }) : []
+
+  // Calculate average remaining
+  const averageRemaining = yearlyData?.months && yearlyData.months.length > 0
+    ? yearlyData.months.reduce((sum, m) => sum + parseFloat(m.remaining), 0) / yearlyData.months.length
+    : 0
 
   return (
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Tableau de bord</h1>
-        <div className="flex gap-2">
-          <select
-            className="select select-bordered select-sm"
-            value={selectedMonth}
-            onChange={(e) => setSelectedMonth(parseInt(e.target.value))}
-          >
-            {MONTHS.map((name, index) => (
-              <option key={index} value={index + 1}>{name}</option>
-            ))}
-          </select>
-          <select
-            className="select select-bordered select-sm"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {years.map((y) => (
-              <option key={y} value={y}>{y}</option>
-            ))}
-          </select>
-        </div>
+        <select
+          className="select select-bordered select-sm"
+          value={selectedYear}
+          onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+        >
+          {years.map((y) => (
+            <option key={y} value={y}>{y}</option>
+          ))}
+        </select>
       </div>
 
       {isLoading ? (
@@ -65,44 +63,105 @@ export default function Dashboard() {
         </div>
       ) : (
         <>
-          {/* Monthly Summary */}
+          {/* Yearly KPIs */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Résumé du mois - {MONTHS[selectedMonth - 1]} {selectedYear}</h2>
+            <h2 className="text-lg font-semibold mb-4">Bilan {selectedYear}</h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Chiffre d'affaire HT</div>
-                <div className="stat-value text-lg text-primary">
-                  {summary ? formatCurrency(summary.revenueHt) : '0 €'}
-                </div>
-                <div className="stat-desc">
-                  TTC: {summary ? formatCurrency(summary.revenueTtc) : '0 €'}
+                <div className="stat-title">Chiffre d'affaires</div>
+                <div className="stat-value text-xl text-primary">
+                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
                 </div>
               </div>
               <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">TVA nette</div>
-                <div className="stat-value text-lg text-secondary">
-                  {summary ? formatCurrency(summary.netTva) : '0 €'}
+                <div className="stat-title">Urssaf</div>
+                <div className="stat-value text-xl text-accent">
+                  {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
                 </div>
                 <div className="stat-desc">
-                  Collectée: {summary ? formatCurrency(summary.tvaCollected) : '0 €'} | Récup.: {summary ? formatCurrency(summary.tvaRecoverable) : '0 €'}
+                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} |
+                  Est.: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}
                 </div>
               </div>
               <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Urssaf estimé</div>
-                <div className="stat-value text-lg text-accent">
-                  {summary ? formatCurrency(summary.urssafEstimate) : '0 €'}
+                <div className="stat-title">Impôts sur le revenu</div>
+                <div className="stat-value text-xl text-warning">
+                  {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
                 </div>
-                <div className="stat-desc">Cotisations sociales</div>
+                <div className="stat-desc">
+                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}
+                </div>
               </div>
               <div className="stat bg-base-100 rounded-box shadow">
                 <div className="stat-title">Restant net</div>
-                <div className="stat-value text-lg text-success">
-                  {summary ? formatCurrency(summary.netRemaining) : '0 €'}
+                <div className={`stat-value text-xl ${yearlyData && parseFloat(yearlyData.kpis.totalRemaining) >= 0 ? 'text-success' : 'text-error'}`}>
+                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
                 </div>
-                <div className="stat-desc">
-                  Après charges et impôts ({summary ? formatCurrency(summary.incomeTaxEstimate) : '0 €'})
-                </div>
+                <div className="stat-desc">Après charges et impôts</div>
               </div>
+            </div>
+          </div>
+
+          {/* Monthly Breakdown Table */}
+          <div className="mb-8">
+            <h2 className="text-lg font-semibold mb-4">Détail mensuel</h2>
+            <div className="overflow-x-auto">
+              <table className="table table-sm bg-base-100 rounded-box shadow">
+                <thead>
+                  <tr>
+                    <th>Mois</th>
+                    <th className="text-right">CA HT</th>
+                    <th className="text-right">Urssaf</th>
+                    <th className="text-right">Impôts</th>
+                    <th className="text-right">TVA</th>
+                    <th className="text-right">Restant</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sortedMonths.map((month) => {
+                    const isCurrentMonth = month.month === yearlyData?.currentMonth
+                    return (
+                      <tr key={month.month} className={isCurrentMonth ? 'bg-base-200' : ''}>
+                        <td className={isCurrentMonth ? 'font-semibold' : ''}>
+                          {MONTHS[month.month - 1]}
+                          {isCurrentMonth && <span className="badge badge-sm badge-primary ml-2">En cours</span>}
+                        </td>
+                        <td className="text-right">{formatCurrency(month.revenue)}</td>
+                        <td className="text-right">
+                          <span className={month.urssafIsPaid ? 'text-success' : 'text-base-content/70'}>
+                            {formatCurrency(month.urssaf)}
+                          </span>
+                          {month.urssafIsPaid && <span className="text-success ml-1">✓</span>}
+                        </td>
+                        <td className="text-right text-base-content/70">
+                          {formatCurrency(month.incomeTax)}
+                        </td>
+                        <td className="text-right">
+                          <span className={month.tvaIsPaid ? 'text-success' : 'text-base-content/70'}>
+                            {formatCurrency(month.tva)}
+                          </span>
+                          {month.tvaIsPaid && <span className="text-success ml-1">✓</span>}
+                        </td>
+                        <td className={`text-right font-medium ${parseFloat(month.remaining) >= 0 ? 'text-success' : 'text-error'}`}>
+                          {formatCurrency(month.remaining)}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+                <tfoot>
+                  <tr className="border-t-2">
+                    <td className="font-semibold">Moyenne</td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td className={`text-right font-semibold ${averageRemaining >= 0 ? 'text-success' : 'text-error'}`}>
+                      {formatCurrency(averageRemaining)}
+                    </td>
+                  </tr>
+                </tfoot>
+              </table>
             </div>
           </div>
 
@@ -144,39 +203,6 @@ export default function Dashboard() {
               </div>
             </div>
           </div>
-
-          {/* Pending Payments */}
-          {summary && summary.upcomingPayments.length > 0 && (
-            <div className="mb-8">
-              <h2 className="text-lg font-semibold mb-4">Paiements à venir</h2>
-              <div className="overflow-x-auto">
-                <table className="table table-sm bg-base-100 rounded-box shadow">
-                  <thead>
-                    <tr>
-                      <th>Type</th>
-                      <th>Description</th>
-                      <th>Échéance</th>
-                      <th className="text-right">Montant</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {summary.upcomingPayments.map((payment, index) => (
-                      <tr key={index}>
-                        <td>
-                          <span className={`badge badge-sm ${payment.type === 'tva' ? 'badge-secondary' : payment.type === 'urssaf' ? 'badge-accent' : 'badge-info'}`}>
-                            {payment.type === 'tva' ? 'TVA' : payment.type === 'urssaf' ? 'Urssaf' : 'Impôts'}
-                          </span>
-                        </td>
-                        <td>{payment.description}</td>
-                        <td>{payment.dueDate || '-'}</td>
-                        <td className="text-right font-medium">{formatCurrency(payment.amount)}</td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
 
           {/* Quick Links */}
           <div>
