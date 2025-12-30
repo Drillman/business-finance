@@ -11,7 +11,7 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2, CreditCard } from 'lucide-react'
+import { Pencil, Trash2, CreditCard, Ban, RotateCcw } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
@@ -114,14 +114,16 @@ export default function Invoices() {
     }
   }, [summary, settings])
 
-  // Group invoices by month
+  // Group invoices by month (prioritize payment date, fall back to invoice date)
   const invoicesByMonth = useMemo(() => {
     if (!invoicesData?.data) return new Map<number, Invoice[]>()
 
     const grouped = new Map<number, Invoice[]>()
 
     invoicesData.data.forEach(invoice => {
-      const month = new Date(invoice.invoiceDate).getMonth()
+      // Use payment date if available, otherwise use invoice date
+      const dateToUse = invoice.paymentDate || invoice.invoiceDate
+      const month = new Date(dateToUse).getMonth()
       if (!grouped.has(month)) {
         grouped.set(month, [])
       }
@@ -226,6 +228,18 @@ export default function Invoices() {
       })
       showSuccess('Paiement enregistré avec succès')
       closePaymentModal()
+    } catch (err) {
+      showError(err instanceof Error ? err.message : 'Une erreur est survenue')
+    }
+  }
+
+  const handleToggleCanceled = async (invoice: Invoice) => {
+    try {
+      await updateMutation.mutateAsync({
+        id: invoice.id,
+        data: { isCanceled: !invoice.isCanceled },
+      })
+      showSuccess(invoice.isCanceled ? 'Facture restaurée' : 'Facture annulée')
     } catch (err) {
       showError(err instanceof Error ? err.message : 'Une erreur est survenue')
     }
@@ -355,8 +369,9 @@ export default function Invoices() {
       ) : (
         <div className="space-y-6">
           {Array.from(invoicesByMonth.entries()).map(([month, monthInvoices]) => {
-            const monthTotal = monthInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountHt), 0)
-            const monthTotalTtc = monthInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountTtc), 0)
+            const activeInvoices = monthInvoices.filter(inv => !inv.isCanceled)
+            const monthTotal = activeInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountHt), 0)
+            const monthTotalTtc = activeInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountTtc), 0)
 
             return (
               <div key={month} className="card bg-base-100 shadow">
@@ -372,36 +387,47 @@ export default function Invoices() {
                   </div>
 
                   <div className="overflow-x-auto">
-                    <table className="table">
+                    <table className="table table-fixed">
                       <thead>
                         <tr>
-                          <th>N° Facture</th>
-                          <th>Client</th>
-                          <th>Date</th>
-                          <th>Paiement</th>
-                          <th className="text-right">Montant HT</th>
-                          <th className="text-right">TVA</th>
-                          <th className="text-right">Montant TTC</th>
-                          <th>Actions</th>
+                          <th className="w-32">N° Facture</th>
+                          <th className="w-48">Client</th>
+                          <th className="w-28">Date facture</th>
+                          <th className="w-32">Date paiement</th>
+                          <th className="w-28 text-right">Montant HT</th>
+                          <th className="w-16 text-right">TVA</th>
+                          <th className="w-28 text-right">Montant TTC</th>
+                          <th className="w-20">Actions</th>
                         </tr>
                       </thead>
                       <tbody>
                         {monthInvoices.map((invoice) => (
-                          <tr key={invoice.id} className="hover">
+                          <tr key={invoice.id} className={`hover ${invoice.isCanceled ? 'opacity-50' : ''}`}>
                             <td className="font-mono text-sm">
-                              {invoice.invoiceNumber || '-'}
+                              <span className={invoice.isCanceled ? 'line-through' : ''}>
+                                {invoice.invoiceNumber || '-'}
+                              </span>
+                              {invoice.isCanceled && (
+                                <span className="badge badge-sm badge-error ml-2">Annulée</span>
+                              )}
                             </td>
                             <td>
-                              <div className="font-medium">{invoice.client}</div>
+                              <div className={`font-medium ${invoice.isCanceled ? 'line-through' : ''}`}>
+                                {invoice.client}
+                              </div>
                               {invoice.description && (
-                                <div className="text-sm text-base-content/60 truncate max-w-xs">
+                                <div className={`text-sm text-base-content/60 truncate max-w-xs ${invoice.isCanceled ? 'line-through' : ''}`}>
                                   {invoice.description}
                                 </div>
                               )}
                             </td>
-                            <td>{formatDate(invoice.invoiceDate)}</td>
+                            <td className={invoice.isCanceled ? 'line-through' : ''}>
+                              {formatDate(invoice.invoiceDate)}
+                            </td>
                             <td>
-                              {invoice.paymentDate ? (
+                              {invoice.isCanceled ? (
+                                <span className="text-base-content/40">-</span>
+                              ) : invoice.paymentDate ? (
                                 <span className="badge badge-sm badge-success">
                                   {formatDate(invoice.paymentDate)}
                                 </span>
@@ -417,24 +443,47 @@ export default function Invoices() {
                                 </button>
                               )}
                             </td>
-                            <td className="text-right font-mono">
+                            <td className={`text-right font-mono ${invoice.isCanceled ? 'line-through' : ''}`}>
                               {formatCurrency(invoice.amountHt)}
                             </td>
-                            <td className="text-right font-mono text-base-content/60">
+                            <td className={`text-right font-mono text-base-content/60 ${invoice.isCanceled ? 'line-through' : ''}`}>
                               {parseFloat(invoice.taxRate)}%
                             </td>
-                            <td className="text-right font-mono font-medium">
+                            <td className={`text-right font-mono font-medium ${invoice.isCanceled ? 'line-through' : ''}`}>
                               {formatCurrency(invoice.amountTtc)}
                             </td>
                             <td>
                               <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square"
-                                  onClick={() => openEditModal(invoice)}
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </button>
+                                {invoice.isCanceled ? (
+                                  <button
+                                    className="btn btn-sm btn-ghost btn-square text-success"
+                                    onClick={() => handleToggleCanceled(invoice)}
+                                    title="Restaurer la facture"
+                                    disabled={updateMutation.isPending}
+                                  >
+                                    <RotateCcw className="h-4 w-4" />
+                                  </button>
+                                ) : (
+                                  <>
+                                    <button
+                                      className="btn btn-sm btn-ghost btn-square"
+                                      onClick={() => openEditModal(invoice)}
+                                      title="Modifier"
+                                    >
+                                      <Pencil className="h-4 w-4" />
+                                    </button>
+                                    {!invoice.paymentDate && (
+                                      <button
+                                        className="btn btn-sm btn-ghost btn-square text-warning"
+                                        onClick={() => handleToggleCanceled(invoice)}
+                                        title="Annuler la facture"
+                                        disabled={updateMutation.isPending}
+                                      >
+                                        <Ban className="h-4 w-4" />
+                                      </button>
+                                    )}
+                                  </>
+                                )}
                                 <button
                                   className="btn btn-sm btn-ghost btn-square text-error"
                                   onClick={() => setDeleteConfirmId(invoice.id)}

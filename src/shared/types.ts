@@ -19,6 +19,7 @@ export interface Invoice {
   amountTtc: string
   invoiceNumber: string | null
   note: string | null
+  isCanceled: boolean
   createdAt: string
 }
 
@@ -31,6 +32,7 @@ export interface CreateInvoiceInput {
   taxRate: number
   invoiceNumber?: string
   note?: string
+  isCanceled?: boolean
 }
 
 export type UpdateInvoiceInput = Partial<CreateInvoiceInput>

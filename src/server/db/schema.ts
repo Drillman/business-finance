@@ -40,6 +40,7 @@ export const invoices = pgTable('invoices', {
   amountTtc: decimal('amount_ttc', { precision: 12, scale: 2 }).notNull(),
   invoiceNumber: varchar('invoice_number', { length: 50 }),
   note: text('note'),
+  isCanceled: boolean('is_canceled').notNull().default(false),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('invoices_user_id_idx').on(table.userId),

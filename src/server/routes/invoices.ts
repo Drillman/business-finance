@@ -14,6 +14,7 @@ const createInvoiceSchema = z.object({
   taxRate: z.number().min(0, 'Le taux de TVA ne peut pas être négatif').max(100, 'Le taux de TVA ne peut pas dépasser 100%'),
   invoiceNumber: z.string().optional(),
   note: z.string().optional(),
+  isCanceled: z.boolean().optional(),
 })
 
 const updateInvoiceSchema = createInvoiceSchema.partial()
@@ -328,6 +329,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
           amountTtc,
           invoiceNumber: data.invoiceNumber,
           note: data.note,
+          isCanceled: data.isCanceled ?? false,
         })
         .returning()
 
@@ -368,6 +370,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
       if (data.paymentDate !== undefined) updateData.paymentDate = data.paymentDate
       if (data.invoiceNumber !== undefined) updateData.invoiceNumber = data.invoiceNumber
       if (data.note !== undefined) updateData.note = data.note
+      if (data.isCanceled !== undefined) updateData.isCanceled = data.isCanceled
 
       // Recalculate TTC if amounts changed
       if (data.amountHt !== undefined || data.taxRate !== undefined) {
@@ -446,6 +449,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
             gte(invoices.invoiceDate, startDate),
             lte(invoices.invoiceDate, endDate)
           )
@@ -498,6 +502,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
             gte(invoices.invoiceDate, startDate),
             lte(invoices.invoiceDate, endDate)
           )

@@ -49,6 +49,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
             gte(invoices.paymentDate, startDate),
             lte(invoices.paymentDate, endDate)
           )

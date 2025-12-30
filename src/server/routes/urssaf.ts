@@ -301,6 +301,7 @@ export async function urssafRoutes(fastify: FastifyInstance) {
           .where(
             and(
               eq(invoices.userId, userId),
+              eq(invoices.isCanceled, false),
               sql`${invoices.paymentDate} >= ${startDate}`,
               sql`${invoices.paymentDate} <= ${endDate}`
             )

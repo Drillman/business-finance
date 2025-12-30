@@ -242,6 +242,7 @@ export async function tvaRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
             gte(invoices.paymentDate, startDate),
             lte(invoices.paymentDate, endDate)
           )
@@ -333,6 +334,7 @@ export async function tvaRoutes(fastify: FastifyInstance) {
           .where(
             and(
               eq(invoices.userId, userId),
+              eq(invoices.isCanceled, false),
               gte(invoices.paymentDate, startDate),
               lte(invoices.paymentDate, endDate)
             )

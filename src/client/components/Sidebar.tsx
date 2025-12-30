@@ -82,7 +82,7 @@ export default function Sidebar() {
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
+                  `${isActive ? 'bg-base-200 text-base-content' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
                 }
                 end={item.to === '/'}
                 title={isCollapsed ? item.label : undefined}
@@ -100,7 +100,7 @@ export default function Sidebar() {
               <NavLink
                 to={item.to}
                 className={({ isActive }) =>
-                  `${isActive ? 'active' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
+                  `${isActive ? 'bg-base-200 text-base-content' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
                 }
                 title={isCollapsed ? item.label : undefined}
               >

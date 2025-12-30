@@ -278,6 +278,7 @@ export async function incomeTaxRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
             sql`EXTRACT(YEAR FROM ${invoices.paymentDate}) = ${year}`
           )
         )
