@@ -125,6 +125,7 @@ export const settings = pgTable('settings', {
   estimatedTaxRate: decimal('estimated_tax_rate', { precision: 5, scale: 2 }).notNull().default('11.00'),
   revenueDeductionRate: decimal('revenue_deduction_rate', { precision: 5, scale: 2 }).notNull().default('34.00'),
   monthlySalary: decimal('monthly_salary', { precision: 12, scale: 2 }).notNull().default('3000.00'),
+  additionalTaxableIncome: decimal('additional_taxable_income', { precision: 12, scale: 2 }).notNull().default('0.00'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
   updatedAt: timestamp('updated_at').defaultNow().notNull(),
 })

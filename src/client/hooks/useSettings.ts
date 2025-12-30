@@ -18,6 +18,8 @@ export function useUpdateSettings() {
       api.put<Settings>('/settings', data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['settings'] })
+      // Also invalidate income-tax summary since additionalTaxableIncome affects it
+      queryClient.invalidateQueries({ queryKey: ['incomeTaxSummary'] })
     },
   })
 }

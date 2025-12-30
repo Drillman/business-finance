@@ -1,7 +1,7 @@
 import { useState, useEffect, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import { Save, Loader2, CheckCircle, XCircle } from 'lucide-react'
+import { Save, Loader2, CheckCircle, XCircle, Plus, Trash2, RotateCcw } from 'lucide-react'
 
 interface UserSettings {
   id: string
@@ -10,6 +10,7 @@ interface UserSettings {
   estimatedTaxRate: string
   revenueDeductionRate: string
   monthlySalary: string
+  additionalTaxableIncome: string
   createdAt: string
   updatedAt: string
 }
@@ -19,6 +20,26 @@ interface UpdateSettingsData {
   estimatedTaxRate?: number
   revenueDeductionRate?: number
   monthlySalary?: number
+  additionalTaxableIncome?: number
+}
+
+interface TaxBracket {
+  id: string
+  minIncome: string
+  maxIncome: string | null
+  rate: string
+}
+
+interface TaxBracketsResponse {
+  year: number
+  brackets: TaxBracket[]
+  isCustom: boolean
+}
+
+interface EditableBracket {
+  minIncome: string
+  maxIncome: string
+  rate: string
 }
 
 export default function Settings() {
@@ -30,9 +51,19 @@ export default function Settings() {
   const [successMessage, setSuccessMessage] = useState('')
   const [errorMessage, setErrorMessage] = useState('')
 
+  // Tax brackets state
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
+  const [editableBrackets, setEditableBrackets] = useState<EditableBracket[]>([])
+  const [bracketsModified, setBracketsModified] = useState(false)
+
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => api.get<UserSettings>('/settings'),
+  })
+
+  const { data: taxBracketsData, isLoading: isLoadingBrackets } = useQuery({
+    queryKey: ['taxBrackets', selectedYear],
+    queryFn: () => api.get<TaxBracketsResponse>(`/settings/tax-brackets?year=${selectedYear}`),
   })
 
   const updateMutation = useMutation({
@@ -49,6 +80,35 @@ export default function Settings() {
     },
   })
 
+  const saveBracketsMutation = useMutation({
+    mutationFn: (data: { year: number; brackets: { minIncome: number; maxIncome: number | null; rate: number }[] }) =>
+      api.post<TaxBracketsResponse>('/settings/tax-brackets', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taxBrackets'] })
+      queryClient.invalidateQueries({ queryKey: ['incomeTaxSummary'] })
+      setSuccessMessage('Tranches d\'imposition enregistrées')
+      setBracketsModified(false)
+      setTimeout(() => setSuccessMessage(''), 3000)
+    },
+    onError: (error) => {
+      setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde')
+    },
+  })
+
+  const resetBracketsMutation = useMutation({
+    mutationFn: () => api.delete<void>('/settings/tax-brackets'),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['taxBrackets'] })
+      queryClient.invalidateQueries({ queryKey: ['incomeTaxSummary'] })
+      setSuccessMessage('Tranches réinitialisées aux valeurs officielles')
+      setBracketsModified(false)
+      setTimeout(() => setSuccessMessage(''), 3000)
+    },
+    onError: (error) => {
+      setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de la réinitialisation')
+    },
+  })
+
   useEffect(() => {
     if (settings) {
       setUrssafRate(settings.urssafRate)
@@ -57,6 +117,19 @@ export default function Settings() {
       setMonthlySalary(settings.monthlySalary)
     }
   }, [settings])
+
+  useEffect(() => {
+    if (taxBracketsData?.brackets) {
+      setEditableBrackets(
+        taxBracketsData.brackets.map((b) => ({
+          minIncome: b.minIncome,
+          maxIncome: b.maxIncome || '',
+          rate: b.rate,
+        }))
+      )
+      setBracketsModified(false)
+    }
+  }, [taxBracketsData])
 
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
@@ -69,6 +142,48 @@ export default function Settings() {
       revenueDeductionRate: parseFloat(revenueDeductionRate),
       monthlySalary: parseFloat(monthlySalary),
     })
+  }
+
+  const updateBracket = (index: number, field: keyof EditableBracket, value: string) => {
+    setEditableBrackets((prev) => {
+      const updated = [...prev]
+      updated[index] = { ...updated[index], [field]: value }
+      return updated
+    })
+    setBracketsModified(true)
+  }
+
+  const addBracket = () => {
+    const lastBracket = editableBrackets[editableBrackets.length - 1]
+    const newMinIncome = lastBracket?.maxIncome
+      ? (parseFloat(lastBracket.maxIncome) + 1).toString()
+      : '0'
+    setEditableBrackets((prev) => [
+      ...prev,
+      { minIncome: newMinIncome, maxIncome: '', rate: '0' },
+    ])
+    setBracketsModified(true)
+  }
+
+  const removeBracket = (index: number) => {
+    if (editableBrackets.length <= 1) return
+    setEditableBrackets((prev) => prev.filter((_, i) => i !== index))
+    setBracketsModified(true)
+  }
+
+  const saveBrackets = () => {
+    const brackets = editableBrackets.map((b) => ({
+      minIncome: parseFloat(b.minIncome) || 0,
+      maxIncome: b.maxIncome ? parseFloat(b.maxIncome) : null,
+      rate: parseFloat(b.rate) || 0,
+    }))
+    saveBracketsMutation.mutate({ year: selectedYear, brackets })
+  }
+
+  const formatCurrency = (value: string) => {
+    const num = parseFloat(value)
+    if (isNaN(num)) return value
+    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num)
   }
 
   if (isLoading) {
@@ -208,6 +323,146 @@ export default function Settings() {
           </div>
         </div>
       </form>
+
+      {/* Tax Brackets Configuration */}
+      <div className="card bg-base-100 shadow mt-6">
+        <div className="card-body">
+          <div className="flex justify-between items-center">
+            <h2 className="card-title">Tranches d'imposition</h2>
+            <div className="flex gap-2 items-center">
+              <select
+                className="select select-bordered select-sm"
+                value={selectedYear}
+                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+              >
+                <option value={2024}>2024</option>
+                <option value={2025}>2025</option>
+                <option value={2026}>2026</option>
+              </select>
+              {taxBracketsData?.isCustom && (
+                <span className="badge badge-warning badge-sm">Personnalisé</span>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-base-content/60 mb-4">
+            Configurez les tranches du barème progressif de l'impôt sur le revenu.
+            Laissez le maximum vide pour la dernière tranche.
+          </p>
+
+          {isLoadingBrackets ? (
+            <div className="flex justify-center py-8">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="table table-sm">
+                  <thead>
+                    <tr>
+                      <th>Minimum (€)</th>
+                      <th>Maximum (€)</th>
+                      <th>Taux (%)</th>
+                      <th className="w-16"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {editableBrackets.map((bracket, index) => (
+                      <tr key={index}>
+                        <td>
+                          <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            className="input input-bordered input-sm w-full"
+                            value={bracket.minIncome}
+                            onChange={(e) => updateBracket(index, 'minIncome', e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="1"
+                            min="0"
+                            className="input input-bordered input-sm w-full"
+                            value={bracket.maxIncome}
+                            onChange={(e) => updateBracket(index, 'maxIncome', e.target.value)}
+                            placeholder="∞"
+                          />
+                        </td>
+                        <td>
+                          <input
+                            type="number"
+                            step="0.1"
+                            min="0"
+                            max="100"
+                            className="input input-bordered input-sm w-24"
+                            value={bracket.rate}
+                            onChange={(e) => updateBracket(index, 'rate', e.target.value)}
+                          />
+                        </td>
+                        <td>
+                          <button
+                            type="button"
+                            className="btn btn-ghost btn-sm btn-square text-error"
+                            onClick={() => removeBracket(index)}
+                            disabled={editableBrackets.length <= 1}
+                            title="Supprimer"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="flex justify-between mt-4">
+                <button
+                  type="button"
+                  className="btn btn-outline btn-sm gap-2"
+                  onClick={addBracket}
+                >
+                  <Plus className="h-4 w-4" />
+                  Ajouter une tranche
+                </button>
+
+                <div className="flex gap-2">
+                  {taxBracketsData?.isCustom && (
+                    <button
+                      type="button"
+                      className="btn btn-ghost btn-sm gap-2"
+                      onClick={() => resetBracketsMutation.mutate()}
+                      disabled={resetBracketsMutation.isPending}
+                    >
+                      {resetBracketsMutation.isPending ? (
+                        <Loader2 className="h-4 w-4 animate-spin" />
+                      ) : (
+                        <RotateCcw className="h-4 w-4" />
+                      )}
+                      Réinitialiser
+                    </button>
+                  )}
+                  <button
+                    type="button"
+                    className="btn btn-primary btn-sm gap-2"
+                    onClick={saveBrackets}
+                    disabled={!bracketsModified || saveBracketsMutation.isPending}
+                  >
+                    {saveBracketsMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <Save className="h-4 w-4" />
+                    )}
+                    Enregistrer les tranches
+                  </button>
+                </div>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

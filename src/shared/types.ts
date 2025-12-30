@@ -161,6 +161,7 @@ export interface IncomeTaxSummary {
   taxableIncome: string
   totalRevenue: string
   deductionRate: string
+  additionalTaxableIncome: string
   totalPaid: string
   totalPending: string
   remaining: string
@@ -183,6 +184,7 @@ export interface Settings {
   estimatedTaxRate: string
   revenueDeductionRate: string
   monthlySalary: string
+  additionalTaxableIncome: string
   createdAt: string
   updatedAt: string
 }
@@ -192,6 +194,7 @@ export interface UpdateSettingsInput {
   estimatedTaxRate?: number
   revenueDeductionRate?: number
   monthlySalary?: number
+  additionalTaxableIncome?: number
 }
 
 // Tax bracket types

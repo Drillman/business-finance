@@ -23,13 +23,14 @@ const listQuerySchema = z.object({
   offset: z.coerce.number().min(0).default(0),
 })
 
-// French tax brackets for 2024
-const DEFAULT_TAX_BRACKETS_2024 = [
-  { minIncome: 0, maxIncome: 11294, rate: 0 },
-  { minIncome: 11295, maxIncome: 28797, rate: 11 },
-  { minIncome: 28798, maxIncome: 82341, rate: 30 },
-  { minIncome: 82342, maxIncome: 177106, rate: 41 },
-  { minIncome: 177107, maxIncome: null, rate: 45 },
+// French tax brackets for 2025 (revenus 2024)
+// Source: https://www.service-public.gouv.fr/particuliers/vosdroits/F1419
+const DEFAULT_TAX_BRACKETS_2025 = [
+  { minIncome: 0, maxIncome: 11497, rate: 0 },
+  { minIncome: 11497, maxIncome: 29315, rate: 11 },
+  { minIncome: 29315, maxIncome: 83823, rate: 30 },
+  { minIncome: 83823, maxIncome: 180294, rate: 41 },
+  { minIncome: 180294, maxIncome: null, rate: 45 },
 ]
 
 // Helper to calculate progressive tax from brackets
@@ -38,7 +39,6 @@ function calculateProgressiveTax(
   brackets: { minIncome: string; maxIncome: string | null; rate: string }[]
 ) {
   let totalTax = 0
-  let remainingIncome = taxableIncome
   const breakdown: {
     minIncome: string
     maxIncome: string | null
@@ -48,14 +48,15 @@ function calculateProgressiveTax(
   }[] = []
 
   for (const bracket of brackets) {
-    if (remainingIncome <= 0) break
-
     const minIncome = parseFloat(bracket.minIncome)
     const maxIncome = bracket.maxIncome ? parseFloat(bracket.maxIncome) : Infinity
     const rate = parseFloat(bracket.rate)
 
-    const bracketWidth = maxIncome - minIncome
-    const incomeInBracket = Math.min(remainingIncome, bracketWidth)
+    // Skip if income doesn't reach this bracket
+    if (taxableIncome <= minIncome) break
+
+    // Calculate income within this bracket
+    const incomeInBracket = Math.min(taxableIncome, maxIncome) - minIncome
 
     if (incomeInBracket > 0) {
       const taxForBracket = incomeInBracket * (rate / 100)
@@ -67,7 +68,6 @@ function calculateProgressiveTax(
         taxableAmount: incomeInBracket.toFixed(2),
         taxAmount: taxForBracket.toFixed(2),
       })
-      remainingIncome -= incomeInBracket
     }
   }
 
@@ -269,6 +269,10 @@ export async function incomeTaxRoutes(fastify: FastifyInstance) {
         ? parseFloat(userSettings.revenueDeductionRate)
         : 34
 
+      const additionalTaxableIncome = userSettings
+        ? parseFloat(userSettings.additionalTaxableIncome || '0')
+        : 0
+
       // Get annual revenue from paid invoices
       const invoiceResult = await db
         .select({
@@ -284,7 +288,8 @@ export async function incomeTaxRoutes(fastify: FastifyInstance) {
         )
 
       const totalRevenue = parseFloat(invoiceResult[0].totalHt)
-      const taxableIncome = totalRevenue * (1 - deductionRate / 100)
+      const revenueAfterDeduction = totalRevenue * (1 - deductionRate / 100)
+      const taxableIncome = revenueAfterDeduction + additionalTaxableIncome
 
       // Get tax brackets (prefer custom, fallback to official)
       let brackets = await db
@@ -305,12 +310,12 @@ export async function incomeTaxRoutes(fastify: FastifyInstance) {
         brackets = brackets.filter((b) => b.userId === null)
       }
 
-      // Use default 2024 brackets if nothing found
+      // Use default 2025 brackets if nothing found
       if (brackets.length === 0) {
-        brackets = DEFAULT_TAX_BRACKETS_2024.map((b, i) => ({
+        brackets = DEFAULT_TAX_BRACKETS_2025.map((b, i) => ({
           id: `default-${i}`,
           userId: null,
-          year: 2024,
+          year: 2025,
           minIncome: b.minIncome.toFixed(2),
           maxIncome: b.maxIncome?.toFixed(2) ?? null,
           rate: b.rate.toFixed(2),
@@ -356,6 +361,7 @@ export async function incomeTaxRoutes(fastify: FastifyInstance) {
         taxableIncome: taxableIncome.toFixed(2),
         totalRevenue: totalRevenue.toFixed(2),
         deductionRate: deductionRate.toFixed(2),
+        additionalTaxableIncome: additionalTaxableIncome.toFixed(2),
         totalPaid: totalPaid.toFixed(2),
         totalPending: totalPending.toFixed(2),
         remaining: remaining.toFixed(2),

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
   useIncomeTaxSummary,
   useIncomeTaxPayments,
@@ -6,10 +6,12 @@ import {
   useUpdateIncomeTaxPayment,
   useDeleteIncomeTaxPayment,
 } from '../hooks/useIncomeTax'
+import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import type { IncomeTaxPayment, CreateIncomeTaxPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
+import { MathInput } from '../components/MathInput'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -68,10 +70,16 @@ export default function IncomeTax() {
 
   const { data: summary, isLoading: isLoadingSummary } = useIncomeTaxSummary(selectedYear)
   const { data: paymentsData, isLoading: isLoadingPayments } = useIncomeTaxPayments({ year: selectedYear })
+  const { data: settings } = useSettings()
+  const updateSettingsMutation = useUpdateSettings()
 
   const createMutation = useCreateIncomeTaxPayment()
   const updateMutation = useUpdateIncomeTaxPayment()
   const deleteMutation = useDeleteIncomeTaxPayment()
+
+  const handleAdditionalIncomeChange = (value: number) => {
+    updateSettingsMutation.mutate({ additionalTaxableIncome: value })
+  }
 
   const yearOptions = [2025, 2026]
 
@@ -198,6 +206,9 @@ export default function IncomeTax() {
           </div>
           <div className="stat-desc">
             Apres abattement ({formatPercent(summary?.deductionRate || '34')})
+            {parseFloat(summary?.additionalTaxableIncome || '0') > 0 && (
+              <> + {formatCurrency(summary?.additionalTaxableIncome || '0')}</>
+            )}
           </div>
         </div>
         <div className="stat bg-base-100 rounded-box shadow">
@@ -222,6 +233,31 @@ export default function IncomeTax() {
           </div>
           <div className="stat-desc">
             {totalPaid > 0 && `${formatCurrency(totalPaid)} deja paye`}
+          </div>
+        </div>
+      </div>
+
+      {/* Additional Taxable Income */}
+      <div className="card bg-base-100 shadow mb-6">
+        <div className="card-body">
+          <h2 className="card-title">Revenu imposable supplementaire</h2>
+          <p className="text-sm text-base-content/60 mb-4">
+            Ajoutez un montant supplementaire a votre revenu imposable (ex: autres revenus, revenus fonciers).
+            Vous pouvez utiliser des expressions mathematiques (ex: 1000 + 500).
+          </p>
+          <div className="form-control max-w-xs">
+            <label className="label">
+              <span className="label-text">Montant supplementaire (EUR)</span>
+            </label>
+            <MathInput
+              value={parseFloat(settings?.additionalTaxableIncome || '0')}
+              onChange={handleAdditionalIncomeChange}
+              placeholder="0"
+              disabled={updateSettingsMutation.isPending}
+            />
+            {updateSettingsMutation.isPending && (
+              <span className="loading loading-spinner loading-xs mt-2"></span>
+            )}
           </div>
         </div>
       </div>

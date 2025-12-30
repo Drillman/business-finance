@@ -10,15 +10,17 @@ const updateSettingsSchema = z.object({
   estimatedTaxRate: z.number().min(0).max(100).optional(),
   revenueDeductionRate: z.number().min(0).max(100).optional(),
   monthlySalary: z.number().min(0).optional(),
+  additionalTaxableIncome: z.number().min(0).optional(),
 })
 
-// French tax brackets for 2024
-const DEFAULT_TAX_BRACKETS_2024 = [
-  { minIncome: 0, maxIncome: 11294, rate: 0 },
-  { minIncome: 11295, maxIncome: 28797, rate: 11 },
-  { minIncome: 28798, maxIncome: 82341, rate: 30 },
-  { minIncome: 82342, maxIncome: 177106, rate: 41 },
-  { minIncome: 177107, maxIncome: null, rate: 45 },
+// French tax brackets for 2025 (revenus 2024)
+// Source: https://www.service-public.gouv.fr/particuliers/vosdroits/F1419
+const DEFAULT_TAX_BRACKETS_2025 = [
+  { minIncome: 0, maxIncome: 11497, rate: 0 },
+  { minIncome: 11497, maxIncome: 29315, rate: 11 },
+  { minIncome: 29315, maxIncome: 83823, rate: 30 },
+  { minIncome: 83823, maxIncome: 180294, rate: 41 },
+  { minIncome: 180294, maxIncome: null, rate: 45 },
 ]
 
 export async function settingsRoutes(fastify: FastifyInstance) {
@@ -90,6 +92,9 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       if (data.monthlySalary !== undefined) {
         updateData.monthlySalary = data.monthlySalary.toFixed(2)
       }
+      if (data.additionalTaxableIncome !== undefined) {
+        updateData.additionalTaxableIncome = data.additionalTaxableIncome.toFixed(2)
+      }
 
       const [updated] = await db
         .update(settings)
@@ -142,14 +147,14 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         brackets = defaultBrackets.filter((b) => b.userId === null)
       }
 
-      // If still no brackets, seed the default 2024 brackets and return them
-      if (brackets.length === 0 && year === 2024) {
+      // If still no brackets, seed the default 2025 brackets and return them
+      if (brackets.length === 0 && year === 2025) {
         const seeded = await db
           .insert(taxBrackets)
           .values(
-            DEFAULT_TAX_BRACKETS_2024.map((bracket) => ({
+            DEFAULT_TAX_BRACKETS_2025.map((bracket) => ({
               userId: null,
-              year: 2024,
+              year: 2025,
               minIncome: bracket.minIncome.toFixed(2),
               maxIncome: bracket.maxIncome?.toFixed(2) ?? null,
               rate: bracket.rate.toFixed(2),
@@ -289,12 +294,12 @@ export async function settingsRoutes(fastify: FastifyInstance) {
         brackets = brackets.filter((b) => b.userId === null)
       }
 
-      // Use default 2024 brackets if nothing found
+      // Use default 2025 brackets if nothing found
       if (brackets.length === 0) {
-        brackets = DEFAULT_TAX_BRACKETS_2024.map((b, i) => ({
+        brackets = DEFAULT_TAX_BRACKETS_2025.map((b, i) => ({
           id: `default-${i}`,
           userId: null,
-          year: 2024,
+          year: 2025,
           minIncome: b.minIncome.toFixed(2),
           maxIncome: b.maxIncome?.toFixed(2) ?? null,
           rate: b.rate.toFixed(2),
@@ -305,18 +310,18 @@ export async function settingsRoutes(fastify: FastifyInstance) {
 
       // Calculate progressive tax
       let totalTax = 0
-      let remainingIncome = taxableIncome
       const breakdown: { bracket: string; income: number; rate: number; tax: number }[] = []
 
       for (const bracket of brackets) {
-        if (remainingIncome <= 0) break
-
         const minIncome = parseFloat(bracket.minIncome)
         const maxIncome = bracket.maxIncome ? parseFloat(bracket.maxIncome) : Infinity
         const rate = parseFloat(bracket.rate)
 
-        const bracketWidth = maxIncome - minIncome
-        const incomeInBracket = Math.min(remainingIncome, bracketWidth)
+        // Skip if income doesn't reach this bracket
+        if (taxableIncome <= minIncome) break
+
+        // Calculate income within this bracket
+        const incomeInBracket = Math.min(taxableIncome, maxIncome) - minIncome
 
         if (incomeInBracket > 0) {
           const taxForBracket = incomeInBracket * (rate / 100)
@@ -329,7 +334,6 @@ export async function settingsRoutes(fastify: FastifyInstance) {
             rate,
             tax: Math.round(taxForBracket),
           })
-          remainingIncome -= incomeInBracket
         }
       }
 
