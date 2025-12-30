@@ -73,13 +73,7 @@ export default function Urssaf() {
   const updateMutation = useUpdateUrssafPayment()
   const deleteMutation = useDeleteUrssafPayment()
 
-  const yearOptions = useMemo(() => {
-    const options = []
-    for (let y = currentYear; y >= currentYear - 5; y--) {
-      options.push(y)
-    }
-    return options
-  }, [])
+  const yearOptions = [2025, 2026]
 
   const openCreateModal = (trimester?: number) => {
     setEditingPayment(null)

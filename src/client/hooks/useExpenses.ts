@@ -106,10 +106,11 @@ export function useExpenseMonthlySummary(year: number, month: number) {
   })
 }
 
-export function useRecurringExpenses() {
+export function useRecurringExpenses(month?: string) {
+  const endpoint = month ? `/expenses/recurring?month=${month}` : '/expenses/recurring'
   return useQuery({
-    queryKey: ['expenses', 'recurring'],
-    queryFn: () => api.get<{ data: Expense[] }>('/expenses/recurring'),
+    queryKey: ['expenses', 'recurring', month],
+    queryFn: () => api.get<{ data: Expense[] }>(endpoint),
     staleTime: 1000 * 60 * 2,
   })
 }

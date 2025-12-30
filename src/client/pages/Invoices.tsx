@@ -241,14 +241,7 @@ export default function Invoices() {
     return ht * (1 + rate / 100)
   }, [formData.amountHt, formData.taxRate])
 
-  const yearOptions = useMemo(() => {
-    const currentYear = new Date().getFullYear()
-    const years = []
-    for (let i = 0; i < 5; i++) {
-      years.push(currentYear - i)
-    }
-    return years
-  }, [])
+  const yearOptions = [2025, 2026]
 
   return (
     <div>

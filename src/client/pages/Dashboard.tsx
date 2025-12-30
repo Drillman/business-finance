@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useDashboardSummary } from '../hooks/useDashboard'
 import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
@@ -29,13 +29,7 @@ export default function Dashboard() {
   const { data: summary, isLoading: summaryLoading } = useDashboardSummary(selectedYear, selectedMonth)
   const { data: accountSummary, isLoading: accountLoading } = useAccountSummary()
 
-  const years = useMemo(() => {
-    const result = []
-    for (let y = currentYear - 2; y <= currentYear + 1; y++) {
-      result.push(y)
-    }
-    return result
-  }, [currentYear])
+  const years = [2025, 2026]
 
   const isLoading = summaryLoading || accountLoading
 

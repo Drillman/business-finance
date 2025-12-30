@@ -16,6 +16,9 @@ const createExpenseSchema = z.object({
   category: z.enum(expenseCategories, { message: 'Catégorie invalide' }),
   isRecurring: z.boolean().default(false),
   recurrencePeriod: z.enum(['monthly', 'quarterly', 'yearly']).optional(),
+  startMonth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').optional(),
+  endMonth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').optional(),
+  paymentDay: z.number().min(1).max(31).optional(),
   note: z.string().optional(),
 })
 
@@ -24,7 +27,7 @@ const updateExpenseSchema = createExpenseSchema.partial()
 const listQuerySchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)').optional(),
   category: z.enum(expenseCategories).optional(),
-  isRecurring: z.coerce.boolean().optional(),
+  isRecurring: z.string().transform(val => val === 'true').optional(),
   limit: z.coerce.number().min(1).max(100).default(50),
   offset: z.coerce.number().min(0).default(0),
 })
@@ -121,11 +124,23 @@ export async function expenseRoutes(fastify: FastifyInstance) {
       const data = parseResult.data
       const userId = request.authUser.userId
 
-      // Validate recurrence period if recurring
-      if (data.isRecurring && !data.recurrencePeriod) {
-        return reply.status(400).send({
-          message: 'La période de récurrence est requise pour les dépenses récurrentes',
-        })
+      // Validate recurring expense fields
+      if (data.isRecurring) {
+        if (!data.recurrencePeriod) {
+          return reply.status(400).send({
+            message: 'La période de récurrence est requise pour les dépenses récurrentes',
+          })
+        }
+        if (!data.startMonth) {
+          return reply.status(400).send({
+            message: 'Le mois de début est requis pour les charges fixes',
+          })
+        }
+        if (!data.paymentDay) {
+          return reply.status(400).send({
+            message: 'Le jour de paiement est requis pour les charges fixes',
+          })
+        }
       }
 
       const [expense] = await db
@@ -140,6 +155,9 @@ export async function expenseRoutes(fastify: FastifyInstance) {
           category: data.category,
           isRecurring: data.isRecurring,
           recurrencePeriod: data.recurrencePeriod,
+          startMonth: data.startMonth,
+          endMonth: data.endMonth,
+          paymentDay: data.paymentDay,
           note: data.note,
         })
         .returning()
@@ -182,15 +200,32 @@ export async function expenseRoutes(fastify: FastifyInstance) {
       if (data.category !== undefined) updateData.category = data.category
       if (data.isRecurring !== undefined) updateData.isRecurring = data.isRecurring
       if (data.recurrencePeriod !== undefined) updateData.recurrencePeriod = data.recurrencePeriod
+      if (data.startMonth !== undefined) updateData.startMonth = data.startMonth
+      if (data.endMonth !== undefined) updateData.endMonth = data.endMonth
+      if (data.paymentDay !== undefined) updateData.paymentDay = data.paymentDay
       if (data.note !== undefined) updateData.note = data.note
 
       // Validate recurrence consistency
       const finalIsRecurring = data.isRecurring ?? existing.isRecurring
       const finalRecurrencePeriod = data.recurrencePeriod ?? existing.recurrencePeriod
-      if (finalIsRecurring && !finalRecurrencePeriod) {
-        return reply.status(400).send({
-          message: 'La période de récurrence est requise pour les dépenses récurrentes',
-        })
+      const finalStartMonth = data.startMonth ?? existing.startMonth
+      const finalPaymentDay = data.paymentDay ?? existing.paymentDay
+      if (finalIsRecurring) {
+        if (!finalRecurrencePeriod) {
+          return reply.status(400).send({
+            message: 'La période de récurrence est requise pour les dépenses récurrentes',
+          })
+        }
+        if (!finalStartMonth) {
+          return reply.status(400).send({
+            message: 'Le mois de début est requis pour les charges fixes',
+          })
+        }
+        if (!finalPaymentDay) {
+          return reply.status(400).send({
+            message: 'Le jour de paiement est requis pour les charges fixes',
+          })
+        }
       }
 
       const [updated] = await db
@@ -304,13 +339,37 @@ export async function expenseRoutes(fastify: FastifyInstance) {
   fastify.get(
     '/api/expenses/recurring',
     { preHandler: [requireAuth] },
-    async (request: FastifyRequest) => {
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const querySchema = z.object({
+        month: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)').optional(),
+      })
+
+      const parseResult = querySchema.safeParse(request.query)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { month } = parseResult.data
       const userId = request.authUser.userId
+
+      const conditions = [eq(expenses.userId, userId), eq(expenses.isRecurring, true)]
+
+      // Filter by active month if provided
+      if (month) {
+        const monthDate = `${month}-01`
+        // startMonth <= selectedMonth AND (endMonth IS NULL OR endMonth >= selectedMonth)
+        conditions.push(lte(expenses.startMonth, monthDate))
+        conditions.push(
+          sql`(${expenses.endMonth} IS NULL OR ${expenses.endMonth} >= ${monthDate})`
+        )
+      }
 
       const results = await db
         .select()
         .from(expenses)
-        .where(and(eq(expenses.userId, userId), eq(expenses.isRecurring, true)))
+        .where(and(...conditions))
         .orderBy(expenses.description)
 
       return { data: results }

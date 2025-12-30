@@ -47,6 +47,9 @@ export interface Expense {
   category: string
   isRecurring: boolean
   recurrencePeriod: string | null
+  startMonth: string | null
+  endMonth: string | null
+  paymentDay: number | null
   note: string | null
   createdAt: string
 }
@@ -63,6 +66,9 @@ export interface CreateExpenseInput {
   category: ExpenseCategory
   isRecurring?: boolean
   recurrencePeriod?: RecurrencePeriod
+  startMonth?: string
+  endMonth?: string
+  paymentDay?: number
   note?: string
 }
 

@@ -58,6 +58,9 @@ export const expenses = pgTable('expenses', {
   category: varchar('category', { length: 50 }).notNull(),
   isRecurring: boolean('is_recurring').notNull().default(false),
   recurrencePeriod: varchar('recurrence_period', { length: 20 }),
+  startMonth: date('start_month'),
+  endMonth: date('end_month'),
+  paymentDay: integer('payment_day'),
   note: text('note'),
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
