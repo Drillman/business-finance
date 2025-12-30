@@ -7,8 +7,7 @@ import { requireAuth } from '../auth/middleware'
 
 const createTaxPaymentSchema = z.object({
   amount: z.number().positive('Le montant doit être positif'),
-  periodStart: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)'),
-  periodEnd: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)'),
+  periodMonth: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)'),
   status: z.enum(['pending', 'paid']).default('pending'),
   paymentDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').optional(),
   reference: z.string().optional(),
@@ -43,10 +42,7 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       const conditions = [eq(taxPayments.userId, userId)]
 
       if (year) {
-        const startDate = `${year}-01-01`
-        const endDate = `${year}-12-31`
-        conditions.push(gte(taxPayments.periodStart, startDate))
-        conditions.push(lte(taxPayments.periodEnd, endDate))
+        conditions.push(sql`${taxPayments.periodMonth} LIKE ${`${year}-%`}`)
       }
 
       if (status) {
@@ -57,7 +53,7 @@ export async function tvaRoutes(fastify: FastifyInstance) {
         .select()
         .from(taxPayments)
         .where(and(...conditions))
-        .orderBy(desc(taxPayments.periodEnd))
+        .orderBy(desc(taxPayments.periodMonth))
         .limit(limit)
         .offset(offset)
 
@@ -110,20 +106,12 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       const data = parseResult.data
       const userId = request.authUser.userId
 
-      // Validate dates
-      if (data.periodEnd < data.periodStart) {
-        return reply.status(400).send({
-          message: 'La date de fin doit être après la date de début',
-        })
-      }
-
       const [payment] = await db
         .insert(taxPayments)
         .values({
           userId,
           amount: data.amount.toFixed(2),
-          periodStart: data.periodStart,
-          periodEnd: data.periodEnd,
+          periodMonth: data.periodMonth,
           status: data.status,
           paymentDate: data.paymentDate,
           reference: data.reference,
@@ -162,21 +150,11 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       const updateData: Record<string, unknown> = {}
 
       if (data.amount !== undefined) updateData.amount = data.amount.toFixed(2)
-      if (data.periodStart !== undefined) updateData.periodStart = data.periodStart
-      if (data.periodEnd !== undefined) updateData.periodEnd = data.periodEnd
+      if (data.periodMonth !== undefined) updateData.periodMonth = data.periodMonth
       if (data.status !== undefined) updateData.status = data.status
       if (data.paymentDate !== undefined) updateData.paymentDate = data.paymentDate
       if (data.reference !== undefined) updateData.reference = data.reference
       if (data.note !== undefined) updateData.note = data.note
-
-      // Validate dates if both are present
-      const finalStart = data.periodStart ?? existing.periodStart
-      const finalEnd = data.periodEnd ?? existing.periodEnd
-      if (finalEnd < finalStart) {
-        return reply.status(400).send({
-          message: 'La date de fin doit être après la date de début',
-        })
-      }
 
       const [updated] = await db
         .update(taxPayments)
@@ -252,25 +230,90 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       const totalTtc = parseFloat(invoiceResult[0].totalTtc)
       const tvaCollected = totalTtc - totalHt
 
-      // Get TVA recoverable from expenses
-      const expenseResult = await db
+      // Get TVA recoverable from non-recurring expenses
+      const nonRecurringResult = await db
         .select({
-          totalTax: sql<string>`COALESCE(SUM(${expenses.taxAmount}::numeric), 0)`,
           recoverableTax: sql<string>`COALESCE(SUM(${expenses.taxAmount}::numeric * ${expenses.taxRecoveryRate}::numeric / 100), 0)`,
         })
         .from(expenses)
         .where(
           and(
             eq(expenses.userId, userId),
+            eq(expenses.isRecurring, false),
             gte(expenses.date, startDate),
             lte(expenses.date, endDate)
           )
         )
 
-      const tvaRecoverable = parseFloat(expenseResult[0].recoverableTax)
+      // Get TVA recoverable from recurring expenses
+      // We need to calculate how many months each recurring expense applies to within the period
+      const recurringExpenses = await db
+        .select({
+          taxAmount: expenses.taxAmount,
+          taxRecoveryRate: expenses.taxRecoveryRate,
+          startMonth: expenses.startMonth,
+          endMonth: expenses.endMonth,
+          recurrencePeriod: expenses.recurrencePeriod,
+        })
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.userId, userId),
+            eq(expenses.isRecurring, true),
+            lte(expenses.startMonth, endDate),
+            sql`(${expenses.endMonth} IS NULL OR ${expenses.endMonth} >= ${startDate})`
+          )
+        )
+
+      // Calculate total recurring TVA
+      let recurringTvaRecoverable = 0
+      const periodStartDate = new Date(startDate)
+      const periodEndDate = new Date(endDate)
+
+      for (const expense of recurringExpenses) {
+        const expenseStart = new Date(expense.startMonth!)
+        const expenseEnd = expense.endMonth ? new Date(expense.endMonth) : periodEndDate
+
+        // Calculate the effective range for this expense within the query period
+        const effectiveStart = expenseStart > periodStartDate ? expenseStart : periodStartDate
+        const effectiveEnd = expenseEnd < periodEndDate ? expenseEnd : periodEndDate
+
+        // Count the number of months this expense applies (considering recurrence period)
+        let monthCount = 0
+        const current = new Date(effectiveStart.getFullYear(), effectiveStart.getMonth(), 1)
+        const endCheck = new Date(effectiveEnd.getFullYear(), effectiveEnd.getMonth(), 1)
+
+        while (current <= endCheck) {
+          if (expense.recurrencePeriod === 'monthly') {
+            monthCount++
+          } else if (expense.recurrencePeriod === 'quarterly') {
+            // Only count if it's a quarter month (Jan, Apr, Jul, Oct or based on start)
+            const startMonth = expenseStart.getMonth()
+            const currentMonth = current.getMonth()
+            if ((currentMonth - startMonth + 12) % 3 === 0) {
+              monthCount++
+            }
+          } else if (expense.recurrencePeriod === 'yearly') {
+            // Only count if it's the anniversary month
+            if (current.getMonth() === expenseStart.getMonth()) {
+              monthCount++
+            }
+          }
+          current.setMonth(current.getMonth() + 1)
+        }
+
+        const taxAmount = parseFloat(expense.taxAmount || '0')
+        const recoveryRate = parseFloat(expense.taxRecoveryRate || '100')
+        recurringTvaRecoverable += (taxAmount * recoveryRate / 100) * monthCount
+      }
+
+      const tvaRecoverable = parseFloat(nonRecurringResult[0].recoverableTax) + recurringTvaRecoverable
       const netTva = tvaCollected - tvaRecoverable
 
       // Get payments made in this period
+      // Convert dates to YYYY-MM format for comparison
+      const startMonth = startDate.substring(0, 7)
+      const endMonth = endDate.substring(0, 7)
       const paymentsResult = await db
         .select({
           totalPaid: sql<string>`COALESCE(SUM(CASE WHEN ${taxPayments.status} = 'paid' THEN ${taxPayments.amount}::numeric ELSE 0 END), 0)`,
@@ -280,8 +323,8 @@ export async function tvaRoutes(fastify: FastifyInstance) {
         .where(
           and(
             eq(taxPayments.userId, userId),
-            gte(taxPayments.periodStart, startDate),
-            lte(taxPayments.periodEnd, endDate)
+            gte(taxPayments.periodMonth, startMonth),
+            lte(taxPayments.periodMonth, endMonth)
           )
         )
 
@@ -317,6 +360,30 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       const { year } = parseResult.data
       const userId = request.authUser.userId
 
+      // Fetch all payments for the year at once to avoid N+1 queries
+      const yearPayments = await db
+        .select()
+        .from(taxPayments)
+        .where(
+          and(
+            eq(taxPayments.userId, userId),
+            sql`${taxPayments.periodMonth} LIKE ${`${year}-%`}`
+          )
+        )
+
+      // Group payments by month
+      const paymentsByMonth = new Map<number, { status: string; amount: string }[]>()
+      for (const payment of yearPayments) {
+        const paymentMonth = parseInt(payment.periodMonth.split('-')[1])
+        if (!paymentsByMonth.has(paymentMonth)) {
+          paymentsByMonth.set(paymentMonth, [])
+        }
+        paymentsByMonth.get(paymentMonth)!.push({
+          status: payment.status,
+          amount: payment.amount,
+        })
+      }
+
       const monthlyData = []
 
       for (let month = 1; month <= 12; month++) {
@@ -344,8 +411,8 @@ export async function tvaRoutes(fastify: FastifyInstance) {
         const totalTtc = parseFloat(invoiceResult[0].totalTtc)
         const collected = totalTtc - totalHt
 
-        // TVA recoverable from expenses
-        const expenseResult = await db
+        // TVA recoverable from non-recurring expenses (based on expense date)
+        const nonRecurringResult = await db
           .select({
             recoverableTax: sql<string>`COALESCE(SUM(${expenses.taxAmount}::numeric * ${expenses.taxRecoveryRate}::numeric / 100), 0)`,
           })
@@ -353,19 +420,120 @@ export async function tvaRoutes(fastify: FastifyInstance) {
           .where(
             and(
               eq(expenses.userId, userId),
+              eq(expenses.isRecurring, false),
               gte(expenses.date, startDate),
               lte(expenses.date, endDate)
             )
           )
 
-        const recoverable = parseFloat(expenseResult[0].recoverableTax)
+        // TVA recoverable from recurring expenses (based on startMonth/endMonth range and recurrence period)
+        const recurringExpensesList = await db
+          .select({
+            taxAmount: expenses.taxAmount,
+            taxRecoveryRate: expenses.taxRecoveryRate,
+            startMonth: expenses.startMonth,
+            recurrencePeriod: expenses.recurrencePeriod,
+          })
+          .from(expenses)
+          .where(
+            and(
+              eq(expenses.userId, userId),
+              eq(expenses.isRecurring, true),
+              lte(expenses.startMonth, startDate),
+              sql`(${expenses.endMonth} IS NULL OR ${expenses.endMonth} >= ${startDate})`
+            )
+          )
+
+        // Calculate recurring TVA based on recurrence period
+        let recurringTax = 0
+        for (const expense of recurringExpensesList) {
+          const expenseStartMonth = new Date(expense.startMonth!).getMonth()
+          const currentMonth = month - 1 // JavaScript months are 0-indexed
+
+          let shouldInclude = false
+          if (expense.recurrencePeriod === 'monthly') {
+            shouldInclude = true
+          } else if (expense.recurrencePeriod === 'quarterly') {
+            // Include if the month aligns with the quarterly schedule
+            shouldInclude = (currentMonth - expenseStartMonth + 12) % 3 === 0
+          } else if (expense.recurrencePeriod === 'yearly') {
+            // Include only in the anniversary month
+            shouldInclude = currentMonth === expenseStartMonth
+          }
+
+          if (shouldInclude) {
+            const taxAmount = parseFloat(expense.taxAmount || '0')
+            const recoveryRate = parseFloat(expense.taxRecoveryRate || '100')
+            recurringTax += taxAmount * recoveryRate / 100
+          }
+        }
+
+        const nonRecurringTax = parseFloat(nonRecurringResult[0].recoverableTax)
+        const recoverable = nonRecurringTax + recurringTax
+        const netTva = collected - recoverable
+
+        // Calculate payment status for this month
+        const monthPayments = paymentsByMonth.get(month) || []
+        const paidAmount = monthPayments
+          .filter(p => p.status === 'paid')
+          .reduce((sum, p) => sum + parseFloat(p.amount), 0)
+        const pendingAmount = monthPayments
+          .filter(p => p.status === 'pending')
+          .reduce((sum, p) => sum + parseFloat(p.amount), 0)
+
+        // Calculate due date: 19th of the following month, or next weekday if weekend
+        const calculateDueDate = (y: number, m: number): string => {
+          // Due date is 19th of the following month
+          let dueDate = new Date(y, m, 19) // m is already 0-indexed month + 1 = following month
+          const dayOfWeek = dueDate.getDay()
+          // If Saturday (6), move to Monday (add 2 days)
+          // If Sunday (0), move to Monday (add 1 day)
+          if (dayOfWeek === 6) {
+            dueDate = new Date(dueDate.getTime() + 2 * 24 * 60 * 60 * 1000)
+          } else if (dayOfWeek === 0) {
+            dueDate = new Date(dueDate.getTime() + 1 * 24 * 60 * 60 * 1000)
+          }
+          return dueDate.toISOString().split('T')[0]
+        }
+
+        const dueDate = calculateDueDate(year, month)
+        const today = new Date().toISOString().split('T')[0]
+        const monthEnd = new Date(year, month, 0) // Last day of the month
+        const isMonthComplete = new Date() > monthEnd
+
+        // Determine payment status
+        // 'paid' - a payment has been made for this month
+        // 'pending' - payment created but not yet paid
+        // 'overdue' - month is complete, no payment, and due date has passed
+        // 'upcoming' - month is complete but due date not yet reached
+        // 'not_due' - month not yet complete
+        let paymentStatus: 'paid' | 'pending' | 'due' | 'overdue' | 'upcoming' | 'not_due'
+        if (paidAmount > 0) {
+          // If any payment was made, consider it paid
+          paymentStatus = 'paid'
+        } else if (pendingAmount > 0) {
+          paymentStatus = 'pending'
+        } else if (!isMonthComplete) {
+          paymentStatus = 'not_due'
+        } else if (netTva <= 0) {
+          // No TVA to pay for this month
+          paymentStatus = 'not_due'
+        } else if (today > dueDate) {
+          paymentStatus = 'overdue'
+        } else {
+          paymentStatus = 'upcoming'
+        }
 
         monthlyData.push({
           month,
           year,
           tvaCollected: collected.toFixed(2),
           tvaRecoverable: recoverable.toFixed(2),
-          netTva: (collected - recoverable).toFixed(2),
+          netTva: netTva.toFixed(2),
+          paidAmount: paidAmount.toFixed(2),
+          pendingAmount: pendingAmount.toFixed(2),
+          dueDate,
+          paymentStatus,
         })
       }
 

@@ -85,15 +85,13 @@ export interface TaxPayment {
   reference: string | null
   paymentDate: string | null
   note: string | null
-  periodStart: string
-  periodEnd: string
+  periodMonth: string // Format: YYYY-MM
   createdAt: string
 }
 
 export interface CreateTaxPaymentInput {
   amount: number
-  periodStart: string
-  periodEnd: string
+  periodMonth: string // Format: YYYY-MM
   status?: 'pending' | 'paid'
   paymentDate?: string
   reference?: string

@@ -121,7 +121,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
             eq(taxPayments.status, 'pending')
           )
         )
-        .orderBy(taxPayments.periodEnd)
+        .orderBy(taxPayments.periodMonth)
         .limit(3)
 
       const upcomingUrssafPayments = await db
@@ -136,12 +136,19 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
         .orderBy(urssafPayments.year, urssafPayments.trimester)
         .limit(3)
 
+      // Helper to format period month as readable date
+      const formatPeriodMonth = (periodMonth: string) => {
+        const [y, m] = periodMonth.split('-')
+        const date = new Date(parseInt(y), parseInt(m) - 1, 1)
+        return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
+      }
+
       const upcomingPayments: { type: 'tva' | 'urssaf'; amount: string; dueDate?: string; description: string }[] = [
         ...upcomingTvaPayments.map((p) => ({
           type: 'tva' as const,
           amount: p.amount,
-          dueDate: p.periodEnd,
-          description: `TVA ${p.periodStart} - ${p.periodEnd}`,
+          dueDate: p.periodMonth,
+          description: `TVA ${formatPeriodMonth(p.periodMonth)}`,
         })),
         ...upcomingUrssafPayments.map((p) => ({
           type: 'urssaf' as const,

@@ -8,7 +8,7 @@ import {
   useMonthlyTva,
 } from '../hooks/useTva'
 import type { TaxPayment, CreateTaxPaymentInput } from '@shared/types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Pencil, Trash2, Check, Clock, AlertTriangle, AlertCircle, CalendarClock, Minus } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 
@@ -33,12 +33,17 @@ function formatMonth(month: number): string {
   return date.toLocaleDateString('fr-FR', { month: 'short' })
 }
 
+function formatPeriodMonth(periodMonth: string): string {
+  const [year, month] = periodMonth.split('-')
+  const date = new Date(parseInt(year), parseInt(month) - 1, 1)
+  return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
+}
+
 const currentYear = new Date().getFullYear()
 
 interface TaxPaymentFormData {
   amount: string
-  periodStart: string
-  periodEnd: string
+  periodMonth: string
   status: 'pending' | 'paid'
   paymentDate: string
   reference: string
@@ -47,8 +52,7 @@ interface TaxPaymentFormData {
 
 const defaultFormData: TaxPaymentFormData = {
   amount: '',
-  periodStart: '',
-  periodEnd: '',
+  periodMonth: '',
   status: 'pending',
   paymentDate: '',
   reference: '',
@@ -81,10 +85,10 @@ export default function TVA() {
 
   const openCreateModal = () => {
     setEditingPayment(null)
+    const currentMonth = new Date().getMonth() + 1
     setFormData({
       ...defaultFormData,
-      periodStart: `${selectedYear}-01-01`,
-      periodEnd: `${selectedYear}-03-31`,
+      periodMonth: `${selectedYear}-${currentMonth.toString().padStart(2, '0')}`,
     })
     setError('')
     setIsModalOpen(true)
@@ -94,8 +98,7 @@ export default function TVA() {
     setEditingPayment(payment)
     setFormData({
       amount: payment.amount,
-      periodStart: payment.periodStart,
-      periodEnd: payment.periodEnd,
+      periodMonth: payment.periodMonth,
       status: payment.status,
       paymentDate: payment.paymentDate || '',
       reference: payment.reference || '',
@@ -118,8 +121,7 @@ export default function TVA() {
 
     const data: CreateTaxPaymentInput = {
       amount: parseFloat(formData.amount),
-      periodStart: formData.periodStart,
-      periodEnd: formData.periodEnd,
+      periodMonth: formData.periodMonth,
       status: formData.status,
       paymentDate: formData.paymentDate || undefined,
       reference: formData.reference.trim() || undefined,
@@ -243,6 +245,7 @@ export default function TVA() {
                     <th className="text-right">TVA collectée</th>
                     <th className="text-right">TVA récupérable</th>
                     <th className="text-right">TVA nette</th>
+                    <th className="text-center">Paiement</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -251,6 +254,59 @@ export default function TVA() {
                     const recoverable = parseFloat(m.tvaRecoverable)
                     const net = parseFloat(m.netTva)
                     const hasData = collected > 0 || recoverable > 0
+
+                    // Payment status indicator
+                    const getPaymentStatusBadge = () => {
+                      // If no net TVA to pay, no payment needed
+                      if (net <= 0) {
+                        return (
+                          <span className="badge badge-ghost gap-1">
+                            <Minus className="h-3 w-3" />
+                            N/A
+                          </span>
+                        )
+                      }
+
+                      switch (m.paymentStatus) {
+                        case 'paid':
+                          return (
+                            <span className="badge badge-success gap-1">
+                              <Check className="h-3 w-3" />
+                              Payé
+                            </span>
+                          )
+                        case 'pending':
+                          return (
+                            <span className="badge badge-warning gap-1">
+                              <Clock className="h-3 w-3" />
+                              En attente
+                            </span>
+                          )
+                        case 'overdue':
+                          return (
+                            <span className="badge badge-error gap-1" title={`Échéance: ${formatDate(m.dueDate)}`}>
+                              <AlertCircle className="h-3 w-3" />
+                              En retard
+                            </span>
+                          )
+                        case 'upcoming':
+                          return (
+                            <span className="badge badge-info gap-1" title={`Échéance: ${formatDate(m.dueDate)}`}>
+                              <CalendarClock className="h-3 w-3" />
+                              À payer
+                            </span>
+                          )
+                        case 'not_due':
+                          return (
+                            <span className="badge badge-ghost gap-1">
+                              <Minus className="h-3 w-3" />
+                              -
+                            </span>
+                          )
+                        default:
+                          return null
+                      }
+                    }
 
                     return (
                       <tr key={m.month} className={hasData ? '' : 'text-base-content/40'}>
@@ -270,6 +326,9 @@ export default function TVA() {
                             '-'
                           )}
                         </td>
+                        <td className="text-center">
+                          {getPaymentStatusBadge()}
+                        </td>
                       </tr>
                     )
                   })}
@@ -288,6 +347,7 @@ export default function TVA() {
                         {formatCurrency(summary?.netTva || '0')}
                       </span>
                     </td>
+                    <td></td>
                   </tr>
                 </tfoot>
               </table>
@@ -324,7 +384,7 @@ export default function TVA() {
                     <tr key={payment.id} className="hover">
                       <td>
                         <div className="font-medium">
-                          {formatDate(payment.periodStart)} - {formatDate(payment.periodEnd)}
+                          {formatPeriodMonth(payment.periodMonth)}
                         </div>
                         {payment.note && (
                           <div className="text-sm text-base-content/60 truncate max-w-xs">
@@ -393,26 +453,13 @@ export default function TVA() {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="form-control">
                   <label className="label">
-                    <span className="label-text">Début de période *</span>
+                    <span className="label-text">Mois *</span>
                   </label>
                   <input
-                    type="date"
+                    type="month"
                     className="input input-bordered w-full"
-                    value={formData.periodStart}
-                    onChange={(e) => updateFormField('periodStart', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Fin de période *</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    value={formData.periodEnd}
-                    onChange={(e) => updateFormField('periodEnd', e.target.value)}
+                    value={formData.periodMonth}
+                    onChange={(e) => updateFormField('periodMonth', e.target.value)}
                     required
                   />
                 </div>

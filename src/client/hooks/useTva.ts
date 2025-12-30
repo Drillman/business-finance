@@ -33,6 +33,10 @@ interface MonthlyTvaData {
   tvaCollected: string
   tvaRecoverable: string
   netTva: string
+  paidAmount: string
+  pendingAmount: string
+  dueDate: string
+  paymentStatus: 'paid' | 'pending' | 'due' | 'overdue' | 'upcoming' | 'not_due'
 }
 
 interface MonthlyTvaResponse {

@@ -78,8 +78,7 @@ export const taxPayments = pgTable('tax_payments', {
   reference: varchar('reference', { length: 100 }),
   paymentDate: date('payment_date'),
   note: text('note'),
-  periodStart: date('period_start').notNull(),
-  periodEnd: date('period_end').notNull(),
+  periodMonth: varchar('period_month', { length: 7 }).notNull(), // Format: YYYY-MM
   createdAt: timestamp('created_at').defaultNow().notNull(),
 }, (table) => [
   index('tax_payments_user_id_idx').on(table.userId),
