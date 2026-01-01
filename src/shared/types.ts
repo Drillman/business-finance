@@ -259,8 +259,11 @@ export interface AccountBalance {
 export interface AccountSummary {
   currentBalance: string
   pendingTva: string
+  estimatedTva: string
   pendingUrssaf: string
+  estimatedUrssaf: string
   pendingIncomeTax: string
+  estimatedIncomeTax: string
   totalObligations: string
   nextMonthSalary: string
   availableFunds: string

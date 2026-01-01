@@ -36,6 +36,13 @@ interface TaxBracketsResponse {
   isCustom: boolean
 }
 
+interface YearlyRatesResponse {
+  year: number
+  urssafRate: string
+  estimatedTaxRate: string
+  isCustom: boolean
+}
+
 interface EditableBracket {
   minIncome: string
   maxIncome: string
@@ -44,8 +51,6 @@ interface EditableBracket {
 
 export default function Settings() {
   const queryClient = useQueryClient()
-  const [urssafRate, setUrssafRate] = useState('')
-  const [estimatedTaxRate, setEstimatedTaxRate] = useState('')
   const [revenueDeductionRate, setRevenueDeductionRate] = useState('')
   const [monthlySalary, setMonthlySalary] = useState('')
   const [successMessage, setSuccessMessage] = useState('')
@@ -56,6 +61,12 @@ export default function Settings() {
   const [editableBrackets, setEditableBrackets] = useState<EditableBracket[]>([])
   const [bracketsModified, setBracketsModified] = useState(false)
 
+  // Yearly rates state
+  const [ratesYear, setRatesYear] = useState(new Date().getFullYear())
+  const [yearlyUrssafRate, setYearlyUrssafRate] = useState('')
+  const [yearlyEstimatedTaxRate, setYearlyEstimatedTaxRate] = useState('')
+  const [ratesModified, setRatesModified] = useState(false)
+
   const { data: settings, isLoading } = useQuery({
     queryKey: ['settings'],
     queryFn: () => api.get<UserSettings>('/settings'),
@@ -64,6 +75,11 @@ export default function Settings() {
   const { data: taxBracketsData, isLoading: isLoadingBrackets } = useQuery({
     queryKey: ['taxBrackets', selectedYear],
     queryFn: () => api.get<TaxBracketsResponse>(`/settings/tax-brackets?year=${selectedYear}`),
+  })
+
+  const { data: yearlyRatesData, isLoading: isLoadingRates } = useQuery({
+    queryKey: ['yearlyRates', ratesYear],
+    queryFn: () => api.get<YearlyRatesResponse>(`/settings/yearly-rates?year=${ratesYear}`),
   })
 
   const updateMutation = useMutation({
@@ -109,10 +125,39 @@ export default function Settings() {
     },
   })
 
+  const saveYearlyRatesMutation = useMutation({
+    mutationFn: (data: { year: number; urssafRate: number; estimatedTaxRate: number }) =>
+      api.post<YearlyRatesResponse>('/settings/yearly-rates', data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['yearlyRates'] })
+      queryClient.invalidateQueries({ queryKey: ['urssafSummary'] })
+      queryClient.invalidateQueries({ queryKey: ['incomeTaxSummary'] })
+      setSuccessMessage('Taux annuels enregistrés')
+      setRatesModified(false)
+      setTimeout(() => setSuccessMessage(''), 3000)
+    },
+    onError: (error) => {
+      setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de la sauvegarde')
+    },
+  })
+
+  const resetYearlyRatesMutation = useMutation({
+    mutationFn: (year: number) => api.delete<void>(`/settings/yearly-rates?year=${year}`),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['yearlyRates'] })
+      queryClient.invalidateQueries({ queryKey: ['urssafSummary'] })
+      queryClient.invalidateQueries({ queryKey: ['incomeTaxSummary'] })
+      setSuccessMessage('Taux réinitialisés aux valeurs par défaut')
+      setRatesModified(false)
+      setTimeout(() => setSuccessMessage(''), 3000)
+    },
+    onError: (error) => {
+      setErrorMessage(error instanceof Error ? error.message : 'Erreur lors de la réinitialisation')
+    },
+  })
+
   useEffect(() => {
     if (settings) {
-      setUrssafRate(settings.urssafRate)
-      setEstimatedTaxRate(settings.estimatedTaxRate)
       setRevenueDeductionRate(settings.revenueDeductionRate)
       setMonthlySalary(settings.monthlySalary)
     }
@@ -131,14 +176,20 @@ export default function Settings() {
     }
   }, [taxBracketsData])
 
+  useEffect(() => {
+    if (yearlyRatesData) {
+      setYearlyUrssafRate(yearlyRatesData.urssafRate)
+      setYearlyEstimatedTaxRate(yearlyRatesData.estimatedTaxRate)
+      setRatesModified(false)
+    }
+  }, [yearlyRatesData])
+
   const handleSubmit = (e: FormEvent) => {
     e.preventDefault()
     setErrorMessage('')
     setSuccessMessage('')
 
     updateMutation.mutate({
-      urssafRate: parseFloat(urssafRate),
-      estimatedTaxRate: parseFloat(estimatedTaxRate),
       revenueDeductionRate: parseFloat(revenueDeductionRate),
       monthlySalary: parseFloat(monthlySalary),
     })
@@ -180,6 +231,14 @@ export default function Settings() {
     saveBracketsMutation.mutate({ year: selectedYear, brackets })
   }
 
+  const saveYearlyRates = () => {
+    saveYearlyRatesMutation.mutate({
+      year: ratesYear,
+      urssafRate: parseFloat(yearlyUrssafRate) || 0,
+      estimatedTaxRate: parseFloat(yearlyEstimatedTaxRate) || 0,
+    })
+  }
+
   const formatCurrency = (value: string) => {
     const num = parseFloat(value)
     if (isNaN(num)) return value
@@ -218,50 +277,6 @@ export default function Settings() {
             <h2 className="card-title">Paramètres généraux</h2>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Taux Urssaf (%)</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  placeholder="22.00"
-                  className="input input-bordered w-full"
-                  value={urssafRate}
-                  onChange={(e) => setUrssafRate(e.target.value)}
-                  required
-                />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/60">
-                    Taux de cotisations sociales pour micro-entrepreneur
-                  </span>
-                </label>
-              </div>
-
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Taux d'impôt estimé (%)</span>
-                </label>
-                <input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  max="100"
-                  placeholder="11.00"
-                  className="input input-bordered w-full"
-                  value={estimatedTaxRate}
-                  onChange={(e) => setEstimatedTaxRate(e.target.value)}
-                  required
-                />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/60">
-                    Taux marginal d'imposition estimé
-                  </span>
-                </label>
-              </div>
-
               <div className="form-control">
                 <label className="label">
                   <span className="label-text">Abattement forfaitaire (%)</span>
@@ -323,6 +338,122 @@ export default function Settings() {
           </div>
         </div>
       </form>
+
+      {/* Yearly Rates Configuration */}
+      <div className="card bg-base-100 shadow mt-6">
+        <div className="card-body">
+          <div className="flex justify-between items-center">
+            <h2 className="card-title">Taux annuels</h2>
+            <div className="flex gap-2 items-center">
+              <select
+                className="select select-bordered select-sm"
+                value={ratesYear}
+                onChange={(e) => setRatesYear(parseInt(e.target.value))}
+              >
+                <option value={2024}>2024</option>
+                <option value={2025}>2025</option>
+                <option value={2026}>2026</option>
+              </select>
+              {yearlyRatesData?.isCustom && (
+                <span className="badge badge-warning badge-sm">Personnalisé</span>
+              )}
+            </div>
+          </div>
+
+          <p className="text-sm text-base-content/60 mb-4">
+            Configurez les taux Urssaf et d'impôt estimé par année.
+          </p>
+
+          {isLoadingRates ? (
+            <div className="flex justify-center py-8">
+              <span className="loading loading-spinner loading-lg"></span>
+            </div>
+          ) : (
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Taux Urssaf (%)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    placeholder="22.00"
+                    className="input input-bordered w-full"
+                    value={yearlyUrssafRate}
+                    onChange={(e) => {
+                      setYearlyUrssafRate(e.target.value)
+                      setRatesModified(true)
+                    }}
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/60">
+                      Taux de cotisations sociales pour micro-entrepreneur
+                    </span>
+                  </label>
+                </div>
+
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Taux d'impôt estimé (%)</span>
+                  </label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    max="100"
+                    placeholder="11.00"
+                    className="input input-bordered w-full"
+                    value={yearlyEstimatedTaxRate}
+                    onChange={(e) => {
+                      setYearlyEstimatedTaxRate(e.target.value)
+                      setRatesModified(true)
+                    }}
+                  />
+                  <label className="label">
+                    <span className="label-text-alt text-base-content/60">
+                      Taux marginal d'imposition estimé
+                    </span>
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 mt-4">
+                {yearlyRatesData?.isCustom && (
+                  <button
+                    type="button"
+                    className="btn btn-ghost btn-sm gap-2"
+                    onClick={() => resetYearlyRatesMutation.mutate(ratesYear)}
+                    disabled={resetYearlyRatesMutation.isPending}
+                  >
+                    {resetYearlyRatesMutation.isPending ? (
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                    ) : (
+                      <RotateCcw className="h-4 w-4" />
+                    )}
+                    Réinitialiser
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="btn btn-primary btn-sm gap-2"
+                  onClick={saveYearlyRates}
+                  disabled={!ratesModified || saveYearlyRatesMutation.isPending}
+                >
+                  {saveYearlyRatesMutation.isPending ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Save className="h-4 w-4" />
+                  )}
+                  Enregistrer les taux
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       {/* Tax Brackets Configuration */}
       <div className="card bg-base-100 shadow mt-6">

@@ -138,39 +138,58 @@ export default function BusinessAccount() {
               <thead>
                 <tr>
                   <th>Type</th>
-                  <th className="text-right">Montant</th>
+                  <th className="text-right">En attente</th>
+                  <th className="text-right">Estimé (non déclaré)</th>
+                  <th className="text-right">Total</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
                   <td>
                     <span className="badge badge-secondary mr-2">TVA</span>
-                    Paiements en attente
                   </td>
                   <td className="text-right font-medium">
                     {summary ? formatCurrency(summary.pendingTva) : '0 €'}
+                  </td>
+                  <td className="text-right font-medium text-base-content/60">
+                    {summary ? formatCurrency(summary.estimatedTva) : '0 €'}
+                  </td>
+                  <td className="text-right font-medium">
+                    {summary ? formatCurrency(parseFloat(summary.pendingTva) + parseFloat(summary.estimatedTva)) : '0 €'}
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <span className="badge badge-accent mr-2">Urssaf</span>
-                    Cotisations en attente
                   </td>
                   <td className="text-right font-medium">
                     {summary ? formatCurrency(summary.pendingUrssaf) : '0 €'}
+                  </td>
+                  <td className="text-right font-medium text-base-content/60">
+                    {summary ? formatCurrency(summary.estimatedUrssaf) : '0 €'}
+                  </td>
+                  <td className="text-right font-medium">
+                    {summary ? formatCurrency(parseFloat(summary.pendingUrssaf) + parseFloat(summary.estimatedUrssaf)) : '0 €'}
                   </td>
                 </tr>
                 <tr>
                   <td>
                     <span className="badge badge-info mr-2">Impôts</span>
-                    Paiements en attente
                   </td>
                   <td className="text-right font-medium">
                     {summary ? formatCurrency(summary.pendingIncomeTax) : '0 €'}
                   </td>
+                  <td className="text-right font-medium text-base-content/60">
+                    {summary ? formatCurrency(summary.estimatedIncomeTax) : '0 €'}
+                  </td>
+                  <td className="text-right font-medium">
+                    {summary ? formatCurrency(parseFloat(summary.pendingIncomeTax) + parseFloat(summary.estimatedIncomeTax)) : '0 €'}
+                  </td>
                 </tr>
                 <tr className="border-t-2">
                   <td className="font-semibold">Total des obligations</td>
+                  <td></td>
+                  <td></td>
                   <td className="text-right font-bold text-warning">
                     {summary ? formatCurrency(summary.totalObligations) : '0 €'}
                   </td>
@@ -178,6 +197,9 @@ export default function BusinessAccount() {
               </tbody>
             </table>
           </div>
+          <p className="text-sm text-base-content/60 mt-4">
+            Les montants estimés sont calculés à partir des factures et dépenses non encore déclarées pour l'année en cours.
+          </p>
         </div>
       </div>
 
@@ -198,6 +220,12 @@ export default function BusinessAccount() {
                   <td className="text-error">- Total des obligations</td>
                   <td className="text-right font-medium text-error">
                     {summary ? formatCurrency(summary.totalObligations) : '0 €'}
+                  </td>
+                </tr>
+                <tr className="border-t-2">
+                  <td className="font-semibold">= Fonds disponibles (hors salaire réservé)</td>
+                  <td className={`text-right font-bold ${summary && (parseFloat(summary.availableFunds) + parseFloat(summary.nextMonthSalary)) >= 0 ? 'text-success' : 'text-error'}`}>
+                    {summary ? formatCurrency(parseFloat(summary.availableFunds) + parseFloat(summary.nextMonthSalary)) : '0 €'}
                   </td>
                 </tr>
                 <tr>

@@ -143,6 +143,19 @@ export const taxBrackets = pgTable('tax_brackets', {
   index('tax_brackets_year_idx').on(table.year),
 ])
 
+// Yearly rates (URSSAF and estimated income tax rates per year)
+export const yearlyRates = pgTable('yearly_rates', {
+  id: uuid('id').primaryKey().defaultRandom(),
+  userId: uuid('user_id').notNull().references(() => users.id, { onDelete: 'cascade' }),
+  year: integer('year').notNull(),
+  urssafRate: decimal('urssaf_rate', { precision: 5, scale: 2 }).notNull(),
+  estimatedTaxRate: decimal('estimated_tax_rate', { precision: 5, scale: 2 }).notNull(),
+  createdAt: timestamp('created_at').defaultNow().notNull(),
+  updatedAt: timestamp('updated_at').defaultNow().notNull(),
+}, (table) => [
+  index('yearly_rates_user_year_idx').on(table.userId, table.year),
+])
+
 // Business account balance
 export const accountBalances = pgTable('account_balances', {
   id: uuid('id').primaryKey().defaultRandom(),

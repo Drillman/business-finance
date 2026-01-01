@@ -1,7 +1,15 @@
 import { useState, useMemo } from 'react'
-import { useSettings } from '../hooks/useSettings'
+import { useQuery } from '@tanstack/react-query'
+import { api } from '../api/client'
 
 type InputMode = 'ht' | 'ttc'
+
+interface YearlyRatesResponse {
+  year: number
+  urssafRate: string
+  estimatedTaxRate: string
+  isCustom: boolean
+}
 
 function formatCurrency(amount: number): string {
   return new Intl.NumberFormat('fr-FR', {
@@ -14,14 +22,18 @@ export default function Calculator() {
   const [inputMode, setInputMode] = useState<InputMode>('ht')
   const [amount, setAmount] = useState('')
   const [taxRate, setTaxRate] = useState('20')
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
 
-  const { data: settings, isLoading: isLoadingSettings } = useSettings()
+  const { data: yearlyRates, isLoading: isLoadingRates } = useQuery({
+    queryKey: ['yearlyRates', selectedYear],
+    queryFn: () => api.get<YearlyRatesResponse>(`/settings/yearly-rates?year=${selectedYear}`),
+  })
 
   const calculations = useMemo(() => {
     const inputAmount = parseFloat(amount) || 0
     const rate = parseFloat(taxRate) || 0
-    const urssafRate = settings ? parseFloat(settings.urssafRate) : 22
-    const estimatedTaxRate = settings ? parseFloat(settings.estimatedTaxRate) : 10
+    const urssafRate = yearlyRates ? parseFloat(yearlyRates.urssafRate) : 22
+    const estimatedTaxRate = yearlyRates ? parseFloat(yearlyRates.estimatedTaxRate) : 11
 
     let amountHt: number
     let amountTtc: number
@@ -53,7 +65,7 @@ export default function Calculator() {
       totalDeductions,
       netRemaining,
     }
-  }, [amount, taxRate, inputMode, settings])
+  }, [amount, taxRate, inputMode, yearlyRates])
 
   const handleInputModeChange = (mode: InputMode) => {
     if (mode === inputMode) return
@@ -85,7 +97,7 @@ export default function Calculator() {
     setInputMode('ht')
   }
 
-  if (isLoadingSettings) {
+  if (isLoadingRates) {
     return (
       <div className="flex justify-center items-center h-64">
         <span className="loading loading-spinner loading-lg"></span>
@@ -95,10 +107,29 @@ export default function Calculator() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Calculateur de prestation</h1>
-      <p className="text-base-content/70 mb-6">
-        Calcul rapide pour estimer le net restant après déductions sur une prestation.
-      </p>
+      <div className="flex justify-between items-start mb-6">
+        <div>
+          <h1 className="text-2xl font-bold">Calculateur de prestation</h1>
+          <p className="text-base-content/70 mt-1">
+            Calcul rapide pour estimer le net restant après déductions sur une prestation.
+          </p>
+        </div>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-base-content/70">Année :</span>
+          <select
+            className="select select-bordered select-sm"
+            value={selectedYear}
+            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+          >
+            <option value={2024}>2024</option>
+            <option value={2025}>2025</option>
+            <option value={2026}>2026</option>
+          </select>
+          {yearlyRates?.isCustom && (
+            <span className="badge badge-warning badge-sm">Personnalisé</span>
+          )}
+        </div>
+      </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Input Card */}
@@ -259,14 +290,14 @@ export default function Calculator() {
       {/* Info Card */}
       <div className="card bg-base-100 shadow mt-6">
         <div className="card-body">
-          <h2 className="card-title text-lg">Informations</h2>
+          <h2 className="card-title text-lg">Informations ({selectedYear})</h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
             <div>
-              <span className="text-base-content/70">Taux Urssaf configuré :</span>
+              <span className="text-base-content/70">Taux Urssaf {selectedYear} :</span>
               <span className="font-semibold ml-2">{calculations.urssafRate}%</span>
             </div>
             <div>
-              <span className="text-base-content/70">Taux d'impôt estimé :</span>
+              <span className="text-base-content/70">Taux d'impôt estimé {selectedYear} :</span>
               <span className="font-semibold ml-2">{calculations.estimatedTaxRate}%</span>
             </div>
             <div>
@@ -277,7 +308,7 @@ export default function Calculator() {
             </div>
           </div>
           <p className="text-base-content/60 text-sm mt-2">
-            Ces taux sont configurables dans les paramètres. Le calcul est basé sur le montant HT.
+            Ces taux sont configurables par année dans les paramètres. Le calcul est basé sur le montant HT.
           </p>
         </div>
       </div>

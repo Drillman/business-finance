@@ -2,7 +2,8 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
-import { settings, taxBrackets } from '../db/schema'
+import { settings, taxBrackets, yearlyRates } from '../db/schema'
+import { and } from 'drizzle-orm'
 import { requireAuth } from '../auth/middleware'
 
 const updateSettingsSchema = z.object({
@@ -238,6 +239,155 @@ export async function settingsRoutes(fastify: FastifyInstance) {
       await db
         .delete(taxBrackets)
         .where(eq(taxBrackets.userId, userId))
+
+      return reply.status(204).send()
+    }
+  )
+
+  // Get yearly rates (URSSAF and estimated tax rate)
+  fastify.get(
+    '/api/settings/yearly-rates',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const querySchema = z.object({
+        year: z.coerce.number().min(2000).max(2100).default(new Date().getFullYear()),
+      })
+
+      const parseResult = querySchema.safeParse(request.query)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { year } = parseResult.data
+      const userId = request.authUser.userId
+
+      // Try to get rates for this year
+      const rates = await db.query.yearlyRates.findFirst({
+        where: and(
+          eq(yearlyRates.userId, userId),
+          eq(yearlyRates.year, year)
+        ),
+      })
+
+      // If no rates for this year, get from general settings as default
+      if (!rates) {
+        const userSettings = await db.query.settings.findFirst({
+          where: eq(settings.userId, userId),
+        })
+
+        return {
+          year,
+          urssafRate: userSettings?.urssafRate ?? '22.00',
+          estimatedTaxRate: userSettings?.estimatedTaxRate ?? '11.00',
+          isCustom: false,
+        }
+      }
+
+      return {
+        year,
+        urssafRate: rates.urssafRate,
+        estimatedTaxRate: rates.estimatedTaxRate,
+        isCustom: true,
+      }
+    }
+  )
+
+  // Set yearly rates
+  fastify.post(
+    '/api/settings/yearly-rates',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const bodySchema = z.object({
+        year: z.number().min(2000).max(2100),
+        urssafRate: z.number().min(0).max(100),
+        estimatedTaxRate: z.number().min(0).max(100),
+      })
+
+      const parseResult = bodySchema.safeParse(request.body)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { year, urssafRate, estimatedTaxRate } = parseResult.data
+      const userId = request.authUser.userId
+
+      // Check if rates exist for this year
+      const existing = await db.query.yearlyRates.findFirst({
+        where: and(
+          eq(yearlyRates.userId, userId),
+          eq(yearlyRates.year, year)
+        ),
+      })
+
+      if (existing) {
+        // Update existing rates
+        const [updated] = await db
+          .update(yearlyRates)
+          .set({
+            urssafRate: urssafRate.toFixed(2),
+            estimatedTaxRate: estimatedTaxRate.toFixed(2),
+            updatedAt: new Date(),
+          })
+          .where(eq(yearlyRates.id, existing.id))
+          .returning()
+
+        return {
+          year,
+          urssafRate: updated.urssafRate,
+          estimatedTaxRate: updated.estimatedTaxRate,
+          isCustom: true,
+        }
+      }
+
+      // Insert new rates
+      const [inserted] = await db
+        .insert(yearlyRates)
+        .values({
+          userId,
+          year,
+          urssafRate: urssafRate.toFixed(2),
+          estimatedTaxRate: estimatedTaxRate.toFixed(2),
+        })
+        .returning()
+
+      return reply.status(201).send({
+        year,
+        urssafRate: inserted.urssafRate,
+        estimatedTaxRate: inserted.estimatedTaxRate,
+        isCustom: true,
+      })
+    }
+  )
+
+  // Delete yearly rates (reset to defaults)
+  fastify.delete(
+    '/api/settings/yearly-rates',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const querySchema = z.object({
+        year: z.coerce.number().min(2000).max(2100),
+      })
+
+      const parseResult = querySchema.safeParse(request.query)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { year } = parseResult.data
+      const userId = request.authUser.userId
+
+      await db
+        .delete(yearlyRates)
+        .where(and(
+          eq(yearlyRates.userId, userId),
+          eq(yearlyRates.year, year)
+        ))
 
       return reply.status(204).send()
     }
