@@ -199,7 +199,7 @@ export default function ManagePasskeys() {
                       </td>
                       <td>
                         <button
-                          className="btn btn-sm btn-error btn-outline"
+                          className="btn btn-sm btn-ghost text-error"
                           onClick={() => handleDelete(passkey.id)}
                           disabled={deletePasskeyMutation.isPending}
                         >

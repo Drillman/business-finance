@@ -49,7 +49,7 @@ export function ConfirmDialog({
           <div className="flex gap-3 w-full">
             <button
               type="button"
-              className="btn btn-ghost flex-1"
+              className="btn flex-1"
               onClick={onCancel}
               disabled={isLoading}
             >
