@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useRef, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import { useUser, useLogout, useRefreshToken } from '../hooks/useAuth'
 import type { User } from '@shared/types'
@@ -18,10 +18,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const logoutMutation = useLogout()
   const refreshMutation = useRefreshToken()
   const queryClient = useQueryClient()
+  const hasAttemptedRefresh = useRef(false)
 
-  // Try to refresh token on 401 error
+  // Try to refresh token on 401 error (only once)
   useEffect(() => {
-    if (error && (error as Error).message === 'Non autorisé') {
+    if (error && (error as Error).message === 'Non autorisé' && !hasAttemptedRefresh.current) {
+      hasAttemptedRefresh.current = true
       refreshMutation.mutate(undefined, {
         onError: () => {
           queryClient.setQueryData(['user'], null)
@@ -29,6 +31,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
     }
   }, [error, refreshMutation, queryClient])
+
+  // Reset the refresh flag when user logs in successfully
+  useEffect(() => {
+    if (user) {
+      hasAttemptedRefresh.current = false
+    }
+  }, [user])
 
   const logout = () => {
     logoutMutation.mutate()
