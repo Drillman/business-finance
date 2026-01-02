@@ -262,8 +262,9 @@ export async function passkeyRoutes(fastify: FastifyInstance) {
         accessToken,
       }
     } catch (error) {
-      fastify.log.error(error)
-      return reply.status(401).send({ message: 'Échec de l\'authentification' })
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error'
+      fastify.log.error({ err: error, expectedOrigin: process.env.WEBAUTHN_ORIGIN, expectedRpId: process.env.WEBAUTHN_RP_ID }, 'Passkey authentication error')
+      return reply.status(401).send({ message: 'Échec de l\'authentification', debug: errorMessage })
     }
   })
 
