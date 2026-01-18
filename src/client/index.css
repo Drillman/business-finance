@@ -35,4 +35,7 @@
   --noise: 0;
 }
 
-
+/* Remove dashed right border from stat components */
+.stat {
+  border-inline-end-width: 0 !important;
+}
