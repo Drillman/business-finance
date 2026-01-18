@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   useTaxPayments,
   useCreateTaxPayment,
@@ -161,6 +162,9 @@ export default function TVA() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">TVA</h1>
         <div className="flex gap-4 items-center">
+          <Link to="/tva/declaration" className="btn btn-outline btn-secondary">
+            Assistant declaration
+          </Link>
           <select
             className="select select-bordered"
             value={selectedYear}

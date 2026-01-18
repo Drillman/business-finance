@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import type { TaxPayment, CreateTaxPaymentInput, UpdateTaxPaymentInput } from '@shared/types'
+import type { TaxPayment, CreateTaxPaymentInput, UpdateTaxPaymentInput, TvaDeclaration } from '@shared/types'
 
 interface TaxPaymentListResponse {
   data: TaxPayment[]
@@ -126,6 +126,15 @@ export function useMonthlyTva(year: number) {
   return useQuery({
     queryKey: ['monthlyTva', year],
     queryFn: () => api.get<MonthlyTvaResponse>(`/tva/monthly?year=${year}`),
+    staleTime: 1000 * 60 * 2,
+  })
+}
+
+export function useTvaDeclaration(month: string) {
+  return useQuery({
+    queryKey: ['tvaDeclaration', month],
+    queryFn: () => api.get<TvaDeclaration>(`/tva/declaration/${month}`),
+    enabled: !!month,
     staleTime: 1000 * 60 * 2,
   })
 }

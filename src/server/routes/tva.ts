@@ -540,4 +540,190 @@ export async function tvaRoutes(fastify: FastifyInstance) {
       return { year, months: monthlyData }
     }
   )
+
+  // Get TVA declaration data for a specific month
+  fastify.get(
+    '/api/tva/declaration/:month',
+    { preHandler: [requireAuth] },
+    async (request: FastifyRequest, reply: FastifyReply) => {
+      const paramsSchema = z.object({
+        month: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)'),
+      })
+
+      const parseResult = paramsSchema.safeParse(request.params)
+      if (!parseResult.success) {
+        return reply.status(400).send({
+          message: parseResult.error.issues[0].message,
+        })
+      }
+
+      const { month } = parseResult.data
+      const userId = request.authUser.userId
+
+      // Calculate date range for the month
+      const [year, monthNum] = month.split('-').map(Number)
+      const startDate = `${month}-01`
+      const lastDay = new Date(year, monthNum, 0).getDate()
+      const endDate = `${month}-${lastDay.toString().padStart(2, '0')}`
+
+      // A1: Get invoices paid this month (based on paymentDate)
+      const invoicesPaid = await db
+        .select()
+        .from(invoices)
+        .where(
+          and(
+            eq(invoices.userId, userId),
+            eq(invoices.isCanceled, false),
+            gte(invoices.paymentDate, startDate),
+            lte(invoices.paymentDate, endDate)
+          )
+        )
+        .orderBy(invoices.paymentDate)
+
+      // Calculate A1 without rounding for intermediate calculations
+      const A1Raw = invoicesPaid.reduce((sum, inv) => sum + parseFloat(inv.amountHt), 0)
+
+      // B2: Get intra-EU expenses for this month (non-recurring only for now)
+      const expensesIntraEu = await db
+        .select()
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.userId, userId),
+            eq(expenses.isIntraEu, true),
+            eq(expenses.isRecurring, false),
+            gte(expenses.date, startDate),
+            lte(expenses.date, endDate)
+          )
+        )
+        .orderBy(expenses.date)
+
+      // Calculate B2 without rounding for intermediate calculations
+      const B2Raw = expensesIntraEu.reduce((sum, exp) => sum + parseFloat(exp.amountHt), 0)
+
+      // Case 08: Base HT 20% (using raw values)
+      const case08Raw = A1Raw + B2Raw
+
+      // Case 17: TVA on intra-EU (20% of B2) - using raw value
+      const case17Raw = B2Raw * 0.20
+
+      // Get non-intra-EU, non-recurring expenses with TVA for this month
+      const nonIntraEuExpenses = await db
+        .select()
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.userId, userId),
+            eq(expenses.isIntraEu, false),
+            eq(expenses.isRecurring, false),
+            gte(expenses.date, startDate),
+            lte(expenses.date, endDate),
+            sql`${expenses.taxAmount}::numeric > 0`
+          )
+        )
+        .orderBy(expenses.date)
+
+      // Get recurring expenses that apply to this month
+      const recurringExpensesList = await db
+        .select()
+        .from(expenses)
+        .where(
+          and(
+            eq(expenses.userId, userId),
+            eq(expenses.isRecurring, true),
+            lte(expenses.startMonth, startDate),
+            sql`(${expenses.endMonth} IS NULL OR ${expenses.endMonth} >= ${startDate})`
+          )
+        )
+        .orderBy(expenses.description)
+
+      // Filter recurring expenses that apply to this specific month
+      const recurringExpensesThisMonth: typeof recurringExpensesList = []
+      for (const expense of recurringExpensesList) {
+        const expenseStartMonth = new Date(expense.startMonth!).getMonth()
+        const currentMonth = monthNum - 1 // JavaScript months are 0-indexed
+
+        let shouldInclude = false
+        if (expense.recurrencePeriod === 'monthly') {
+          shouldInclude = true
+        } else if (expense.recurrencePeriod === 'quarterly') {
+          shouldInclude = (currentMonth - expenseStartMonth + 12) % 3 === 0
+        } else if (expense.recurrencePeriod === 'yearly') {
+          shouldInclude = currentMonth === expenseStartMonth
+        }
+
+        if (shouldInclude) {
+          recurringExpensesThisMonth.push(expense)
+        }
+      }
+
+      // Combine non-recurring and recurring non-intra-EU expenses with TVA
+      const allNonIntraEuExpenses = [
+        ...nonIntraEuExpenses,
+        ...recurringExpensesThisMonth.filter(
+          (exp) => !exp.isIntraEu && parseFloat(exp.taxAmount || '0') > 0
+        ),
+      ]
+
+      // Case 19: TVA deductible on immobilisations (expenses > 500 EUR HT)
+      const expensesOver500 = allNonIntraEuExpenses.filter(
+        (exp) => parseFloat(exp.amountHt) > 500
+      )
+      const case19Raw = expensesOver500.reduce((sum, exp) => {
+        const taxAmount = parseFloat(exp.taxAmount)
+        const recoveryRate = parseFloat(exp.taxRecoveryRate) / 100
+        return sum + taxAmount * recoveryRate
+      }, 0)
+
+      // Case 20: Other deductible TVA (expenses <= 500 EUR HT) + case 17
+      const expensesWithTva = allNonIntraEuExpenses.filter(
+        (exp) => parseFloat(exp.amountHt) <= 500
+      )
+      const tvaDeductibleOtherRaw = expensesWithTva.reduce((sum, exp) => {
+        const taxAmount = parseFloat(exp.taxAmount)
+        const recoveryRate = parseFloat(exp.taxRecoveryRate) / 100
+        return sum + taxAmount * recoveryRate
+      }, 0)
+      const case20Raw = tvaDeductibleOtherRaw + case17Raw
+
+      // Summary calculations using raw values
+      const tvaCollectedRaw = case08Raw * 0.20
+      const tvaDeductibleRaw = case19Raw + case20Raw
+      const tvaNetRaw = tvaCollectedRaw - tvaDeductibleRaw
+
+      // Only round for the final case values (for display/declaration)
+      const A1 = Math.round(A1Raw)
+      const B2 = Math.round(B2Raw)
+      const case08 = Math.round(case08Raw)
+      const case17 = Math.round(case17Raw)
+      const case19 = Math.round(case19Raw)
+      const case20 = Math.round(case20Raw)
+      const tvaCollected = Math.round(tvaCollectedRaw)
+      const tvaDeductible = Math.round(tvaDeductibleRaw)
+      const tvaNet = Math.round(tvaNetRaw)
+
+      return {
+        month,
+        cases: {
+          A1,
+          B2,
+          case08,
+          case17,
+          case19,
+          case20,
+        },
+        details: {
+          invoicesPaid,
+          expensesWithTva,
+          expensesIntraEu,
+          expensesOver500,
+        },
+        summary: {
+          tvaCollected,
+          tvaDeductible,
+          tvaNet,
+        },
+      }
+    }
+  )
 }

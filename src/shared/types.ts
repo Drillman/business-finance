@@ -48,6 +48,7 @@ export interface Expense {
   taxRecoveryRate: string
   category: string
   isRecurring: boolean
+  isIntraEu: boolean
   recurrencePeriod: string | null
   startMonth: string | null
   endMonth: string | null
@@ -67,6 +68,7 @@ export interface CreateExpenseInput {
   taxRecoveryRate?: number
   category: ExpenseCategory
   isRecurring?: boolean
+  isIntraEu?: boolean
   recurrencePeriod?: RecurrencePeriod
   startMonth?: string
   endMonth?: string
@@ -324,4 +326,34 @@ export interface YearlyDashboard {
   currentMonth: number | null
   kpis: YearlyDashboardKpis
   months: MonthlyBreakdown[]
+}
+
+// TVA Declaration types
+export interface TvaDeclarationCases {
+  A1: number      // CA encaisse HT
+  B2: number      // Achats intra-UE HT
+  case08: number  // Base HT 20% (A1 + B2)
+  case17: number  // TVA intra-UE (20% de B2)
+  case19: number  // TVA immobilisations (> 500 EUR)
+  case20: number  // Autre TVA + case17
+}
+
+export interface TvaDeclarationDetails {
+  invoicesPaid: Invoice[]
+  expensesWithTva: Expense[]
+  expensesIntraEu: Expense[]
+  expensesOver500: Expense[]
+}
+
+export interface TvaDeclarationSummary {
+  tvaCollected: number
+  tvaDeductible: number
+  tvaNet: number
+}
+
+export interface TvaDeclaration {
+  month: string
+  cases: TvaDeclarationCases
+  details: TvaDeclarationDetails
+  summary: TvaDeclarationSummary
 }

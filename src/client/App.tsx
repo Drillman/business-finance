@@ -6,6 +6,7 @@ import Invoices from './pages/Invoices'
 import InvoiceSettings from './pages/InvoiceSettings'
 import Expenses from './pages/Expenses'
 import TVA from './pages/TVA'
+import TvaDeclaration from './pages/TvaDeclaration'
 import Urssaf from './pages/Urssaf'
 import BusinessAccount from './pages/BusinessAccount'
 import IncomeTax from './pages/IncomeTax'
@@ -33,6 +34,7 @@ function App() {
         <Route path="invoices/settings" element={<InvoiceSettings />} />
         <Route path="expenses" element={<Expenses />} />
         <Route path="tva" element={<TVA />} />
+        <Route path="tva/declaration" element={<TvaDeclaration />} />
         <Route path="urssaf" element={<Urssaf />} />
         <Route path="account" element={<BusinessAccount />} />
         <Route path="income-tax" element={<IncomeTax />} />

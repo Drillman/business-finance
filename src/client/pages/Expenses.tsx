@@ -61,6 +61,7 @@ interface ExpenseFormData {
   taxRecoveryRate: string
   category: ExpenseCategory
   isRecurring: boolean
+  isIntraEu: boolean
   recurrencePeriod: RecurrencePeriod | ''
   startMonth: string
   endMonth: string
@@ -79,6 +80,7 @@ const defaultFormData: ExpenseFormData = {
   taxRecoveryRate: '100',
   category: 'one-time',
   isRecurring: false,
+  isIntraEu: false,
   recurrencePeriod: 'monthly',
   startMonth: `${new Date().getFullYear()}-01`,
   endMonth: '',
@@ -237,6 +239,7 @@ export default function Expenses() {
       taxRecoveryRate: expense.taxRecoveryRate,
       category: expense.category as ExpenseCategory,
       isRecurring: expense.isRecurring,
+      isIntraEu: expense.isIntraEu,
       recurrencePeriod: (expense.recurrencePeriod as RecurrencePeriod) || 'monthly',
       startMonth: expense.startMonth ? expense.startMonth.substring(0, 7) : `${new Date().getFullYear()}-01`,
       endMonth: expense.endMonth ? expense.endMonth.substring(0, 7) : '',
@@ -287,6 +290,7 @@ export default function Expenses() {
       taxRecoveryRate: parseFloat(formData.taxRecoveryRate) || 100,
       category: formData.category,
       isRecurring: formData.isRecurring,
+      isIntraEu: formData.isIntraEu,
       recurrencePeriod: formData.isRecurring ? (formData.recurrencePeriod as RecurrencePeriod) : undefined,
       startMonth: formData.isRecurring ? `${formData.startMonth}-01` : undefined,
       endMonth: formData.isRecurring && formData.endMonth ? `${formData.endMonth}-01` : undefined,
@@ -899,6 +903,33 @@ export default function Expenses() {
                     ))}
                   </select>
                 </div>
+
+                {/* Intra-EU checkbox - only for non-recurring expenses */}
+                {!formData.isRecurring && (
+                  <div className="form-control md:col-span-2">
+                    <label className="label cursor-pointer justify-start gap-3">
+                      <input
+                        type="checkbox"
+                        className="checkbox checkbox-primary"
+                        checked={formData.isIntraEu}
+                        onChange={(e) => {
+                          updateFormField('isIntraEu', e.target.checked)
+                          // When intra-EU is checked, set tax amount to 0 (auto-liquidation)
+                          if (e.target.checked) {
+                            updateFormField('taxAmount', '0')
+                            updateFormField('taxRate', '0')
+                          }
+                        }}
+                      />
+                      <div>
+                        <span className="label-text font-medium">Achat intracommunautaire (intra-UE)</span>
+                        <span className="label-text-alt block text-xs text-base-content/60">
+                          Auto-liquidation TVA - La TVA sera declaree mais non payee au fournisseur
+                        </span>
+                      </div>
+                    </label>
+                  </div>
+                )}
 
                 {/* Amount input mode toggle */}
                 <div className="form-control md:col-span-2">

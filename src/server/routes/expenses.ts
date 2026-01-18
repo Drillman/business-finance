@@ -15,6 +15,7 @@ const createExpenseSchema = z.object({
   taxRecoveryRate: z.number().min(0).max(100).default(100),
   category: z.enum(expenseCategories, { message: 'Catégorie invalide' }),
   isRecurring: z.boolean().default(false),
+  isIntraEu: z.boolean().default(false),
   recurrencePeriod: z.enum(['monthly', 'quarterly', 'yearly']).optional(),
   startMonth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').optional(),
   endMonth: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)').optional(),
@@ -154,6 +155,7 @@ export async function expenseRoutes(fastify: FastifyInstance) {
           taxRecoveryRate: data.taxRecoveryRate.toFixed(2),
           category: data.category,
           isRecurring: data.isRecurring,
+          isIntraEu: data.isIntraEu,
           recurrencePeriod: data.recurrencePeriod,
           startMonth: data.startMonth,
           endMonth: data.endMonth,
@@ -199,6 +201,7 @@ export async function expenseRoutes(fastify: FastifyInstance) {
       if (data.taxRecoveryRate !== undefined) updateData.taxRecoveryRate = data.taxRecoveryRate.toFixed(2)
       if (data.category !== undefined) updateData.category = data.category
       if (data.isRecurring !== undefined) updateData.isRecurring = data.isRecurring
+      if (data.isIntraEu !== undefined) updateData.isIntraEu = data.isIntraEu
       if (data.recurrencePeriod !== undefined) updateData.recurrencePeriod = data.recurrencePeriod
       if (data.startMonth !== undefined) updateData.startMonth = data.startMonth
       if (data.endMonth !== undefined) updateData.endMonth = data.endMonth

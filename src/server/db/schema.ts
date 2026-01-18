@@ -58,6 +58,7 @@ export const expenses = pgTable('expenses', {
   taxRecoveryRate: decimal('tax_recovery_rate', { precision: 5, scale: 2 }).notNull().default('100'),
   category: varchar('category', { length: 50 }).notNull(),
   isRecurring: boolean('is_recurring').notNull().default(false),
+  isIntraEu: boolean('is_intra_eu').notNull().default(false),
   recurrencePeriod: varchar('recurrence_period', { length: 20 }),
   startMonth: date('start_month'),
   endMonth: date('end_month'),
