@@ -8,6 +8,7 @@ import {
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { YearSelect, YEARS } from '../components/YearSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {
@@ -72,8 +73,6 @@ export default function Urssaf() {
   const createMutation = useCreateUrssafPayment()
   const updateMutation = useUpdateUrssafPayment()
   const deleteMutation = useDeleteUrssafPayment()
-
-  const yearOptions = [2025, 2026]
 
   const openCreateModal = (trimester?: number) => {
     setEditingPayment(null)
@@ -168,17 +167,7 @@ export default function Urssaf() {
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Urssaf</h1>
         <div className="flex gap-4 items-center">
-          <select
-            className="select select-bordered"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
           <button className="btn btn-primary" onClick={() => openCreateModal()}>
             Ajouter une cotisation
           </button>
@@ -405,7 +394,7 @@ export default function Urssaf() {
                     onChange={(e) => updateFormField('year', e.target.value)}
                     disabled={!!editingPayment}
                   >
-                    {yearOptions.map((year) => (
+                    {YEARS.map((year) => (
                       <option key={year} value={year}>
                         {year}
                       </option>

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useYearlyDashboard } from '../hooks/useDashboard'
 import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
+import { YearSelect } from '../components/YearSelect'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -22,8 +23,6 @@ export default function Dashboard() {
 
   const { data: yearlyData, isLoading: yearlyLoading } = useYearlyDashboard(selectedYear)
   const { data: accountSummary, isLoading: accountLoading } = useAccountSummary()
-
-  const years = [2024, 2025, 2026]
 
   const isLoading = yearlyLoading || accountLoading
 
@@ -46,15 +45,7 @@ export default function Dashboard() {
     <div>
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
         <h1 className="text-2xl font-bold">Tableau de bord</h1>
-        <select
-          className="select select-bordered select-sm"
-          value={selectedYear}
-          onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-        >
-          {years.map((y) => (
-            <option key={y} value={y}>{y}</option>
-          ))}
-        </select>
+        <YearSelect value={selectedYear} onChange={setSelectedYear} size="sm" />
       </div>
 
       {isLoading ? (

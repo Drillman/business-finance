@@ -15,6 +15,7 @@ import { Pencil, Trash2, CreditCard, Ban, RotateCcw } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
+import { YearSelect } from '../components/YearSelect'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -30,10 +31,6 @@ function formatCurrency(amount: string | number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(num)
-}
-
-function getCurrentYear(): number {
-  return new Date().getFullYear()
 }
 
 const monthNames = [
@@ -64,7 +61,7 @@ const defaultFormData: InvoiceFormData = {
 }
 
 export default function Invoices() {
-  const [selectedYear, setSelectedYear] = useState(getCurrentYear())
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
   const [clientFilter, setClientFilter] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
@@ -255,8 +252,6 @@ export default function Invoices() {
     return ht * (1 + rate / 100)
   }, [formData.amountHt, formData.taxRate])
 
-  const yearOptions = [2025, 2026]
-
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
@@ -329,17 +324,7 @@ export default function Invoices() {
           <label className="label">
             <span className="label-text">Année</span>
           </label>
-          <select
-            className="select select-bordered"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
         </div>
         <div className="form-control">
           <label className="label">

@@ -11,6 +11,7 @@ import {
 import type { TaxPayment, CreateTaxPaymentInput } from '@shared/types'
 import { Pencil, Trash2, Check, Clock, AlertTriangle, AlertCircle, CalendarClock, Minus } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
+import { YearSelect } from '../components/YearSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {
@@ -81,8 +82,6 @@ export default function TVA() {
   const createMutation = useCreateTaxPayment()
   const updateMutation = useUpdateTaxPayment()
   const deleteMutation = useDeleteTaxPayment()
-
-  const yearOptions = [2025, 2026]
 
   const openCreateModal = () => {
     setEditingPayment(null)
@@ -165,17 +164,7 @@ export default function TVA() {
           <Link to="/tva/declaration" className="btn btn-secondary">
             Assistant déclaration
           </Link>
-          <select
-            className="select select-bordered"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            {yearOptions.map((year) => (
-              <option key={year} value={year}>
-                {year}
-              </option>
-            ))}
-          </select>
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
           <button className="btn btn-primary" onClick={openCreateModal}>
             Ajouter un paiement
           </button>
