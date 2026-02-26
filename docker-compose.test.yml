@@ -1,0 +1,17 @@
+services:
+  test-db:
+    image: postgres:17-alpine
+    container_name: business-finance-test-db
+    environment:
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: test
+      POSTGRES_DB: business_finance_test
+    ports:
+      - "5434:5432"
+    tmpfs:
+      - /var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d business_finance_test"]
+      interval: 2s
+      timeout: 2s
+      retries: 10

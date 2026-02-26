@@ -5,7 +5,7 @@ import { db } from '../db'
 import { invoices, invoiceClients, invoiceDescriptions } from '../db/schema'
 import { requireAuth } from '../auth/middleware'
 
-const createInvoiceSchema = z.object({
+export const createInvoiceSchema = z.object({
   client: z.string().min(1, 'Le client est requis'),
   description: z.string().optional(),
   invoiceDate: z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Format de date invalide (YYYY-MM-DD)'),
@@ -17,9 +17,9 @@ const createInvoiceSchema = z.object({
   isCanceled: z.boolean().optional(),
 })
 
-const updateInvoiceSchema = createInvoiceSchema.partial()
+export const updateInvoiceSchema = createInvoiceSchema.partial()
 
-const listQuerySchema = z.object({
+export const listQuerySchema = z.object({
   month: z.string().regex(/^\d{4}-\d{2}$/, 'Format de mois invalide (YYYY-MM)').optional(),
   year: z.coerce.number().min(2000).max(2100).optional(),
   client: z.string().optional(),
@@ -27,7 +27,7 @@ const listQuerySchema = z.object({
   offset: z.coerce.number().min(0).default(0),
 })
 
-function calculateTtc(amountHt: number, taxRate: number): string {
+export function calculateTtc(amountHt: number, taxRate: number): string {
   const ttc = amountHt * (1 + taxRate / 100)
   return ttc.toFixed(2)
 }
