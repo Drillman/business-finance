@@ -7,7 +7,8 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install all dependencies (including dev for building)
-RUN npm ci
+# Coolify/build environments may set NODE_ENV=production, so force dev deps here.
+RUN npm ci --include=dev
 
 # Copy source code
 COPY . .
@@ -28,7 +29,7 @@ WORKDIR /app
 COPY package*.json ./
 
 # Install only production dependencies
-RUN npm ci --only=production && npm cache clean --force
+RUN npm ci --omit=dev && npm cache clean --force
 
 # Copy built files from builder stage
 COPY --from=builder /app/dist ./dist
