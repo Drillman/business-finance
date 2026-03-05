@@ -52,8 +52,8 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <YearSelect value={selectedYear} onChange={setSelectedYear} size="sm" />
-          <Link to="/invoices" className="btn btn-primary btn-sm sm:btn-md">
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
+          <Link to="/invoices" className="btn btn-primary">
             Aller aux factures
           </Link>
         </div>
@@ -68,17 +68,17 @@ export default function Dashboard() {
           {/* Yearly KPIs */}
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold">Bilan {selectedYear}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="stat border-l-[3px] border-l-[#818CF8] bg-base-100 rounded-box shadow">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#6366F1] bg-base-100 shadow">
                 <div className="stat-title">Chiffre d'affaires</div>
-                <div className="stat-value text-xl text-primary">
+                <div className="stat-value text-2xl text-[#818CF8]">
                   {yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
                 </div>
                 <div className="stat-desc">Total encaisse sur l'annee</div>
               </div>
-              <div className="stat border-l-[3px] border-l-[#FBBF24] bg-base-100 rounded-box shadow">
+              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#F59E0B] bg-base-100 shadow">
                 <div className="stat-title">Urssaf</div>
-                <div className="stat-value text-xl text-accent">
+                <div className="stat-value text-2xl text-[#FBBF24]">
                   {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
                 </div>
                 <div className="stat-desc">
@@ -86,18 +86,18 @@ export default function Dashboard() {
                   Est.: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}
                 </div>
               </div>
-              <div className="stat border-l-[3px] border-l-[#A78BFA] bg-base-100 rounded-box shadow">
+              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#8B5CF6] bg-base-100 shadow">
                 <div className="stat-title">Impôts sur le revenu</div>
-                <div className="stat-value text-xl text-warning">
+                <div className="stat-value text-2xl text-[#A78BFA]">
                   {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
                 </div>
                 <div className="stat-desc">
                   Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}
                 </div>
               </div>
-              <div className="stat border-l-[3px] border-l-[#34D399] bg-base-100 rounded-box shadow">
+              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#10B981] bg-base-100 shadow">
                 <div className="stat-title">Restant net</div>
-                <div className={`stat-value text-xl ${yearlyData && parseFloat(yearlyData.kpis.totalRemaining) >= 0 ? 'text-success' : 'text-error'}`}>
+                <div className={`stat-value text-2xl ${yearlyData && parseFloat(yearlyData.kpis.totalRemaining) >= 0 ? 'text-[#34D399]' : 'text-error'}`}>
                   {yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
                 </div>
                 <div className="stat-desc">Après charges et impôts</div>
@@ -110,7 +110,7 @@ export default function Dashboard() {
             <h2 className="mb-4 text-lg font-semibold">Détail mensuel</h2>
             <div className="overflow-hidden rounded-[10px] border border-[#E2E5F0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
               <div className="overflow-x-auto">
-                <table className="table table-sm">
+                <table className="table">
                   <thead>
                     <tr className="bg-[#F5F7FB] text-[#71717A]">
                       <th className="font-semibold">Mois</th>
@@ -134,7 +134,7 @@ export default function Dashboard() {
                         >
                           <td className={isCurrentMonth ? 'font-semibold' : ''}>
                             {MONTHS[month.month - 1]}
-                            {isCurrentMonth && <span className="badge badge-sm ml-2 border-0 bg-[#6366F1] text-white">En cours</span>}
+                            {isCurrentMonth && <span className="badge ml-2 border-0 bg-[#6366F1] text-white">En cours</span>}
                           </td>
                           <td className="text-right">{formatCurrency(month.revenue)}</td>
                           <td className="text-right">

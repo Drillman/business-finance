@@ -41,7 +41,7 @@ const settingsItems: NavItem[] = [
 
 function SidebarLogo() {
   return (
-    <div className="relative h-10 w-10 rounded-[10px] bg-gradient-to-br from-[#4F46E5] via-[#2563EB] to-[#1E40AF]">
+    <div className="relative h-9 w-9 rounded-[10px] bg-gradient-to-br from-[#4F46E5] via-[#2563EB] to-[#1E40AF]">
       <span className="absolute left-[9px] top-[7px] h-[26px] w-[4px] rounded-[2px] bg-white" />
       <span className="absolute left-[9px] top-[7px] h-[4px] w-[12px] rounded-[2px] bg-white" />
       <span className="absolute left-[9px] top-[18px] h-[4px] w-[16px] rounded-[2px] bg-white" />
@@ -69,7 +69,7 @@ function SidebarLink({ to, label, icon: Icon, end = false }: SidebarLinkProps) {
         [
           'flex h-10 w-full items-center gap-2.5 rounded-lg px-3 transition-colors',
           isActive
-            ? 'bg-[#334155] text-white'
+            ? 'bg-[#334155] font-semibold text-white'
             : 'text-[#CBD5E1] hover:bg-[#334155] hover:text-white',
         ].join(' ')
       }
@@ -84,7 +84,7 @@ export default function Sidebar() {
   const { user, logout, isLoggingOut } = useAuth()
 
   return (
-    <aside className="flex w-56 shrink-0 flex-col gap-2 bg-gradient-to-br from-[#1E3A5F] via-[#1A1F4B] to-[#0F172A] px-5 py-7">
+    <aside className="flex w-60 shrink-0 flex-col gap-6 bg-gradient-to-br from-[#1E3A5F] via-[#1A1F4B] to-[#0F172A] px-5 py-7">
       <div className="flex h-11 items-center gap-2.5 px-1">
         <SidebarLogo />
         <h1 className="truncate text-xl font-bold tracking-tight text-white">Finance</h1>
