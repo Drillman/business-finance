@@ -1,10 +1,9 @@
-import { useState, useEffect } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
   LayoutDashboard,
   FileText,
-  FileText as FileTextSettings,
+  FileCog,
   Wallet,
   Receipt,
   Landmark,
@@ -13,8 +12,6 @@ import {
   Calculator,
   Settings,
   KeyRound,
-  ChevronsRight,
-  ChevronsLeft,
   LogOut,
   type LucideIcon,
 } from 'lucide-react'
@@ -38,97 +35,97 @@ const navItems: NavItem[] = [
 
 const settingsItems: NavItem[] = [
   { to: '/settings', label: 'Configuration', icon: Settings },
-  { to: '/invoices/settings', label: 'Param. factures', icon: FileTextSettings },
+  { to: '/invoices/settings', label: 'Param. factures', icon: FileCog },
   { to: '/passkeys', label: 'Passkeys', icon: KeyRound },
 ]
 
-const SIDEBAR_COLLAPSED_KEY = 'sidebar-collapsed'
+function SidebarLogo() {
+  return (
+    <div className="relative h-10 w-10 rounded-[10px] bg-gradient-to-br from-[#4F46E5] via-[#2563EB] to-[#1E40AF]">
+      <span className="absolute left-[9px] top-[7px] h-[26px] w-[4px] rounded-[2px] bg-white" />
+      <span className="absolute left-[9px] top-[7px] h-[4px] w-[12px] rounded-[2px] bg-white" />
+      <span className="absolute left-[9px] top-[18px] h-[4px] w-[16px] rounded-[2px] bg-white" />
+      <span className="absolute left-[9px] top-[29px] h-[4px] w-[16px] rounded-[2px] bg-white" />
+      <span className="absolute left-[17px] top-[7px] h-[15px] w-[4px] rounded-[2px] bg-white" />
+      <span className="absolute left-[21px] top-[18px] h-[15px] w-[4px] rounded-[2px] bg-white" />
+      <span className="absolute left-[29px] top-[11px] h-[22px] w-[3px] rounded-[2px] bg-white/35" />
+    </div>
+  )
+}
+
+interface SidebarLinkProps {
+  to: string
+  label: string
+  icon: LucideIcon
+  end?: boolean
+}
+
+function SidebarLink({ to, label, icon: Icon, end = false }: SidebarLinkProps) {
+  return (
+    <NavLink
+      to={to}
+      end={end}
+      className={({ isActive }) =>
+        [
+          'flex h-10 w-full items-center gap-2.5 rounded-lg px-3 transition-colors',
+          isActive
+            ? 'bg-[#334155] text-white'
+            : 'text-[#CBD5E1] hover:bg-[#334155] hover:text-white',
+        ].join(' ')
+      }
+    >
+      <Icon className="h-5 w-5 shrink-0" />
+      <span className="truncate text-sm font-medium">{label}</span>
+    </NavLink>
+  )
+}
 
 export default function Sidebar() {
   const { user, logout, isLoggingOut } = useAuth()
-  const [isCollapsed, setIsCollapsed] = useState(() => {
-    const saved = localStorage.getItem(SIDEBAR_COLLAPSED_KEY)
-    return saved === 'true'
-  })
-
-  useEffect(() => {
-    localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(isCollapsed))
-  }, [isCollapsed])
-
-  const toggleSidebar = () => setIsCollapsed(!isCollapsed)
 
   return (
-    <aside className={`${isCollapsed ? 'w-16' : 'w-56'} bg-base-100 shadow-lg flex flex-col transition-all duration-300`}>
-      <div className={`p-4 border-b border-base-300 flex items-center ${isCollapsed ? 'justify-center' : 'justify-between'}`}>
-        {!isCollapsed && (
-          <h1 className="text-lg font-bold text-primary truncate">Finances</h1>
-        )}
-        <button
-          onClick={toggleSidebar}
-          className="btn btn-ghost btn-sm btn-square"
-          title={isCollapsed ? 'Agrandir' : 'Réduire'}
-        >
-          {isCollapsed ? (
-            <ChevronsRight className="h-5 w-5" />
-          ) : (
-            <ChevronsLeft className="h-5 w-5" />
-          )}
-        </button>
+    <aside className="flex w-56 shrink-0 flex-col gap-2 bg-gradient-to-br from-[#1E3A5F] via-[#1A1F4B] to-[#0F172A] px-5 py-7">
+      <div className="flex h-11 items-center gap-2.5 px-1">
+        <SidebarLogo />
+        <h1 className="truncate text-xl font-bold tracking-tight text-white">Finance</h1>
       </div>
-      <nav className="p-2 flex-1 overflow-hidden">
-        <ul className={`menu menu-compact gap-1 w-full ${isCollapsed ? 'items-center' : ''}`}>
+
+      <nav className="flex flex-1 flex-col overflow-y-auto">
+        <div className="space-y-0.5">
           {navItems.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  `${isActive ? 'bg-base-200 text-base-content' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
-                }
-                end={item.to === '/'}
-                title={isCollapsed ? item.label : undefined}
-              >
-                <item.icon className="h-5 w-5" />
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
-              </NavLink>
-            </li>
+            <SidebarLink
+              key={item.to}
+              to={item.to}
+              label={item.label}
+              icon={item.icon}
+              end={item.to === '/'}
+            />
           ))}
-        </ul>
-        <div className="divider my-2"></div>
-        <ul className={`menu menu-compact gap-1 w-full ${isCollapsed ? 'items-center' : ''}`}>
+        </div>
+
+        <div className="my-2 h-px w-full bg-[#334155]" />
+
+        <div className="space-y-0.5">
           {settingsItems.map((item) => (
-            <li key={item.to}>
-              <NavLink
-                to={item.to}
-                className={({ isActive }) =>
-                  `${isActive ? 'bg-base-200 text-base-content' : ''} ${isCollapsed ? 'justify-center px-0 min-w-8' : ''}`
-                }
-                title={isCollapsed ? item.label : undefined}
-              >
-                <item.icon className="h-5 w-5" />
-                {!isCollapsed && <span className="truncate">{item.label}</span>}
-              </NavLink>
-            </li>
+            <SidebarLink key={item.to} to={item.to} label={item.label} icon={item.icon} />
           ))}
-        </ul>
+        </div>
       </nav>
-      <div className={`p-2 border-t border-base-300 ${isCollapsed ? 'flex flex-col items-center' : 'p-4'}`}>
-        {!isCollapsed && (
-          <div className="text-sm text-base-content/70 mb-2 truncate">
-            {user?.email}
-          </div>
-        )}
+
+      <div className="space-y-2.5">
+        <p className="truncate px-1 text-xs text-[#CBD5E1]">{user?.email}</p>
         <button
           onClick={logout}
           disabled={isLoggingOut}
-          className={`btn btn-sm btn-outline btn-error ${isCollapsed ? 'btn-square' : 'w-full'}`}
-          title={isCollapsed ? 'Déconnexion' : undefined}
+          className="flex h-9 w-full items-center justify-center rounded-lg border border-[#F87171] px-3 text-sm font-medium text-[#F87171] transition-colors hover:bg-[#7F1D1D]/25 disabled:cursor-not-allowed disabled:opacity-60"
         >
           {isLoggingOut ? (
-            <span className="loading loading-spinner loading-sm"></span>
-          ) : isCollapsed ? (
-            <LogOut className="h-4 w-4" />
+            <span className="loading loading-spinner loading-sm" />
           ) : (
-            'Déconnexion'
+            <span className="flex items-center gap-2">
+              <LogOut className="h-4 w-4" />
+              Déconnexion
+            </span>
           )}
         </button>
       </div>

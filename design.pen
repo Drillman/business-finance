@@ -27,13 +27,13 @@
           "height": 20,
           "iconFontName": "layout-dashboard",
           "iconFontFamily": "lucide",
-          "fill": "$text-secondary"
+          "fill": "$sidebar-text"
         },
         {
           "type": "text",
           "id": "xbj5h",
           "name": "navLabel",
-          "fill": "$text-secondary",
+          "fill": "$sidebar-text",
           "content": "Menu Item",
           "fontFamily": "Inter",
           "fontSize": 14,
@@ -50,7 +50,7 @@
       "reusable": true,
       "width": 200,
       "height": 40,
-      "fill": "$bg-highlight",
+      "fill": "$sidebar-hover",
       "cornerRadius": 8,
       "gap": 10,
       "padding": [
@@ -67,13 +67,13 @@
           "height": 20,
           "iconFontName": "layout-dashboard",
           "iconFontFamily": "lucide",
-          "fill": "$accent-primary"
+          "fill": "$sidebar-text-active"
         },
         {
           "type": "text",
           "id": "iR6Ul",
           "name": "navLabelA",
-          "fill": "$accent-primary",
+          "fill": "$sidebar-text-active",
           "content": "Menu Item",
           "fontFamily": "Inter",
           "fontSize": 14,
@@ -93,8 +93,23 @@
       "cornerRadius": 10,
       "stroke": {
         "align": "inside",
-        "thickness": 1,
+        "thickness": {
+          "top": 1,
+          "right": 1,
+          "bottom": 1,
+          "left": 3
+        },
         "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#0000000A",
+        "offset": {
+          "x": 0,
+          "y": 1
+        },
+        "blur": 3
       },
       "layout": "vertical",
       "gap": 4,
@@ -257,13 +272,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -293,13 +328,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "i49fS",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -443,7 +478,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -519,7 +554,7 @@
                   "type": "text",
                   "id": "3p1an",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -535,7 +570,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -544,7 +579,7 @@
                       "type": "text",
                       "id": "Fyehj",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -698,6 +733,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "kpi1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-blue"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "CHIFFRE D'AFFAIRES"
@@ -706,9 +752,9 @@
                       "content": "45 200 €",
                       "fill": "$kpi-blue",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 28,
+                      "fontSize": 22,
                       "fontWeight": "600",
-                      "letterSpacing": -0.5
+                      "letterSpacing": -0.3
                     },
                     "BRA9R": {
                       "content": "Année 2026"
@@ -721,6 +767,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "kpi2",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-indigo"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "URSSAF"
@@ -729,9 +786,9 @@
                       "content": "9 944 €",
                       "fill": "$kpi-indigo",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 28,
+                      "fontSize": 22,
                       "fontWeight": "600",
-                      "letterSpacing": -0.5
+                      "letterSpacing": -0.3
                     },
                     "BRA9R": {
                       "content": "Payé 6 200 € | Est. 3 744 €"
@@ -744,6 +801,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "kpi3",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-amber"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "IMPÔTS SUR LE REVENU"
@@ -752,9 +820,9 @@
                       "content": "4 520 €",
                       "fill": "$kpi-amber",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 28,
+                      "fontSize": 22,
                       "fontWeight": "600",
-                      "letterSpacing": -0.5
+                      "letterSpacing": -0.3
                     },
                     "BRA9R": {
                       "content": "Payé 2 800 €"
@@ -767,6 +835,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "kpi4",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-emerald"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "RESTANT NET"
@@ -775,9 +854,9 @@
                       "content": "30 736 €",
                       "fill": "$kpi-emerald",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 28,
+                      "fontSize": 22,
                       "fontWeight": "600",
-                      "letterSpacing": -0.5
+                      "letterSpacing": -0.3
                     },
                     "BRA9R": {
                       "content": "Après charges et impôts"
@@ -798,6 +877,16 @@
                 "align": "inside",
                 "thickness": 1,
                 "fill": "$border-default"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
               },
               "layout": "vertical",
               "children": [
@@ -831,7 +920,7 @@
                   "name": "TableHeadRow",
                   "width": "fill_container",
                   "height": 42,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -1064,7 +1153,7 @@
                   "name": "TableFooter",
                   "width": "fill_container",
                   "height": 44,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "padding": [
                     0,
                     24
@@ -1432,13 +1521,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -1468,13 +1577,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "ERnGa",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -1618,7 +1727,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -1694,7 +1803,7 @@
                   "type": "text",
                   "id": "8G9eY",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -1710,7 +1819,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -1719,7 +1828,7 @@
                       "type": "text",
                       "id": "E7PIk",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -1887,6 +1996,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "ik1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$accent-primary"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "CA HT 2026"
@@ -1979,6 +2099,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "ik5",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-emerald"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "RESTANT"
@@ -2122,6 +2253,16 @@
                     "thickness": 1,
                     "fill": "$border-default"
                   },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
+                  },
                   "layout": "vertical",
                   "children": [
                     {
@@ -2130,7 +2271,7 @@
                       "name": "thRow",
                       "width": "fill_container",
                       "height": 42,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -2415,6 +2556,7 @@
                       "name": "row2",
                       "width": "fill_container",
                       "height": 52,
+                      "fill": "$table-row-alt",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -2605,13 +2747,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -2641,13 +2803,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "i2scN",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -2791,7 +2953,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -2867,7 +3029,7 @@
                   "type": "text",
                   "id": "SPvjc",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -2883,7 +3045,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -2946,6 +3108,92 @@
                   ]
                 },
                 {
+                  "type": "frame",
+                  "id": "lw1WY",
+                  "name": "monthSelector",
+                  "height": 36,
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "JVipV",
+                      "name": "monthPrev",
+                      "width": 36,
+                      "height": "fill_container",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "qaClb",
+                          "name": "monthPrevIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-left",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "BOt77",
+                      "name": "monthText",
+                      "width": 120,
+                      "height": "fill_container",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": {
+                          "right": 1,
+                          "left": 1
+                        },
+                        "fill": "$border-default"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "5uIl2",
+                          "name": "monthLabel",
+                          "fill": "$text-primary",
+                          "content": "Mars 2026",
+                          "fontFamily": "Space Grotesk",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "dGGl3",
+                      "name": "monthNext",
+                      "width": 36,
+                      "height": "fill_container",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "0eNCc",
+                          "name": "monthNextIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-right",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
                   "id": "vqMaE",
                   "type": "ref",
                   "ref": "SOfYp",
@@ -2963,10 +3211,110 @@
             },
             {
               "type": "frame",
+              "id": "eL7BN",
+              "name": "ExpenseStats",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "id": "EUnV7",
+                  "type": "ref",
+                  "ref": "CiMZ8",
+                  "width": "fill_container",
+                  "name": "es1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$accent-primary"
+                  },
+                  "fill": "$bg-card",
+                  "descendants": {
+                    "D0eyG": {
+                      "content": "TOTAL HT"
+                    },
+                    "VHwyU": {
+                      "content": "1 850 €",
+                      "fill": "$text-primary",
+                      "fontSize": 22,
+                      "fontFamily": "Space Grotesk",
+                      "fontWeight": "600",
+                      "letterSpacing": -0.3
+                    },
+                    "BRA9R": {
+                      "content": "6 dépenses"
+                    }
+                  }
+                },
+                {
+                  "id": "XKvGv",
+                  "type": "ref",
+                  "ref": "CiMZ8",
+                  "width": "fill_container",
+                  "name": "es2",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-emerald"
+                  },
+                  "fill": "$bg-card",
+                  "descendants": {
+                    "D0eyG": {
+                      "content": "TVA RÉCUPÉRABLE"
+                    },
+                    "VHwyU": {
+                      "content": "370 €",
+                      "fill": "$kpi-emerald",
+                      "fontSize": 22,
+                      "fontFamily": "Space Grotesk",
+                      "fontWeight": "600",
+                      "letterSpacing": -0.3
+                    },
+                    "BRA9R": {
+                      "content": ""
+                    }
+                  }
+                },
+                {
+                  "id": "kpORD",
+                  "type": "ref",
+                  "ref": "CiMZ8",
+                  "width": "fill_container",
+                  "name": "es3",
+                  "descendants": {
+                    "D0eyG": {
+                      "content": "TOTAL TTC"
+                    },
+                    "VHwyU": {
+                      "content": "2 220 €",
+                      "fill": "$text-primary",
+                      "fontSize": 22,
+                      "fontFamily": "Space Grotesk",
+                      "fontWeight": "600",
+                      "letterSpacing": -0.3
+                    },
+                    "BRA9R": {
+                      "content": ""
+                    }
+                  }
+                }
+              ]
+            },
+            {
+              "type": "frame",
               "id": "4igJt",
               "name": "Tabs",
               "height": 40,
-              "fill": "#F3F4F6",
+              "fill": "$table-header-bg",
               "cornerRadius": 8,
               "gap": 4,
               "padding": 4,
@@ -3037,144 +3385,6 @@
             },
             {
               "type": "frame",
-              "id": "XEqi0",
-              "name": "MonthNav",
-              "width": "fill_container",
-              "gap": 12,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "icon_font",
-                  "id": "1ifTI",
-                  "name": "monthPrev",
-                  "width": 20,
-                  "height": 20,
-                  "iconFontName": "chevron-left",
-                  "iconFontFamily": "lucide",
-                  "fill": "$text-secondary"
-                },
-                {
-                  "type": "frame",
-                  "id": "91VgN",
-                  "name": "monthSelect",
-                  "height": 36,
-                  "fill": "$bg-card",
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "padding": [
-                    0,
-                    16
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "SS957",
-                      "name": "monthLabel",
-                      "fill": "$text-primary",
-                      "content": "Mars 2026",
-                      "fontFamily": "Space Grotesk",
-                      "fontSize": 14,
-                      "fontWeight": "500"
-                    }
-                  ]
-                },
-                {
-                  "type": "icon_font",
-                  "id": "v8CUe",
-                  "name": "monthNext",
-                  "width": 20,
-                  "height": 20,
-                  "iconFontName": "chevron-right",
-                  "iconFontFamily": "lucide",
-                  "fill": "$text-secondary"
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "eL7BN",
-              "name": "ExpenseStats",
-              "width": "fill_container",
-              "gap": 16,
-              "children": [
-                {
-                  "id": "EUnV7",
-                  "type": "ref",
-                  "ref": "CiMZ8",
-                  "width": "fill_container",
-                  "name": "es1",
-                  "descendants": {
-                    "D0eyG": {
-                      "content": "TOTAL HT"
-                    },
-                    "VHwyU": {
-                      "content": "1 850 €",
-                      "fill": "$text-primary",
-                      "fontSize": 22,
-                      "fontFamily": "Space Grotesk",
-                      "fontWeight": "600",
-                      "letterSpacing": -0.3
-                    },
-                    "BRA9R": {
-                      "content": "6 dépenses"
-                    }
-                  }
-                },
-                {
-                  "id": "XKvGv",
-                  "type": "ref",
-                  "ref": "CiMZ8",
-                  "width": "fill_container",
-                  "name": "es2",
-                  "descendants": {
-                    "D0eyG": {
-                      "content": "TVA RÉCUPÉRABLE"
-                    },
-                    "VHwyU": {
-                      "content": "370 €",
-                      "fill": "$kpi-emerald",
-                      "fontSize": 22,
-                      "fontFamily": "Space Grotesk",
-                      "fontWeight": "600",
-                      "letterSpacing": -0.3
-                    },
-                    "BRA9R": {
-                      "content": ""
-                    }
-                  }
-                },
-                {
-                  "id": "kpORD",
-                  "type": "ref",
-                  "ref": "CiMZ8",
-                  "width": "fill_container",
-                  "name": "es3",
-                  "descendants": {
-                    "D0eyG": {
-                      "content": "TOTAL TTC"
-                    },
-                    "VHwyU": {
-                      "content": "2 220 €",
-                      "fill": "$text-primary",
-                      "fontSize": 22,
-                      "fontFamily": "Space Grotesk",
-                      "fontWeight": "600",
-                      "letterSpacing": -0.3
-                    },
-                    "BRA9R": {
-                      "content": ""
-                    }
-                  }
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "j3G1i",
               "name": "FixedExpenses",
               "width": "fill_container",
@@ -3184,6 +3394,16 @@
                 "align": "inside",
                 "thickness": 1,
                 "fill": "$border-default"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
               },
               "layout": "vertical",
               "gap": 8,
@@ -3234,6 +3454,16 @@
                 "thickness": 1,
                 "fill": "$border-default"
               },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
+              },
               "layout": "vertical",
               "children": [
                 {
@@ -3265,7 +3495,7 @@
                   "name": "ethRow",
                   "width": "fill_container",
                   "height": 42,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -3524,6 +3754,7 @@
                   "name": "er2",
                   "width": "fill_container",
                   "height": 48,
+                  "fill": "$table-row-alt",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -3669,7 +3900,7 @@
                   "name": "footerRow",
                   "width": "fill_container",
                   "height": 44,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "padding": [
                     0,
                     16
@@ -3785,13 +4016,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -3821,13 +4072,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "mG6VB",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -3971,7 +4222,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -4047,7 +4298,7 @@
                   "type": "text",
                   "id": "VizLU",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -4063,7 +4314,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -4072,7 +4323,7 @@
                       "type": "text",
                       "id": "zBvJt",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -4240,6 +4491,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "tk1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$accent-primary"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "TVA COLLECTÉE"
@@ -4309,6 +4571,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "tk4",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-amber"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "SOLDE RESTANT"
@@ -4341,6 +4614,16 @@
                 "thickness": 1,
                 "fill": "$border-default"
               },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
+              },
               "layout": "vertical",
               "children": [
                 {
@@ -4371,7 +4654,7 @@
                   "name": "tvaHead",
                   "width": "fill_container",
                   "height": 42,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -4569,6 +4852,7 @@
                   "name": "tr2",
                   "width": "fill_container",
                   "height": 44,
+                  "fill": "$table-row-alt",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -4793,13 +5077,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -4829,13 +5133,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "VZMBu",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -4979,7 +5283,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -5055,7 +5359,7 @@
                   "type": "text",
                   "id": "cSvEs",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -5071,7 +5375,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -5080,7 +5384,7 @@
                       "type": "text",
                       "id": "Ulcsl",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -5248,6 +5552,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "uk1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$accent-primary"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "CA DÉCLARÉ"
@@ -5317,6 +5632,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "uk4",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-amber"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "RESTE À PAYER"
@@ -5349,6 +5675,16 @@
                 "thickness": 1,
                 "fill": "$border-default"
               },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
+              },
               "layout": "vertical",
               "children": [
                 {
@@ -5379,7 +5715,7 @@
                   "name": "qHead",
                   "width": "fill_container",
                   "height": 42,
-                  "fill": "#FAFAFA",
+                  "fill": "$table-header-bg",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -5617,6 +5953,7 @@
                   "name": "qr2",
                   "width": "fill_container",
                   "height": 48,
+                  "fill": "$table-row-alt",
                   "stroke": {
                     "align": "inside",
                     "thickness": {
@@ -5693,7 +6030,7 @@
                           "id": "JfP02",
                           "name": "qr2b",
                           "height": 22,
-                          "fill": "#F4F4F5",
+                          "fill": "$table-row-alt",
                           "cornerRadius": 100,
                           "padding": [
                             0,
@@ -5766,13 +6103,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -5802,13 +6159,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "ATcSC",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -5952,7 +6309,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -6028,7 +6385,7 @@
                   "type": "text",
                   "id": "QZNZl",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -6044,7 +6401,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -6053,7 +6410,7 @@
                       "type": "text",
                       "id": "xOeWs",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -6105,6 +6462,92 @@
                       "letterSpacing": -0.5
                     }
                   ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NOxmr",
+                  "name": "yearSelector",
+                  "height": 36,
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "0pFFd",
+                      "name": "yearPrev",
+                      "width": 36,
+                      "height": "fill_container",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "J7xGa",
+                          "name": "yearPrevIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-left",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "3G1Eb",
+                      "name": "yearText",
+                      "width": 80,
+                      "height": "fill_container",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": {
+                          "right": 1,
+                          "left": 1
+                        },
+                        "fill": "$border-default"
+                      },
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "7agHi",
+                          "name": "yearLabel",
+                          "fill": "$text-primary",
+                          "content": "2026",
+                          "fontFamily": "Space Grotesk",
+                          "fontSize": 14,
+                          "fontWeight": "600"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "E5KIC",
+                      "name": "yearNext",
+                      "width": 36,
+                      "height": "fill_container",
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "a7j0x",
+                          "name": "yearNextIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-right",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
                 }
               ]
             },
@@ -6126,6 +6569,16 @@
                     "align": "inside",
                     "thickness": 1,
                     "fill": "$border-default"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
                   },
                   "layout": "vertical",
                   "gap": 16,
@@ -6250,8 +6703,23 @@
                   "cornerRadius": 10,
                   "stroke": {
                     "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-emerald"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
                   },
                   "layout": "vertical",
                   "gap": 12,
@@ -6317,6 +6785,16 @@
                     "thickness": 1,
                     "fill": "$border-default"
                   },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
+                  },
                   "layout": "vertical",
                   "children": [
                     {
@@ -6347,7 +6825,7 @@
                       "name": "oblHead",
                       "width": "fill_container",
                       "height": 42,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -6517,6 +6995,7 @@
                       "name": "or2",
                       "width": "fill_container",
                       "height": 40,
+                      "fill": "$table-row-alt",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -6703,7 +7182,7 @@
                       "name": "oblFooter",
                       "width": "fill_container",
                       "height": 44,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "padding": [
                         0,
                         24
@@ -6771,6 +7250,16 @@
                     "align": "inside",
                     "thickness": 1,
                     "fill": "$border-default"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
                   },
                   "layout": "vertical",
                   "children": [
@@ -6894,7 +7383,7 @@
                       "name": "cr3",
                       "width": "fill_container",
                       "height": 44,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -6988,7 +7477,7 @@
                       "name": "cr5",
                       "width": "fill_container",
                       "height": 44,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -7054,13 +7543,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -7090,13 +7599,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "9mDjk",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -7240,7 +7749,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -7316,7 +7825,7 @@
                   "type": "text",
                   "id": "r5HNj",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -7332,7 +7841,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -7341,7 +7850,7 @@
                       "type": "text",
                       "id": "fbEMK",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -7509,6 +8018,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "ik1",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$accent-primary"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "CA ANNUEL"
@@ -7578,6 +8098,17 @@
                   "ref": "CiMZ8",
                   "width": "fill_container",
                   "name": "ik4",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "top": 1,
+                      "right": 1,
+                      "bottom": 1,
+                      "left": 3
+                    },
+                    "fill": "$kpi-amber"
+                  },
+                  "fill": "$bg-card",
                   "descendants": {
                     "D0eyG": {
                       "content": "RESTE À PAYER"
@@ -7617,6 +8148,16 @@
                     "thickness": 1,
                     "fill": "$border-default"
                   },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
+                  },
                   "layout": "vertical",
                   "children": [
                     {
@@ -7647,7 +8188,7 @@
                       "name": "bHead",
                       "width": "fill_container",
                       "height": 42,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -7796,6 +8337,7 @@
                       "name": "br2",
                       "width": "fill_container",
                       "height": 40,
+                      "fill": "$table-row-alt",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -7933,7 +8475,7 @@
                       "name": "bFooter",
                       "width": "fill_container",
                       "height": 44,
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -8008,6 +8550,16 @@
                     "thickness": 1,
                     "fill": "$border-default"
                   },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
+                  },
                   "layout": "vertical",
                   "gap": 16,
                   "padding": 24,
@@ -8038,7 +8590,7 @@
                       "name": "progressBar",
                       "width": "fill_container",
                       "height": 8,
-                      "fill": "#E4E4E7",
+                      "fill": "$border-default",
                       "cornerRadius": 100,
                       "children": [
                         {
@@ -9007,13 +9559,33 @@
           "name": "Sidebar",
           "width": 224,
           "height": "fill_container",
-          "fill": "$bg-card",
+          "fill": {
+            "type": "gradient",
+            "gradientType": "linear",
+            "enabled": true,
+            "rotation": 200,
+            "size": {
+              "height": 1
+            },
+            "colors": [
+              {
+                "color": "#1E3A5F",
+                "position": 0
+              },
+              {
+                "color": "#1A1F4B",
+                "position": 0.5
+              },
+              {
+                "color": "#0F172A",
+                "position": 1
+              }
+            ]
+          },
           "stroke": {
             "align": "inside",
-            "thickness": {
-              "right": 1
-            },
-            "fill": "$border-default"
+            "thickness": 0,
+            "fill": "#00000000"
           },
           "layout": "vertical",
           "gap": 8,
@@ -9043,13 +9615,13 @@
                   "height": 24,
                   "iconFontName": "chart-bar",
                   "iconFontFamily": "lucide",
-                  "fill": "$accent-primary"
+                  "fill": "$sidebar-accent"
                 },
                 {
                   "type": "text",
                   "id": "aqiq4",
                   "name": "sidebarTitle",
-                  "fill": "$text-primary",
+                  "fill": "$sidebar-text-active",
                   "content": "Finances",
                   "fontFamily": "Space Grotesk",
                   "fontSize": 20,
@@ -9193,7 +9765,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$border-default"
+              "fill": "$sidebar-divider"
             },
             {
               "type": "frame",
@@ -9269,7 +9841,7 @@
                   "type": "text",
                   "id": "Xoa0x",
                   "name": "userEmail",
-                  "fill": "$text-secondary",
+                  "fill": "$sidebar-text",
                   "content": "user@example.com",
                   "fontFamily": "Inter",
                   "fontSize": 12,
@@ -9285,7 +9857,7 @@
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#F87171"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -9294,7 +9866,7 @@
                       "type": "text",
                       "id": "FwE60",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#F87171",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -9360,6 +9932,16 @@
                 "align": "inside",
                 "thickness": 1,
                 "fill": "$border-default"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
               },
               "layout": "vertical",
               "gap": 20,
@@ -9542,6 +10124,16 @@
                 "align": "inside",
                 "thickness": 1,
                 "fill": "$border-default"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
               },
               "layout": "vertical",
               "gap": 20,
@@ -9789,6 +10381,16 @@
                 "thickness": 1,
                 "fill": "$border-default"
               },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
+              },
               "layout": "vertical",
               "gap": 20,
               "padding": 24,
@@ -9848,7 +10450,7 @@
                       "id": "jQEDT",
                       "name": "tableHeader",
                       "width": "fill_container",
-                      "fill": "#FAFAFA",
+                      "fill": "$table-header-bg",
                       "gap": 12,
                       "padding": [
                         12,
@@ -9975,6 +10577,7 @@
                       "id": "CJ4i2",
                       "name": "row2",
                       "width": "fill_container",
+                      "fill": "$table-row-alt",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -10117,6 +10720,7 @@
                       "id": "WVj3B",
                       "name": "row4",
                       "width": "fill_container",
+                      "fill": "$table-row-alt",
                       "stroke": {
                         "align": "inside",
                         "thickness": {
@@ -10190,6 +10794,505 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "MVj94",
+      "x": -493,
+      "y": 0,
+      "name": "Component/Logo",
+      "reusable": true,
+      "width": 40,
+      "height": 40,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 225,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#4F46E5",
+            "position": 0
+          },
+          {
+            "color": "#2563EB",
+            "position": 0.5
+          },
+          {
+            "color": "#1E40AF",
+            "position": 1
+          }
+        ]
+      },
+      "cornerRadius": 10,
+      "layout": "none",
+      "children": [
+        {
+          "type": "rectangle",
+          "cornerRadius": 1.5,
+          "id": "PCtaN",
+          "x": 9,
+          "y": 7,
+          "name": "spine",
+          "fill": "#FFFFFF",
+          "width": 4,
+          "height": 26
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": [
+            1.5,
+            2,
+            2,
+            1.5
+          ],
+          "id": "FkhPw",
+          "x": 9,
+          "y": 7,
+          "name": "topBar",
+          "fill": "#FFFFFF",
+          "width": 12,
+          "height": 4
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": [
+            1.5,
+            2,
+            2,
+            1.5
+          ],
+          "id": "D1tUL",
+          "x": 9,
+          "y": 18,
+          "name": "midBar",
+          "fill": "#FFFFFF",
+          "width": 16,
+          "height": 4
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": [
+            1.5,
+            2,
+            2,
+            1.5
+          ],
+          "id": "hoeJf",
+          "x": 9,
+          "y": 29,
+          "name": "botBar",
+          "fill": "#FFFFFF",
+          "width": 16,
+          "height": 4
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "id": "8ABMQ",
+          "x": 17,
+          "y": 7,
+          "name": "topCurve",
+          "fill": "#FFFFFF",
+          "width": 4,
+          "height": 15
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": [
+            2,
+            3,
+            3,
+            2
+          ],
+          "id": "AGLzv",
+          "x": 21,
+          "y": 18,
+          "name": "botCurve",
+          "fill": "#FFFFFF",
+          "width": 4,
+          "height": 15
+        },
+        {
+          "type": "rectangle",
+          "cornerRadius": 1.5,
+          "id": "6rIN7",
+          "x": 29,
+          "y": 11,
+          "name": "chartAccent",
+          "opacity": 0.35,
+          "fill": "#FFFFFF",
+          "width": 3,
+          "height": 22
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "3vR9V",
+      "x": -777,
+      "y": 0,
+      "name": "Sidebar Example",
+      "width": 224,
+      "height": 900,
+      "fill": {
+        "type": "gradient",
+        "gradientType": "linear",
+        "enabled": true,
+        "rotation": 200,
+        "size": {
+          "height": 1
+        },
+        "colors": [
+          {
+            "color": "#1E3A5F",
+            "position": 0
+          },
+          {
+            "color": "#1A1F4B",
+            "position": 0.5
+          },
+          {
+            "color": "#0F172A",
+            "position": 1
+          }
+        ]
+      },
+      "stroke": {
+        "align": "inside",
+        "thickness": 0,
+        "fill": "#00000000"
+      },
+      "layout": "vertical",
+      "gap": 8,
+      "padding": [
+        28,
+        20
+      ],
+      "children": [
+        {
+          "type": "frame",
+          "id": "Wroio",
+          "name": "sidebarHeader",
+          "width": "fill_container",
+          "height": 44,
+          "gap": 10,
+          "padding": [
+            0,
+            4
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "eBy5c",
+              "type": "ref",
+              "ref": "MVj94",
+              "x": 4,
+              "y": 2,
+              "width": 40,
+              "height": 40,
+              "opacity": 1,
+              "effect": [],
+              "descendants": {
+                "PCtaN": {
+                  "x": 9,
+                  "y": 7
+                },
+                "FkhPw": {
+                  "x": 9,
+                  "y": 7
+                },
+                "D1tUL": {
+                  "x": 9,
+                  "y": 18
+                },
+                "hoeJf": {
+                  "x": 9,
+                  "y": 29
+                },
+                "8ABMQ": {
+                  "x": 17,
+                  "y": 7
+                },
+                "AGLzv": {
+                  "x": 21,
+                  "y": 18
+                },
+                "6rIN7": {
+                  "opacity": 0.35,
+                  "x": 29,
+                  "y": 11
+                }
+              }
+            },
+            {
+              "type": "text",
+              "id": "YfWp3",
+              "name": "sidebarTitle",
+              "fill": "$sidebar-text-active",
+              "content": "Finance",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "700"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "dsZvM",
+          "name": "NavGroup",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 2,
+          "children": [
+            {
+              "id": "IV6q1",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "newNav1",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "layout-dashboard"
+                },
+                "xbj5h": {
+                  "content": "Tableau de bord"
+                }
+              }
+            },
+            {
+              "id": "Clwfi",
+              "type": "ref",
+              "ref": "KZxHs",
+              "width": "fill_container",
+              "name": "newNav2",
+              "descendants": {
+                "rUnNB": {
+                  "iconFontName": "file-text"
+                },
+                "iR6Ul": {
+                  "content": "Factures"
+                }
+              }
+            },
+            {
+              "id": "iZEcF",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav3",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "wallet"
+                },
+                "xbj5h": {
+                  "content": "Dépenses"
+                }
+              }
+            },
+            {
+              "id": "mCkIC",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav4",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "receipt"
+                },
+                "xbj5h": {
+                  "content": "TVA"
+                }
+              }
+            },
+            {
+              "id": "jhldh",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav5",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "landmark"
+                },
+                "xbj5h": {
+                  "content": "Urssaf"
+                }
+              }
+            },
+            {
+              "id": "fEG97",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav6",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "building-2"
+                },
+                "xbj5h": {
+                  "content": "Compte entreprise"
+                }
+              }
+            },
+            {
+              "id": "g6ViT",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav7",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "clipboard-list"
+                },
+                "xbj5h": {
+                  "content": "Impôts"
+                }
+              }
+            },
+            {
+              "id": "kJn5Y",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav8",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "calculator"
+                },
+                "xbj5h": {
+                  "content": "Calculateur"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "ATxJO",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$sidebar-divider"
+        },
+        {
+          "type": "frame",
+          "id": "jUFO7",
+          "name": "SettingsGroup",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 2,
+          "children": [
+            {
+              "id": "FuAuh",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "s1",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "settings"
+                },
+                "xbj5h": {
+                  "content": "Configuration"
+                }
+              }
+            },
+            {
+              "id": "08fVt",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "s2",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "file-cog"
+                },
+                "xbj5h": {
+                  "content": "Param. factures"
+                }
+              }
+            },
+            {
+              "id": "WcG7k",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "s3",
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "key"
+                },
+                "xbj5h": {
+                  "content": "Passkeys"
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "x3grP",
+          "name": "spacer",
+          "width": "fill_container",
+          "height": "fill_container"
+        },
+        {
+          "type": "frame",
+          "id": "bBO2P",
+          "name": "UserFooter",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 10,
+          "children": [
+            {
+              "type": "text",
+              "id": "bva9Q",
+              "name": "userEmail",
+              "fill": "$sidebar-text",
+              "content": "user@example.com",
+              "fontFamily": "Inter",
+              "fontSize": 12,
+              "fontWeight": "normal"
+            },
+            {
+              "type": "frame",
+              "id": "BNRnt",
+              "name": "logoutBtn",
+              "width": "fill_container",
+              "height": 36,
+              "cornerRadius": 8,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1.5,
+                "fill": "#F87171"
+              },
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "G4L0I",
+                  "name": "logoutText",
+                  "fill": "#F87171",
+                  "content": "Déconnexion",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
@@ -10256,6 +11359,12 @@
         },
         {
           "value": "#FFFFFF"
+        },
+        {
+          "value": "#FFFFFF"
+        },
+        {
+          "value": "#FFFFFF"
         }
       ]
     },
@@ -10267,6 +11376,12 @@
         },
         {
           "value": "#EEF2FF"
+        },
+        {
+          "value": "#E0E7FF"
+        },
+        {
+          "value": "#E0E7FF"
         }
       ]
     },
@@ -10278,6 +11393,18 @@
         },
         {
           "value": "#FAFAFA"
+        },
+        {
+          "value": "#F0F2F8"
+        },
+        {
+          "value": "#F0F2F8"
+        },
+        {
+          "value": "#F2F3F7"
+        },
+        {
+          "value": "#F2F3F7"
         }
       ]
     },
@@ -10289,6 +11416,12 @@
         },
         {
           "value": "#FFFFFF"
+        },
+        {
+          "value": "#1E293B"
+        },
+        {
+          "value": "#1E293B"
         }
       ]
     },
@@ -10300,6 +11433,12 @@
         },
         {
           "value": "#E5E7EB"
+        },
+        {
+          "value": "#E2E5F0"
+        },
+        {
+          "value": "#E2E5F0"
         }
       ]
     },
@@ -10422,6 +11561,48 @@
     "kpi-indigo-bg": {
       "type": "color",
       "value": "#F5F3FF"
+    },
+    "sidebar-accent": {
+      "type": "color",
+      "value": "#6366F1"
+    },
+    "sidebar-divider": {
+      "type": "color",
+      "value": "#334155"
+    },
+    "sidebar-hover": {
+      "type": "color",
+      "value": "#334155"
+    },
+    "sidebar-text": {
+      "type": "color",
+      "value": "#CBD5E1"
+    },
+    "sidebar-text-active": {
+      "type": "color",
+      "value": "#FFFFFF"
+    },
+    "table-header-bg": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#F5F7FB"
+        },
+        {
+          "value": "#EEF0F6"
+        }
+      ]
+    },
+    "table-row-alt": {
+      "type": "color",
+      "value": [
+        {
+          "value": "#F8F9FC"
+        },
+        {
+          "value": "#F6F7FA"
+        }
+      ]
     }
   }
 }
