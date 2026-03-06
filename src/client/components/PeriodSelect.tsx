@@ -111,7 +111,7 @@ function PeriodSelectShell({
     <div className={`group inline-flex h-9 items-stretch rounded-lg bg-[var(--card-bg)] transition-colors ${isOpen ? 'border-[1.5px] border-[var(--color-primary)]' : 'border border-[var(--border-default)] focus-within:border-[1.5px] focus-within:border-[var(--color-primary)]'}`}>
       <button
         type="button"
-        className="flex w-9 items-center justify-center rounded-l-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] active:text-[var(--text-primary)] disabled:opacity-30"
+        className="flex w-9 items-center justify-center rounded-l-lg text-[var(--text-secondary)] transition-colors cursor-pointer disabled:cursor-not-allowed hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] active:text-[var(--text-primary)] disabled:opacity-30"
         onClick={onPrev}
         disabled={!canPrev}
         title={prevTitle}
@@ -123,7 +123,7 @@ function PeriodSelectShell({
       </div>
       <button
         type="button"
-        className="flex w-9 items-center justify-center rounded-r-lg text-[var(--text-secondary)] transition-colors hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] active:text-[var(--text-primary)] disabled:opacity-30"
+        className="flex w-9 items-center justify-center rounded-r-lg text-[var(--text-secondary)] transition-colors cursor-pointer disabled:cursor-not-allowed hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] active:text-[var(--text-primary)] disabled:opacity-30"
         onClick={onNext}
         disabled={!canNext}
         title={nextTitle}
