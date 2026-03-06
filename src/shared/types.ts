@@ -225,6 +225,12 @@ export interface RegisterInput {
   password: string
 }
 
+export interface AuthSetupStatus {
+  hasUser: boolean
+  hasPasskey: boolean
+  email?: string
+}
+
 // Passkey types
 export interface Passkey {
   id: string

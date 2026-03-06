@@ -1,6 +1,6 @@
-import { useState, type FormEvent } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { useNavigate, useLocation, Link } from 'react-router-dom'
-import { useLogin } from '../hooks/useAuth'
+import { useAuthSetupStatus, useLogin } from '../hooks/useAuth'
 import { loginWithPasskey, isPasskeySupported } from '../utils/passkey'
 import { useQueryClient } from '@tanstack/react-query'
 import { XCircle, Fingerprint, EyeOff, ShieldCheck, Receipt, TrendingUp } from 'lucide-react'
@@ -16,8 +16,24 @@ export default function Login() {
   const location = useLocation()
   const queryClient = useQueryClient()
   const loginMutation = useLogin()
+  const { data: authSetupStatus } = useAuthSetupStatus()
 
   const from = (location.state as { from?: { pathname: string } })?.from?.pathname || '/'
+  const isDev = import.meta.env.DEV
+  const hasExistingUser = Boolean(authSetupStatus?.hasUser)
+  const hasPasskey = Boolean(authSetupStatus?.hasPasskey)
+  const shouldShowEmailField = isDev || !hasPasskey
+  const shouldShowPasswordLogin = isDev || !hasPasskey
+  const supportsPasskey = isPasskeySupported()
+  const shouldShowPasskeyLogin = supportsPasskey && (isDev || (hasExistingUser && hasPasskey))
+  const shouldShowSeparator = shouldShowPasswordLogin && shouldShowPasskeyLogin
+  const shouldShowSignup = !isDev && !hasExistingUser
+
+  useEffect(() => {
+    if (!shouldShowEmailField && authSetupStatus?.email) {
+      setEmail((previousEmail) => previousEmail || authSetupStatus.email || '')
+    }
+  }, [shouldShowEmailField, authSetupStatus?.email])
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault()
@@ -50,8 +66,6 @@ export default function Login() {
       setIsPasskeyLoading(false)
     }
   }
-
-  const supportsPasskey = isPasskeySupported()
 
   return (
     <div className="min-h-screen bg-white">
@@ -116,56 +130,62 @@ export default function Login() {
               </div>
             )}
 
-            <form onSubmit={handleSubmit} className="space-y-4">
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-[#18181B]">Adresse e-mail</label>
-                <input
-                  type="email"
-                  placeholder="nom@exemple.com"
-                  className="input input-bordered h-10.5 w-full rounded-lg border-[#E2E5F0] bg-white px-3 text-sm"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  required
-                  autoComplete="email"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <label className="block text-sm font-medium text-[#18181B]">Mot de passe</label>
-                <div className="relative">
-                  <input
-                    type="password"
-                    placeholder="••••••••"
-                    className="input input-bordered h-10.5 w-full rounded-lg border-[#E2E5F0] bg-white px-3 pr-10 text-sm"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                    autoComplete="current-password"
-                  />
-                  <EyeOff className="pointer-events-none absolute right-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#A1A1AA]" />
-                </div>
-              </div>
-
-              <button
-                type="submit"
-                className="btn h-9.5 w-full rounded-lg border-none bg-[#2563EB] text-sm font-medium text-white hover:bg-[#1D4ED8]"
-                disabled={loginMutation.isPending}
-              >
-                {loginMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  'Se connecter'
+            {shouldShowPasswordLogin && (
+              <form onSubmit={handleSubmit} className="space-y-4">
+                {shouldShowEmailField && (
+                  <div className="space-y-1.5">
+                    <label className="block text-sm font-medium text-[#18181B]">Adresse e-mail</label>
+                    <input
+                      type="email"
+                      placeholder="nom@exemple.com"
+                      className="input input-bordered h-10.5 w-full rounded-lg border-[#E2E5F0] bg-white px-3 text-sm"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      required
+                      autoComplete="email"
+                    />
+                  </div>
                 )}
-              </button>
-            </form>
 
-            {supportsPasskey && (
-              <>
-                <div className="flex w-full items-center gap-3">
-                  <div className="h-px flex-1 bg-[#E2E5F0]" />
-                  <span className="text-[13px] text-[#A1A1AA]">ou</span>
-                  <div className="h-px flex-1 bg-[#E2E5F0]" />
+                <div className="space-y-1.5">
+                  <label className="block text-sm font-medium text-[#18181B]">Mot de passe</label>
+                  <div className="relative">
+                    <input
+                      type="password"
+                      placeholder="••••••••"
+                      className="input input-bordered h-10.5 w-full rounded-lg border-[#E2E5F0] bg-white px-3 pr-10 text-sm"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      autoComplete="current-password"
+                    />
+                    <EyeOff className="pointer-events-none absolute right-3 top-1/2 h-4.5 w-4.5 -translate-y-1/2 text-[#A1A1AA]" />
+                  </div>
                 </div>
+
+                <button
+                  type="submit"
+                  className="btn h-9.5 w-full rounded-lg border-none bg-[#2563EB] text-sm font-medium text-white hover:bg-[#1D4ED8]"
+                  disabled={loginMutation.isPending}
+                >
+                  {loginMutation.isPending ? (
+                    <span className="loading loading-spinner loading-sm"></span>
+                  ) : (
+                    'Se connecter'
+                  )}
+                </button>
+              </form>
+            )}
+
+            {shouldShowPasskeyLogin && (
+              <>
+                {shouldShowSeparator && (
+                  <div className="flex w-full items-center gap-3">
+                    <div className="h-px flex-1 bg-[#E2E5F0]" />
+                    <span className="text-[13px] text-[#A1A1AA]">ou</span>
+                    <div className="h-px flex-1 bg-[#E2E5F0]" />
+                  </div>
+                )}
 
                 <button
                   type="button"
@@ -185,12 +205,14 @@ export default function Login() {
               </>
             )}
 
-            <div className="pt-1 text-center text-sm text-[#71717A]">
-              Pas encore de compte ?{' '}
-              <Link to="/register" className="font-medium text-[#2563EB] hover:text-[#1D4ED8]">
-                S'inscrire
-              </Link>
-            </div>
+            {shouldShowSignup && (
+              <div className="pt-1 text-center text-sm text-[#71717A]">
+                Pas encore de compte ?{' '}
+                <Link to="/register" className="font-medium text-[#2563EB] hover:text-[#1D4ED8]">
+                  S'inscrire
+                </Link>
+              </div>
+            )}
           </div>
         </main>
       </div>

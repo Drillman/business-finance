@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { eq } from 'drizzle-orm'
 import { db } from '../db'
-import { users, refreshTokens, settings } from '../db/schema'
+import { users, refreshTokens, settings, passkeys } from '../db/schema'
 import { hashPassword, verifyPassword } from '../auth/password'
 import {
   generateAccessToken,
@@ -30,6 +30,29 @@ const COOKIE_OPTIONS = {
 }
 
 export async function authRoutes(fastify: FastifyInstance) {
+  // Public setup status for login UI behavior
+  fastify.get('/api/auth/setup-status', async () => {
+    const existingUser = await db.query.users.findFirst()
+
+    if (!existingUser) {
+      return {
+        hasUser: false,
+        hasPasskey: false,
+        email: undefined,
+      }
+    }
+
+    const existingPasskey = await db.query.passkeys.findFirst({
+      where: eq(passkeys.userId, existingUser.id),
+    })
+
+    return {
+      hasUser: true,
+      hasPasskey: Boolean(existingPasskey),
+      email: existingUser.email,
+    }
+  })
+
   // Register
   fastify.post('/api/auth/register', async (request: FastifyRequest, reply: FastifyReply) => {
     const parseResult = registerSchema.safeParse(request.body)
