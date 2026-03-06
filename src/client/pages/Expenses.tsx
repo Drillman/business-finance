@@ -65,13 +65,12 @@ const fixedExpenseColumns: FinanceTableColumn[] = [
 ]
 
 const variableExpenseColumns: FinanceTableColumn[] = [
-  { key: 'description', label: 'Description', className: 'w-[300px]' },
-  { key: 'date', label: 'Date', className: 'w-[130px]' },
-  { key: 'amount-ht', label: 'Montant HT', className: 'w-[130px] text-right' },
-  { key: 'tax', label: 'TVA', className: 'w-[120px] text-right' },
-  { key: 'recoverable', label: 'Recuperable', className: 'w-[150px] text-right' },
-  { key: 'amount-ttc', label: 'TTC', className: 'w-[130px] text-right' },
-  { key: 'actions', label: 'Actions', className: 'w-[108px] text-right' },
+  { key: 'description', label: 'Description', className: 'w-[150px]' },
+  { key: 'date', label: 'Date', className: 'w-[100px]' },
+  { key: 'amount-ht', label: 'Montant HT', className: 'w-[110px] text-right' },
+  { key: 'tax', label: 'TVA', className: 'w-[80px] text-right' },
+  { key: 'recoverable', label: 'Recuperable', className: 'w-[100px] text-right' },
+  { key: 'actions', label: 'Actions', className: 'w-[80px] text-right' },
 ]
 
 type FixedExpenseStatus = 'termine' | 'en-cours' | 'a-venir'
@@ -558,7 +557,7 @@ export default function Expenses() {
               value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
               description="Deduction possible"
               accentColor="#34D399"
-              valueClassName="text-[#047857]"
+              valueColor="#34D399"
             />
             <KpiCard
               title="Charges fixes actives"
@@ -654,7 +653,7 @@ export default function Expenses() {
                 <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
               </div>
             ) : (
-              <FinanceTable columns={variableExpenseColumns} minWidthClassName="min-w-[1030px]">
+              <FinanceTable columns={variableExpenseColumns} minWidthClassName="min-w-[990px]">
                 {nonFixedExpenses.map((expense, index) => {
                   const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
                   return (
@@ -666,7 +665,7 @@ export default function Expenses() {
                       ].join(' ')}
                     >
                       <td className="px-3 md:px-4">
-                        <div className="font-medium text-(--text-primary)">{expense.description}</div>
+                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
                         {expense.note && (
                           <div className="max-w-xs truncate text-xs text-(--text-secondary)">
                             {expense.note}
@@ -679,9 +678,6 @@ export default function Expenses() {
                       <td className="px-3 text-right font-mono text-sm md:px-4">
                         <span className="text-[#15803D]">{formatCurrency(taxRecovery)}</span>
                         <span className="ml-1 text-[11px] text-(--text-tertiary)">({parseFloat(expense.taxRecoveryRate)}%)</span>
-                      </td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">
-                        {formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount))}
                       </td>
                       <td className="px-3 md:px-4">
                         <div className="flex justify-end gap-1">
@@ -712,7 +708,6 @@ export default function Expenses() {
                   <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalHt)}</td>
                   <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTax)}</td>
                   <td className="px-3 text-right font-mono text-sm text-[#15803D] md:px-4">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
-                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTtc)}</td>
                   <td className="px-3 md:px-4" />
                 </tr>
               </FinanceTable>
@@ -853,7 +848,7 @@ export default function Expenses() {
                             ].join(' ')}
                           >
                             <td className="px-3 md:px-4">
-                              <div className="font-medium text-(--text-primary)">{expense.description}</div>
+                              <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
                               {expense.note && (
                                 <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
                               )}

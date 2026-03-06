@@ -64,9 +64,6 @@ export default function Dashboard() {
         </div>
         <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
-          {/* <Link to="/invoices" className="btn btn-primary">
-            Aller aux factures
-          </Link> */}
         </div>
       </div>
 
