@@ -50,8 +50,19 @@
       "reusable": true,
       "width": 200,
       "height": 40,
-      "fill": "$sidebar-hover",
+      "fill": "#FFFFFF30",
       "cornerRadius": 8,
+      "stroke": {
+        "align": "inside",
+        "thickness": {
+          "left": 3
+        },
+        "fill": "#FFFFFF"
+      },
+      "effect": {
+        "type": "background_blur",
+        "radius": 8
+      },
       "gap": 10,
       "padding": [
         0,
@@ -282,15 +293,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -356,6 +367,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "nav1",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "layout-dashboard"
@@ -478,7 +490,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -1451,15 +1463,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -1540,6 +1552,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "newNav2",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "file-text"
@@ -1647,7 +1660,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -2597,15 +2610,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -2701,6 +2714,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "newNav3",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "wallet"
@@ -2793,7 +2807,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -3786,15 +3800,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -3905,6 +3919,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "n4",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "receipt"
@@ -3982,7 +3997,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -4767,15 +4782,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -4901,6 +4916,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "n5",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "landmark"
@@ -4963,7 +4979,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -5713,15 +5729,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -5862,6 +5878,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "n6",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "building-2"
@@ -5909,7 +5926,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -7073,15 +7090,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -7237,6 +7254,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "n7",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "clipboard-list"
@@ -7269,7 +7287,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -9009,15 +9027,15 @@
             },
             "colors": [
               {
-                "color": "#1E3A5F",
+                "color": "#1E3A8A",
                 "position": 0
               },
               {
-                "color": "#1A1F4B",
+                "color": "#2544A8",
                 "position": 0.5
               },
               {
-                "color": "#0F172A",
+                "color": "#4338CA",
                 "position": 1
               }
             ]
@@ -9205,7 +9223,7 @@
               "name": "divider",
               "width": "fill_container",
               "height": 1,
-              "fill": "$sidebar-divider"
+              "fill": "#FFFFFF20"
             },
             {
               "type": "frame",
@@ -9221,6 +9239,7 @@
                   "ref": "KZxHs",
                   "width": "fill_container",
                   "name": "s1",
+                  "fill": "#FFFFFF20",
                   "descendants": {
                     "rUnNB": {
                       "iconFontName": "settings"
@@ -10393,15 +10412,15 @@
         },
         "colors": [
           {
-            "color": "#1E3A5F",
+            "color": "#1E3A8A",
             "position": 0
           },
           {
-            "color": "#1A1F4B",
+            "color": "#2544A8",
             "position": 0.5
           },
           {
-            "color": "#0F172A",
+            "color": "#4338CA",
             "position": 1
           }
         ]
@@ -10514,6 +10533,7 @@
               "ref": "KZxHs",
               "width": "fill_container",
               "name": "newNav2",
+              "fill": "#FFFFFF20",
               "descendants": {
                 "rUnNB": {
                   "iconFontName": "file-text"
@@ -10621,7 +10641,7 @@
           "name": "divider",
           "width": "fill_container",
           "height": 1,
-          "fill": "$sidebar-divider"
+          "fill": "#FFFFFF20"
         },
         {
           "type": "frame",
@@ -13043,15 +13063,36 @@
     },
     "sidebar-accent": {
       "type": "color",
-      "value": "#6366F1"
+      "value": [
+        {
+          "value": "#6366F1"
+        },
+        {
+          "value": "#FFFFFF"
+        }
+      ]
     },
     "sidebar-divider": {
       "type": "color",
-      "value": "#334155"
+      "value": [
+        {
+          "value": "#334155"
+        },
+        {
+          "value": "#FFFFFF25"
+        }
+      ]
     },
     "sidebar-hover": {
       "type": "color",
-      "value": "#334155"
+      "value": [
+        {
+          "value": "#334155"
+        },
+        {
+          "value": "#FFFFFF20"
+        }
+      ]
     },
     "sidebar-text": {
       "type": "color",

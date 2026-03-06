@@ -4,6 +4,8 @@ import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
 import { YearSelect } from '../components/PeriodSelect'
 import { ArrowUpRight, Landmark, Receipt, Wallet } from 'lucide-react'
+import { KpiCard } from '../components/ui/KpiCard'
+import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -16,6 +18,15 @@ function formatCurrency(amount: string | number): string {
 const MONTHS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+]
+
+const monthlyColumns: FinanceTableColumn[] = [
+  { key: 'month', label: 'Mois' },
+  { key: 'revenue', label: 'CA HT', className: 'text-right' },
+  { key: 'urssaf', label: 'Urssaf', className: 'text-right' },
+  { key: 'income-tax', label: 'Impôts', className: 'text-right' },
+  { key: 'tva', label: 'TVA', className: 'text-right' },
+  { key: 'remaining', label: 'Restant', className: 'text-right' },
 ]
 
 export default function Dashboard() {
@@ -69,111 +80,92 @@ export default function Dashboard() {
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold">Bilan {selectedYear}</h2>
             <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#6366F1] bg-base-100 shadow">
-                <div className="stat-title">Chiffre d'affaires</div>
-                <div className="stat-value text-2xl text-[#818CF8]">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
-                </div>
-                <div className="stat-desc">Total encaisse sur l'annee</div>
-              </div>
-              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#F59E0B] bg-base-100 shadow">
-                <div className="stat-title">Urssaf</div>
-                <div className="stat-value text-2xl text-[#FBBF24]">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
-                </div>
-                <div className="stat-desc">
-                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} |
-                  Est.: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}
-                </div>
-              </div>
-              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#8B5CF6] bg-base-100 shadow">
-                <div className="stat-title">Impôts sur le revenu</div>
-                <div className="stat-value text-2xl text-[#A78BFA]">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
-                </div>
-                <div className="stat-desc">
-                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}
-                </div>
-              </div>
-              <div className="stat min-h-33 rounded-box border-l-[3px] border-l-[#10B981] bg-base-100 shadow">
-                <div className="stat-title">Restant net</div>
-                <div className={`stat-value text-2xl ${yearlyData && parseFloat(yearlyData.kpis.totalRemaining) >= 0 ? 'text-[#34D399]' : 'text-error'}`}>
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
-                </div>
-                <div className="stat-desc">Après charges et impôts</div>
-              </div>
+              <KpiCard
+                title="Chiffre d'affaires"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
+                description="Total encaisse sur l'annee"
+                accentColor="#818CF8"
+                valueColor="#818CF8"
+              />
+              <KpiCard
+                title="Urssaf"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
+                description={`Payé: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} | Est.: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}`}
+                accentColor="#FBBF24"
+                valueColor="#FBBF24"
+              />
+              <KpiCard
+                title="Impôts sur le revenu"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
+                description={`Payé: ${yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}`}
+                accentColor="#A78BFA"
+                valueColor="#A78BFA"
+              />
+              <KpiCard
+                title="Restant net"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
+                description="Après charges et impôts"
+                accentColor="#34D399"
+                valueColor={yearlyData && parseFloat(yearlyData.kpis.totalRemaining) < 0 ? 'var(--color-error)' : '#34D399'}
+              />
             </div>
           </div>
 
           {/* Monthly Breakdown Table */}
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold">Détail mensuel</h2>
-            <div className="overflow-hidden rounded-[10px] border border-[#E2E5F0] bg-white shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-              <div className="overflow-x-auto">
-                <table className="table">
-                  <thead>
-                    <tr className="bg-[#F5F7FB] text-[#71717A]">
-                      <th className="font-semibold">Mois</th>
-                      <th className="text-right font-semibold">CA HT</th>
-                      <th className="text-right font-semibold">Urssaf</th>
-                      <th className="text-right font-semibold">Impôts</th>
-                      <th className="text-right font-semibold">TVA</th>
-                      <th className="text-right font-semibold">Restant</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {sortedMonths.map((month, index) => {
-                      const isCurrentMonth = month.month === yearlyData?.currentMonth
-                      return (
-                        <tr
-                          key={month.month}
-                          className={[
-                            index % 2 === 1 ? 'bg-[#F8F9FC]' : 'bg-white',
-                            isCurrentMonth ? 'bg-[#EEF2FF]' : '',
-                          ].join(' ').trim()}
-                        >
-                          <td className={isCurrentMonth ? 'font-semibold' : ''}>
-                            {MONTHS[month.month - 1]}
-                            {isCurrentMonth && <span className="badge ml-2 border-0 bg-[#6366F1] text-white">En cours</span>}
-                          </td>
-                          <td className="text-right">{formatCurrency(month.revenue)}</td>
-                          <td className="text-right">
-                            <span className={month.urssafIsPaid ? 'text-success' : 'text-base-content/70'}>
-                              {formatCurrency(month.urssaf)}
-                            </span>
-                            {month.urssafIsPaid && <span className="ml-1 text-success">✓</span>}
-                          </td>
-                          <td className="text-right text-base-content/70">
-                            {formatCurrency(month.incomeTax)}
-                          </td>
-                          <td className="text-right">
-                            <span className={month.tvaIsPaid ? 'text-success' : 'text-base-content/70'}>
-                              {formatCurrency(month.tva)}
-                            </span>
-                            {month.tvaIsPaid && <span className="ml-1 text-success">✓</span>}
-                          </td>
-                          <td className={`text-right font-medium ${parseFloat(month.remaining) >= 0 ? 'text-success' : 'text-error'}`}>
-                            {formatCurrency(month.remaining)}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                  <tfoot>
-                    <tr className="border-t border-[#E2E5F0] bg-white">
-                      <td className="font-semibold">Moyenne</td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td></td>
-                      <td className={`text-right font-semibold ${averageRemaining >= 0 ? 'text-success' : 'text-error'}`}>
-                        {formatCurrency(averageRemaining)}
-                      </td>
-                    </tr>
-                  </tfoot>
-                </table>
-              </div>
-            </div>
+            <FinanceTable
+              columns={monthlyColumns}
+              minWidthClassName="min-w-[920px]"
+              footer={
+                <tr className="h-11 border-t border-(--border-default) bg-(--card-bg)">
+                  <td className="px-4 text-sm font-semibold text-(--text-primary)">Moyenne</td>
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className={`px-4 text-right text-sm font-semibold ${averageRemaining >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                    {formatCurrency(averageRemaining)}
+                  </td>
+                </tr>
+              }
+            >
+              {sortedMonths.map((month, index) => {
+                const isCurrentMonth = month.month === yearlyData?.currentMonth
+                return (
+                  <tr
+                    key={month.month}
+                    className={[
+                      'h-12 border-b border-(--border-default)',
+                      index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      isCurrentMonth ? 'bg-[#EEF2FF]' : '',
+                    ].join(' ').trim()}
+                  >
+                    <td className="px-4 text-sm text-(--text-primary)">
+                      <span className={isCurrentMonth ? 'font-semibold' : ''}>{MONTHS[month.month - 1]}</span>
+                      {isCurrentMonth && <span className="ml-2 inline-flex rounded-full bg-[#6366F1] px-2 py-0.5 text-[10px] font-semibold text-white">En cours</span>}
+                    </td>
+                    <td className="px-4 text-right text-sm">{formatCurrency(month.revenue)}</td>
+                    <td className="px-4 text-right text-sm">
+                      <span className={month.urssafIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
+                        {formatCurrency(month.urssaf)}
+                      </span>
+                      {month.urssafIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
+                    </td>
+                    <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.incomeTax)}</td>
+                    <td className="px-4 text-right text-sm">
+                      <span className={month.tvaIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
+                        {formatCurrency(month.tva)}
+                      </span>
+                      {month.tvaIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
+                    </td>
+                    <td className={`px-4 text-right text-sm font-medium ${parseFloat(month.remaining) >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                      {formatCurrency(month.remaining)}
+                    </td>
+                  </tr>
+                )
+              })}
+            </FinanceTable>
           </div>
 
           {/* Account Overview */}
