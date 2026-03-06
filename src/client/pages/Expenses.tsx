@@ -13,7 +13,7 @@ import { useSnackbar } from '../contexts/SnackbarContext'
 import { MonthSelect } from '../components/PeriodSelect'
 import { AppButton } from '../components/ui/AppButton'
 import { KpiCard } from '../components/ui/KpiCard'
-import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -57,14 +57,14 @@ const recurrenceLabels: Record<RecurrencePeriod, string> = {
   yearly: 'Annuelle',
 }
 
-const fixedExpenseColumns: FinanceTableColumn[] = [
+const fixedExpenseColumns: DataTableColumn[] = [
   { key: 'description', label: 'Description', className: 'w-[320px]' },
   { key: 'payment-day', label: 'Jour', className: 'w-[92px] text-center' },
   { key: 'amount-ht', label: 'Montant HT', className: 'w-[170px] text-right' },
   { key: 'amount-ttc', label: 'Montant TTC', className: 'w-[170px] text-right' },
 ]
 
-const variableExpenseColumns: FinanceTableColumn[] = [
+const variableExpenseColumns: DataTableColumn[] = [
   { key: 'description', label: 'Description', className: 'w-[150px]' },
   { key: 'date', label: 'Date', className: 'w-[100px]' },
   { key: 'amount-ht', label: 'Montant HT', className: 'w-[110px] text-right' },
@@ -344,6 +344,84 @@ export default function Expenses() {
       : <ChevronDown className="h-3.5 w-3.5 text-(--text-secondary)" />
   }
 
+  const fixedLibraryColumns: DataTableColumn[] = [
+    {
+      key: 'description',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('description')}
+        >
+          Description
+          {renderSortIcon('description')}
+        </button>
+      ),
+      className: 'w-55',
+    },
+    {
+      key: 'amount-ttc',
+      label: (
+        <button
+          type="button"
+          className="ml-auto inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('amountTtc')}
+        >
+          Montant TTC
+          {renderSortIcon('amountTtc')}
+        </button>
+      ),
+      className: 'w-30 text-right',
+    },
+    {
+      key: 'payment-day',
+      label: (
+        <button
+          type="button"
+          className="mx-auto inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('paymentDay')}
+        >
+          Jour
+          {renderSortIcon('paymentDay')}
+        </button>
+      ),
+      className: 'w-18 text-center',
+    },
+    {
+      key: 'status',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('status')}
+        >
+          Statut
+          {renderSortIcon('status')}
+        </button>
+      ),
+      className: 'w-48',
+    },
+    {
+      key: 'recurrence',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('recurrence')}
+        >
+          Periodicite
+          {renderSortIcon('recurrence')}
+        </button>
+      ),
+      className: 'w-30',
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      className: 'w-24 text-right',
+    },
+  ]
+
   const openCreateModal = (isFixed: boolean = false) => {
     setEditingExpense(null)
     setFormData({
@@ -601,7 +679,7 @@ export default function Expenses() {
                 <p className="text-sm text-(--text-secondary)">Aucune charge fixe active pour cette période.</p>
               </div>
             ) : (
-              <FinanceTable columns={fixedExpenseColumns} minWidthClassName="min-w-[780px]">
+              <DataTable columns={fixedExpenseColumns} minWidthClassName="min-w-[780px]">
                 {activeFixedData?.data.map((expense, index) => {
                   const ht = parseFloat(expense.amountHt)
                   const ttc = ht + parseFloat(expense.taxAmount)
@@ -620,7 +698,7 @@ export default function Expenses() {
                     </tr>
                   )
                 })}
-              </FinanceTable>
+              </DataTable>
             )}
           </section>
 
@@ -653,7 +731,7 @@ export default function Expenses() {
                 <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
               </div>
             ) : (
-              <FinanceTable columns={variableExpenseColumns} minWidthClassName="min-w-[990px]">
+              <DataTable columns={variableExpenseColumns} minWidthClassName="min-w-[990px]">
                 {nonFixedExpenses.map((expense, index) => {
                   const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
                   return (
@@ -710,7 +788,7 @@ export default function Expenses() {
                   <td className="px-3 text-right font-mono text-sm text-[#15803D] md:px-4">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
                   <td className="px-3 md:px-4" />
                 </tr>
-              </FinanceTable>
+              </DataTable>
             )}
           </section>
         </>
@@ -766,138 +844,75 @@ export default function Expenses() {
                 <p className="mt-3 text-sm text-(--text-secondary)">Aucune charge fixe enregistrée.</p>
               </div>
             ) : (
-              <div className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <div className="overflow-x-auto">
-                  <table className="w-full table-fixed border-collapse">
-                    <thead>
-                      <tr className="h-10 border-b border-(--border-default) bg-(--color-base-200) text-left">
-                        <th className="w-55 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1"
-                            onClick={() => toggleFixedSort('description')}
-                          >
-                            Description
-                            {renderSortIcon('description')}
-                          </button>
-                        </th>
-                        <th className="w-30 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          <button
-                            type="button"
-                            className="ml-auto inline-flex items-center gap-1"
-                            onClick={() => toggleFixedSort('amountTtc')}
-                          >
-                            Montant TTC
-                            {renderSortIcon('amountTtc')}
-                          </button>
-                        </th>
-                        <th className="w-18 px-3 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          <button
-                            type="button"
-                            className="mx-auto inline-flex items-center gap-1"
-                            onClick={() => toggleFixedSort('paymentDay')}
-                          >
-                            Jour
-                            {renderSortIcon('paymentDay')}
-                          </button>
-                        </th>
-                        <th className="w-48 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1"
-                            onClick={() => toggleFixedSort('status')}
-                          >
-                            Statut
-                            {renderSortIcon('status')}
-                          </button>
-                        </th>
-                        <th className="w-30 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          <button
-                            type="button"
-                            className="inline-flex items-center gap-1"
-                            onClick={() => toggleFixedSort('recurrence')}
-                          >
-                            Periodicite
-                            {renderSortIcon('recurrence')}
-                          </button>
-                        </th>
-                        <th className="w-24 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
-                          Actions
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {sortedFixedExpenses.map((expense, index) => {
-                        const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
-                        const status = getFixedExpenseStatus(expense, currentMonthKey)
-                        const statusTooltip = getFixedExpenseStatusTooltip(expense)
-                        const statusLabel = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
-                        const statusClassName =
-                          status === 'termine'
-                            ? 'bg-[#F3F4F6] text-[#6B7280]'
-                            : status === 'a-venir'
-                              ? 'bg-[#FEF3C7] text-[#92400E]'
-                              : 'bg-[#DCFCE7] text-[#15803D]'
+              <DataTable columns={fixedLibraryColumns} minWidthClassName="">
+                {sortedFixedExpenses.map((expense, index) => {
+                  const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
+                  const status = getFixedExpenseStatus(expense, currentMonthKey)
+                  const statusTooltip = getFixedExpenseStatusTooltip(expense)
+                  const statusLabel = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
+                  const statusClassName =
+                    status === 'termine'
+                      ? 'bg-[#F3F4F6] text-[#6B7280]'
+                      : status === 'a-venir'
+                        ? 'bg-[#FEF3C7] text-[#92400E]'
+                        : 'bg-[#DCFCE7] text-[#15803D]'
 
-                        return (
-                          <tr
-                            key={expense.id}
-                            className={[
-                              'h-12 border-b border-(--border-default) align-middle',
-                              index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
-                            ].join(' ')}
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 md:px-4">
+                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
+                        {expense.note && (
+                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
+                        )}
+                      </td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
+                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
+                      <td className="px-3 text-sm md:px-4">
+                        <span className="group relative inline-flex">
+                          <span className={`inline-flex w-fit cursor-help rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName}`}>
+                            {statusLabel}
+                          </span>
+                          <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100">
+                            {statusTooltip}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <span className="inline-flex rounded-full bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4338CA]">
+                          {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
+                        </span>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <div className="flex justify-end gap-1">
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => openEditModal(expense)}
+                            title="Modifier"
                           >
-                            <td className="px-3 md:px-4">
-                              <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
-                              {expense.note && (
-                                <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
-                              )}
-                            </td>
-                            <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
-                            <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
-                            <td className="px-3 text-sm md:px-4">
-                              <span className="group relative inline-flex">
-                                <span className={`inline-flex w-fit cursor-help rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName}`}>
-                                  {statusLabel}
-                                </span>
-                                <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100">
-                                  {statusTooltip}
-                                </span>
-                              </span>
-                            </td>
-                            <td className="px-3 md:px-4">
-                              <span className="inline-flex rounded-full bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4338CA]">
-                                {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
-                              </span>
-                            </td>
-                            <td className="px-3 md:px-4">
-                              <div className="flex justify-end gap-1">
-                                <AppButton
-                                  size="icon-sm"
-                                  variant="ghost"
-                                  onClick={() => openEditModal(expense)}
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </AppButton>
-                                <AppButton
-                                  size="icon-sm"
-                                  variant="ghost"
-                                  onClick={() => setDeleteConfirmId(expense.id)}
-                                  title="Supprimer"
-                                  className="text-(--color-error) hover:bg-[#FEE2E2]"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </AppButton>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              </div>
+                            <Pencil className="h-4 w-4" />
+                          </AppButton>
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmId(expense.id)}
+                            title="Supprimer"
+                            className="text-(--color-error) hover:bg-[#FEE2E2]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AppButton>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </DataTable>
             )}
           </section>
         </>

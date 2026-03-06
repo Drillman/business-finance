@@ -5,7 +5,7 @@ import { Link } from 'react-router-dom'
 import { YearSelect } from '../components/PeriodSelect'
 import { ArrowUpRight, Landmark, Receipt, Wallet } from 'lucide-react'
 import { KpiCard } from '../components/ui/KpiCard'
-import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -20,7 +20,7 @@ const MONTHS = [
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
 ]
 
-const monthlyColumns: FinanceTableColumn[] = [
+const monthlyColumns: DataTableColumn[] = [
   { key: 'month', label: 'Mois' },
   { key: 'revenue', label: 'CA HT', className: 'text-right' },
   { key: 'urssaf', label: 'Urssaf', className: 'text-right' },
@@ -111,7 +111,7 @@ export default function Dashboard() {
           {/* Monthly Breakdown Table */}
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold">Détail mensuel</h2>
-            <FinanceTable
+            <DataTable
               columns={monthlyColumns}
               minWidthClassName="min-w-[920px]"
               footer={
@@ -162,7 +162,7 @@ export default function Dashboard() {
                   </tr>
                 )
               })}
-            </FinanceTable>
+            </DataTable>
           </div>
 
           {/* Account Overview */}
