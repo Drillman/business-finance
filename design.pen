@@ -578,11 +578,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -591,7 +592,7 @@
                       "type": "text",
                       "id": "Fyehj",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -1748,11 +1749,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -1761,7 +1763,7 @@
                       "type": "text",
                       "id": "E7PIk",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -2844,11 +2846,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -2857,7 +2860,7 @@
                       "type": "text",
                       "id": "X3Bja",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -4034,11 +4037,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -4047,7 +4051,7 @@
                       "type": "text",
                       "id": "zBvJt",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -5016,11 +5020,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -5029,7 +5034,7 @@
                       "type": "text",
                       "id": "Ulcsl",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -5963,11 +5968,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -5976,7 +5982,7 @@
                       "type": "text",
                       "id": "xOeWs",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -7324,11 +7330,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -7337,7 +7344,7 @@
                       "type": "text",
                       "id": "fbEMK",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -8404,11 +8411,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "$accent-error"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -8417,7 +8425,7 @@
                       "type": "text",
                       "id": "8GZxe",
                       "name": "logoutText",
-                      "fill": "$accent-error",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -9261,11 +9269,12 @@
                   "name": "logoutBtn",
                   "width": "fill_container",
                   "height": 36,
+                  "fill": "#FFFFFF10",
                   "cornerRadius": 8,
                   "stroke": {
                     "align": "inside",
                     "thickness": 1.5,
-                    "fill": "#F87171"
+                    "fill": "#FFFFFF40"
                   },
                   "justifyContent": "center",
                   "alignItems": "center",
@@ -9274,7 +9283,7 @@
                       "type": "text",
                       "id": "FwE60",
                       "name": "logoutText",
-                      "fill": "#F87171",
+                      "fill": "#FFFFFFCC",
                       "content": "Déconnexion",
                       "fontFamily": "Inter",
                       "fontSize": 13,
@@ -10678,11 +10687,12 @@
               "name": "logoutBtn",
               "width": "fill_container",
               "height": 36,
+              "fill": "#FFFFFF10",
               "cornerRadius": 8,
               "stroke": {
                 "align": "inside",
                 "thickness": 1.5,
-                "fill": "#F87171"
+                "fill": "#FFFFFF40"
               },
               "justifyContent": "center",
               "alignItems": "center",
@@ -10691,7 +10701,7 @@
                   "type": "text",
                   "id": "G4L0I",
                   "name": "logoutText",
-                  "fill": "#F87171",
+                  "fill": "#FFFFFFCC",
                   "content": "Déconnexion",
                   "fontFamily": "Inter",
                   "fontSize": 13,
