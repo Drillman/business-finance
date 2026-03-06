@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { useTvaDeclaration } from '../hooks/useTva'
-import { ChevronLeft, ChevronRight, ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { ChevronDown, ChevronUp, Info } from 'lucide-react'
+import { MonthSelect } from '../components/PeriodSelect'
 
 function formatCurrency(amount: number | string): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -24,12 +25,6 @@ function getCurrentMonth(): string {
   return `${now.getFullYear()}-${(now.getMonth() + 1).toString().padStart(2, '0')}`
 }
 
-function formatMonthLabel(month: string): string {
-  const [year, monthNum] = month.split('-').map(Number)
-  const date = new Date(year, monthNum - 1, 1)
-  return date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
-}
-
 interface CollapsibleSectionProps {
   title: string
   count: number
@@ -42,23 +37,99 @@ function CollapsibleSection({ title, count, total, children, defaultOpen = false
   const [isOpen, setIsOpen] = useState(defaultOpen)
 
   return (
-    <div className="border border-base-300 rounded-lg">
+    <div className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
       <button
-        className="w-full flex items-center justify-between p-4 hover:bg-base-200 transition-colors"
+        className="flex w-full items-center justify-between px-5 py-3 transition-colors hover:bg-(--bg-hover)"
         onClick={() => setIsOpen(!isOpen)}
       >
-        <div className="flex items-center gap-2">
-          {isOpen ? <ChevronUp className="h-4 w-4" /> : <ChevronDown className="h-4 w-4" />}
-          <span className="font-medium">{title}</span>
-          <span className="badge badge-sm">{count}</span>
+        <div className="flex items-center gap-2.5">
+          {isOpen ? <ChevronUp className="h-4 w-4 text-(--text-secondary)" /> : <ChevronDown className="h-4 w-4 text-(--text-secondary)" />}
+          <span className="text-sm font-semibold text-(--text-primary)">{title}</span>
+          <span className="inline-flex h-5.5 min-w-5.5 items-center justify-center rounded-full bg-[#EFF6FF] px-2 text-[11px] font-semibold text-[#2563EB]">
+            {count}
+          </span>
         </div>
-        <span className="font-mono font-bold">{total}</span>
+        <span className="font-['Space_Grotesk'] text-sm font-semibold text-(--text-primary)">{total}</span>
       </button>
       {isOpen && (
-        <div className="border-t border-base-300 p-4">
+        <div className="border-t border-(--border-default)">
           {children}
         </div>
       )}
+    </div>
+  )
+}
+
+interface CaseCardProps {
+  label: string
+  value: string
+  description: string
+  variant?: 'default' | 'primary' | 'success'
+}
+
+function CaseCard({ label, value, description, variant = 'default' }: CaseCardProps) {
+  const variantStyles = {
+    default: {
+      card: 'border-(--border-default) bg-(--card-bg)',
+      text: 'text-(--text-primary)',
+      label: 'text-(--text-tertiary)',
+      desc: 'text-(--text-secondary)',
+    },
+    primary: {
+      card: 'border-[#2563EB] bg-[#EFF6FF]',
+      text: 'text-[#2563EB]',
+      label: 'text-[#2563EB]',
+      desc: 'text-[#2563EB]/70',
+    },
+    success: {
+      card: 'border-[#16A34A] bg-[#ECFDF5]',
+      text: 'text-[#16A34A]',
+      label: 'text-[#16A34A]',
+      desc: 'text-[#16A34A]/70',
+    },
+  }
+
+  const styles = variantStyles[variant]
+
+  return (
+    <div className={`rounded-[10px] border p-4 ${styles.card}`}>
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.05em] ${styles.label}`}>{label}</p>
+      <p className={`mt-1 font-['Space_Grotesk'] text-2xl font-semibold tracking-tight ${styles.text}`}>{value}</p>
+      <p className={`mt-1 text-xs ${styles.desc}`}>{description}</p>
+    </div>
+  )
+}
+
+interface SummaryCardProps {
+  label: string
+  value: string
+  description: string
+  tone: 'warning' | 'success' | 'error'
+}
+
+function SummaryCard({ label, value, description, tone }: SummaryCardProps) {
+  const toneStyles = {
+    warning: {
+      card: 'border-[#F59E0B] bg-[#FFFBEB]',
+      text: 'text-[#F59E0B]',
+    },
+    success: {
+      card: 'border-[#16A34A] bg-[#ECFDF5]',
+      text: 'text-[#16A34A]',
+    },
+    error: {
+      card: 'border-[#DC2626] bg-[#FEF2F2]',
+      text: 'text-[#DC2626]',
+    },
+  }
+
+  const styles = toneStyles[tone]
+
+  return (
+    <div className={`rounded-[10px] border p-4 ${styles.card}`}>
+      <p className={`text-[11px] font-semibold uppercase tracking-[0.08em] ${styles.text}`}>{label}</p>
+      <p className={`mt-1 font-['Space_Grotesk'] text-[22px] font-semibold ${styles.text}`}>{value}</p>
+      <p className={`mt-1 text-xs ${styles.text} opacity-70`}>{description}</p>
     </div>
   )
 }
@@ -68,58 +139,17 @@ export default function TvaDeclaration() {
 
   const { data: declaration, isLoading, error } = useTvaDeclaration(selectedMonth)
 
-  const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = []
-    const currentYear = new Date().getFullYear()
-    for (const year of [currentYear + 1, currentYear, currentYear - 1, currentYear - 2]) {
-      for (let month = 12; month >= 1; month--) {
-        const value = `${year}-${month.toString().padStart(2, '0')}`
-        const label = formatMonthLabel(value)
-        options.push({ value, label })
-      }
-    }
-    return options
-  }, [])
-
-  const navigateMonth = (direction: 'prev' | 'next') => {
-    const [year, month] = selectedMonth.split('-').map(Number)
-    const newDate = new Date(year, month - 1 + (direction === 'next' ? 1 : -1), 1)
-    setSelectedMonth(`${newDate.getFullYear()}-${(newDate.getMonth() + 1).toString().padStart(2, '0')}`)
-  }
+  const currentYear = new Date().getFullYear()
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Assistant Declaration TVA</h1>
-      </div>
-
-      {/* Month Selector */}
-      <div className="flex items-center gap-2 mb-6">
-        <button
-          className="btn btn-square btn-sm"
-          onClick={() => navigateMonth('prev')}
-          title="Mois precedent"
-        >
-          <ChevronLeft className="h-4 w-4" />
-        </button>
-        <select
-          className="select select-bordered"
+    <div className="flex flex-col gap-7">
+      <div className="flex flex-wrap items-center justify-between gap-4">
+        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Assistant Declaration TVA</h1>
+        <MonthSelect
           value={selectedMonth}
-          onChange={(e) => setSelectedMonth(e.target.value)}
-        >
-          {monthOptions.map((option) => (
-            <option key={option.value} value={option.value}>
-              {option.label}
-            </option>
-          ))}
-        </select>
-        <button
-          className="btn btn-square btn-sm"
-          onClick={() => navigateMonth('next')}
-          title="Mois suivant"
-        >
-          <ChevronRight className="h-4 w-4" />
-        </button>
+          onChange={setSelectedMonth}
+          years={[currentYear + 1, currentYear, currentYear - 1, currentYear - 2]}
+        />
       </div>
 
       {isLoading && (
@@ -136,228 +166,216 @@ export default function TvaDeclaration() {
 
       {declaration && (
         <>
-          {/* Cases Grid */}
-          <div className="card bg-base-100 shadow mb-6">
-            <div className="card-body">
-              <h2 className="card-title">Cases a remplir</h2>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <CaseCard
+              label="Case A1"
+              value={formatCurrency(declaration.cases.A1)}
+              description="CA encaisse HT"
+            />
+            <CaseCard
+              label="Case B2"
+              value={formatCurrency(declaration.cases.B2)}
+              description="Achats intra-UE"
+            />
+            <CaseCard
+              label="Case 08"
+              value={formatCurrency(declaration.cases.case08)}
+              description="Base HT 20%"
+              variant="primary"
+            />
+          </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-                <div className="stat bg-base-200 rounded-box p-4">
-                  <div className="stat-title text-xs">Case A1</div>
-                  <div className="stat-value text-lg">{formatCurrency(declaration.cases.A1)}</div>
-                  <div className="stat-desc text-xs">CA encaisse HT</div>
-                </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <CaseCard
+              label="Case 17"
+              value={formatCurrency(declaration.cases.case17)}
+              description="TVA intra-UE"
+            />
+            <CaseCard
+              label="Case 19"
+              value={formatCurrency(declaration.cases.case19)}
+              description="TVA immobilisations"
+              variant="success"
+            />
+            <CaseCard
+              label="Case 20"
+              value={formatCurrency(declaration.cases.case20)}
+              description="Autre TVA deductible"
+              variant="success"
+            />
+          </div>
 
-                <div className="stat bg-base-200 rounded-box p-4">
-                  <div className="stat-title text-xs">Case B2</div>
-                  <div className="stat-value text-lg">{formatCurrency(declaration.cases.B2)}</div>
-                  <div className="stat-desc text-xs">Achats intra-UE</div>
-                </div>
-
-                <div className="stat bg-primary/10 rounded-box p-4">
-                  <div className="stat-title text-xs">Case 08</div>
-                  <div className="stat-value text-lg text-primary">{formatCurrency(declaration.cases.case08)}</div>
-                  <div className="stat-desc text-xs">Base HT 20%</div>
-                </div>
-
-                <div className="stat bg-base-200 rounded-box p-4">
-                  <div className="stat-title text-xs">Case 17</div>
-                  <div className="stat-value text-lg">{formatCurrency(declaration.cases.case17)}</div>
-                  <div className="stat-desc text-xs">TVA intra-UE</div>
-                </div>
-
-                <div className="stat bg-success/10 rounded-box p-4">
-                  <div className="stat-title text-xs">Case 19</div>
-                  <div className="stat-value text-lg text-success">{formatCurrency(declaration.cases.case19)}</div>
-                  <div className="stat-desc text-xs">TVA immobilisations</div>
-                </div>
-
-                <div className="stat bg-success/10 rounded-box p-4">
-                  <div className="stat-title text-xs">Case 20</div>
-                  <div className="stat-value text-lg text-success">{formatCurrency(declaration.cases.case20)}</div>
-                  <div className="stat-desc text-xs">Autre TVA deductible</div>
-                </div>
-              </div>
-
-              {/* Summary */}
-              <div className="divider"></div>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <div className="stat bg-warning/10 rounded-box p-4">
-                  <div className="stat-title">TVA collectee</div>
-                  <div className="stat-value text-xl text-warning">{formatCurrency(declaration.summary.tvaCollected)}</div>
-                  <div className="stat-desc">20% de case 08</div>
-                </div>
-
-                <div className="stat bg-success/10 rounded-box p-4">
-                  <div className="stat-title">TVA deductible</div>
-                  <div className="stat-value text-xl text-success">{formatCurrency(declaration.summary.tvaDeductible)}</div>
-                  <div className="stat-desc">Case 19 + Case 20</div>
-                </div>
-
-                <div className={`stat rounded-box p-4 ${declaration.summary.tvaNet >= 0 ? 'bg-error/10' : 'bg-success/10'}`}>
-                  <div className="stat-title">TVA nette</div>
-                  <div className={`stat-value text-xl ${declaration.summary.tvaNet >= 0 ? 'text-error' : 'text-success'}`}>
-                    {formatCurrency(Math.abs(declaration.summary.tvaNet))}
-                  </div>
-                  <div className="stat-desc">
-                    {declaration.summary.tvaNet >= 0 ? 'A payer' : 'Credit de TVA'}
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
+            <SummaryCard
+              label="TVA COLLECTEE"
+              value={formatCurrency(declaration.summary.tvaCollected)}
+              description="20% de case 08"
+              tone="warning"
+            />
+            <SummaryCard
+              label="TVA DEDUCTIBLE"
+              value={formatCurrency(declaration.summary.tvaDeductible)}
+              description="Case 19 + Case 20"
+              tone="success"
+            />
+            <SummaryCard
+              label="TVA NETTE"
+              value={formatCurrency(Math.abs(declaration.summary.tvaNet))}
+              description={declaration.summary.tvaNet >= 0 ? 'A payer' : 'Credit de TVA'}
+              tone={declaration.summary.tvaNet >= 0 ? 'error' : 'success'}
+            />
           </div>
 
           {/* Details Sections */}
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h2 className="card-title">Details du mois</h2>
-
-              <div className="space-y-4">
-                {/* Invoices Paid */}
-                <CollapsibleSection
-                  title="Encaissements"
-                  count={declaration.details.invoicesPaid.length}
-                  total={formatCurrency(declaration.cases.A1) + ' HT'}
-                  defaultOpen={true}
-                >
-                  {declaration.details.invoicesPaid.length === 0 ? (
-                    <p className="text-base-content/60">Aucun encaissement ce mois</p>
-                  ) : (
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Client</th>
-                          <th>Date paiement</th>
-                          <th className="text-right">Montant HT</th>
+          <div className="space-y-3">
+            <CollapsibleSection
+              title="Encaissements"
+              count={declaration.details.invoicesPaid.length}
+              total={formatCurrency(declaration.cases.A1)}
+              defaultOpen={true}
+            >
+              {declaration.details.invoicesPaid.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-(--text-secondary)">Aucun encaissement ce mois</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-160">
+                    <thead className="h-9 border-b border-(--border-default) bg-(--color-base-200)">
+                      <tr>
+                        <th className="px-5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Client</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Date paiement</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Montant HT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {declaration.details.invoicesPaid.map((inv, index) => (
+                        <tr key={inv.id} className={`h-10 ${index % 2 === 1 ? 'bg-(--color-base-200)/45' : ''}`}>
+                          <td className="px-5 text-sm text-(--text-primary)">{inv.client}</td>
+                          <td className="px-5 text-right text-sm text-(--text-secondary)">{inv.paymentDate ? formatDate(inv.paymentDate) : '-'}</td>
+                          <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(inv.amountHt))}</td>
                         </tr>
-                      </thead>
-                      <tbody>
-                        {declaration.details.invoicesPaid.map((inv) => (
-                          <tr key={inv.id}>
-                            <td>{inv.client}</td>
-                            <td>{inv.paymentDate ? formatDate(inv.paymentDate) : '-'}</td>
-                            <td className="text-right font-mono">{formatCurrency(parseFloat(inv.amountHt))}</td>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Achats intra-UE"
+              count={declaration.details.expensesIntraEu.length}
+              total={formatCurrency(declaration.cases.B2)}
+            >
+              {declaration.details.expensesIntraEu.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-(--text-secondary)">Aucun achat intra-UE ce mois</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-160">
+                    <thead className="h-9 border-b border-(--border-default) bg-(--color-base-200)">
+                      <tr>
+                        <th className="px-5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Description</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Date</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Montant HT</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {declaration.details.expensesIntraEu.map((exp, index) => (
+                        <tr key={exp.id} className={`h-10 ${index % 2 === 1 ? 'bg-(--color-base-200)/45' : ''}`}>
+                          <td className="px-5 text-sm text-(--text-primary)">{exp.description}</td>
+                          <td className="px-5 text-right text-sm text-(--text-secondary)">{formatDate(exp.date)}</td>
+                          <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(exp.amountHt))}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CollapsibleSection>
+
+            <CollapsibleSection
+              title="Immobilisations"
+              count={declaration.details.expensesOver500.length}
+              total={formatCurrency(declaration.cases.case19)}
+            >
+              {declaration.details.expensesOver500.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-(--text-secondary)">Aucune immobilisation ce mois</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-190">
+                    <thead className="h-9 border-b border-(--border-default) bg-(--color-base-200)">
+                      <tr>
+                        <th className="px-5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Description</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Date</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">HT</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">TVA</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Recuperable</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {declaration.details.expensesOver500.map((exp, index) => {
+                        const recoverable = parseFloat(exp.taxAmount) * parseFloat(exp.taxRecoveryRate) / 100
+                        return (
+                          <tr key={exp.id} className={`h-10 ${index % 2 === 1 ? 'bg-(--color-base-200)/45' : ''}`}>
+                            <td className="px-5 text-sm text-(--text-primary)">{exp.description}</td>
+                            <td className="px-5 text-right text-sm text-(--text-secondary)">{formatDate(exp.date)}</td>
+                            <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(exp.amountHt))}</td>
+                            <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(exp.taxAmount))}</td>
+                            <td className="px-5 text-right text-sm font-semibold text-[#16A34A]">{formatCurrency(recoverable)}</td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </CollapsibleSection>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CollapsibleSection>
 
-                {/* Intra-EU Expenses */}
-                <CollapsibleSection
-                  title="Achats intra-UE"
-                  count={declaration.details.expensesIntraEu.length}
-                  total={formatCurrency(declaration.cases.B2) + ' HT'}
-                >
-                  {declaration.details.expensesIntraEu.length === 0 ? (
-                    <p className="text-base-content/60">Aucun achat intra-UE ce mois</p>
-                  ) : (
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Date</th>
-                          <th className="text-right">Montant HT</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {declaration.details.expensesIntraEu.map((exp) => (
-                          <tr key={exp.id}>
-                            <td>{exp.description}</td>
-                            <td>{formatDate(exp.date)}</td>
-                            <td className="text-right font-mono">{formatCurrency(parseFloat(exp.amountHt))}</td>
+            <CollapsibleSection
+              title="Autres depenses avec TVA"
+              count={declaration.details.expensesWithTva.length}
+              total={formatCurrency(declaration.cases.case20 - declaration.cases.case17)}
+            >
+              {declaration.details.expensesWithTva.length === 0 ? (
+                <p className="px-5 py-4 text-sm text-(--text-secondary)">Aucune autre depense avec TVA ce mois</p>
+              ) : (
+                <div className="overflow-x-auto">
+                  <table className="w-full min-w-190">
+                    <thead className="h-9 border-b border-(--border-default) bg-(--color-base-200)">
+                      <tr>
+                        <th className="px-5 text-left text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Description</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Date</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">HT</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">TVA</th>
+                        <th className="px-5 text-right text-[10px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Recuperable</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {declaration.details.expensesWithTva.map((exp, index) => {
+                        const recoverable = parseFloat(exp.taxAmount) * parseFloat(exp.taxRecoveryRate) / 100
+                        return (
+                          <tr key={exp.id} className={`h-10 ${index % 2 === 1 ? 'bg-(--color-base-200)/45' : ''}`}>
+                            <td className="px-5 text-sm text-(--text-primary)">{exp.description}</td>
+                            <td className="px-5 text-right text-sm text-(--text-secondary)">{formatDate(exp.date)}</td>
+                            <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(exp.amountHt))}</td>
+                            <td className="px-5 text-right text-sm font-medium text-(--text-primary)">{formatCurrency(parseFloat(exp.taxAmount))}</td>
+                            <td className="px-5 text-right text-sm font-semibold text-[#16A34A]">{formatCurrency(recoverable)}</td>
                           </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  )}
-                </CollapsibleSection>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              )}
+            </CollapsibleSection>
 
-                {/* Expenses > 500 EUR (Immobilisations) */}
-                <CollapsibleSection
-                  title="Immobilisations (> 500 EUR HT)"
-                  count={declaration.details.expensesOver500.length}
-                  total={formatCurrency(declaration.cases.case19) + ' TVA'}
-                >
-                  {declaration.details.expensesOver500.length === 0 ? (
-                    <p className="text-base-content/60">Aucune immobilisation ce mois</p>
-                  ) : (
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Date</th>
-                          <th className="text-right">HT</th>
-                          <th className="text-right">TVA</th>
-                          <th className="text-right">Recuperable</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {declaration.details.expensesOver500.map((exp) => {
-                          const recoverable = parseFloat(exp.taxAmount) * parseFloat(exp.taxRecoveryRate) / 100
-                          return (
-                            <tr key={exp.id}>
-                              <td>{exp.description}</td>
-                              <td>{formatDate(exp.date)}</td>
-                              <td className="text-right font-mono">{formatCurrency(parseFloat(exp.amountHt))}</td>
-                              <td className="text-right font-mono">{formatCurrency(parseFloat(exp.taxAmount))}</td>
-                              <td className="text-right font-mono text-success">{formatCurrency(recoverable)}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                </CollapsibleSection>
-
-                {/* Other Expenses with TVA */}
-                <CollapsibleSection
-                  title="Autres depenses avec TVA (< 500 EUR HT)"
-                  count={declaration.details.expensesWithTva.length}
-                  total={formatCurrency(declaration.cases.case20 - declaration.cases.case17) + ' TVA'}
-                >
-                  {declaration.details.expensesWithTva.length === 0 ? (
-                    <p className="text-base-content/60">Aucune autre depense avec TVA ce mois</p>
-                  ) : (
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Date</th>
-                          <th className="text-right">HT</th>
-                          <th className="text-right">TVA</th>
-                          <th className="text-right">Recuperable</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {declaration.details.expensesWithTva.map((exp) => {
-                          const recoverable = parseFloat(exp.taxAmount) * parseFloat(exp.taxRecoveryRate) / 100
-                          return (
-                            <tr key={exp.id}>
-                              <td>{exp.description}</td>
-                              <td>{formatDate(exp.date)}</td>
-                              <td className="text-right font-mono">{formatCurrency(parseFloat(exp.amountHt))}</td>
-                              <td className="text-right font-mono">{formatCurrency(parseFloat(exp.taxAmount))}</td>
-                              <td className="text-right font-mono text-success">{formatCurrency(recoverable)}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  )}
-                </CollapsibleSection>
-              </div>
-
-              {/* Info box */}
-              <div className="alert alert-info mt-4">
-                <Info className="h-5 w-5" />
+            <div className="mt-1 rounded-[10px] border border-[#3B82F6] bg-[#DBEAFE] px-5 py-4">
+              <div className="flex items-start gap-3">
+                <Info className="mt-0.5 h-4.5 w-4.5 shrink-0 text-[#3B82F6]" />
                 <div>
-                  <div className="font-medium">Note sur le calcul</div>
-                  <div className="text-sm">
-                    Case 20 inclut la TVA auto-liquidee (case 17) pour neutraliser l'effet des achats intra-UE.
-                    Les montants sont arrondis a l'euro le plus proche.
-                  </div>
+                  <p className="text-[13px] font-semibold text-[#3B82F6]">Note sur le calcul</p>
+                  <p className="mt-1 text-xs leading-5 text-[#3B82F6]/80">
+                    Case 20 inclut la TVA auto-liquidee (case 17) pour neutraliser l&apos;effet des achats intra-UE.
+                    Les montants sont arrondis a l&apos;euro le plus proche.
+                  </p>
                 </div>
               </div>
             </div>
