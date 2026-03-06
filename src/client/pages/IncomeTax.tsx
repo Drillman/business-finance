@@ -13,6 +13,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { YearSelect, YEARS } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { MathInput } from '../components/MathInput'
+import { AppButton } from '../components/ui/AppButton'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -165,9 +166,9 @@ export default function IncomeTax() {
         <h1 className="text-2xl font-bold">Impots sur le revenu</h1>
         <div className="flex gap-4 items-center">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
-          <button className="btn btn-primary" onClick={openCreateModal}>
+          <AppButton onClick={openCreateModal}>
             Ajouter un paiement
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -411,9 +412,9 @@ export default function IncomeTax() {
           ) : (
             <p className="text-base-content/60 py-4">
               Aucun paiement enregistre pour {selectedYear}.{' '}
-              <button className="link link-primary" onClick={openCreateModal}>
+              <AppButton size="sm" variant="ghost" className="h-auto p-0 text-(--color-primary) hover:bg-transparent" onClick={openCreateModal}>
                 Ajouter un paiement
-              </button>
+              </AppButton>
             </p>
           )}
         </div>
@@ -536,12 +537,11 @@ export default function IncomeTax() {
               </div>
 
               <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
+                <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                   type="submit"
-                  className="btn btn-primary"
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
@@ -551,7 +551,7 @@ export default function IncomeTax() {
                   ) : (
                     'Ajouter'
                   )}
-                </button>
+                </AppButton>
               </div>
             </form>
           </div>

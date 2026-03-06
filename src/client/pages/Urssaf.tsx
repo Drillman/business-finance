@@ -10,6 +10,7 @@ import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { YearSelect, YEARS } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
+import { AppButton } from '../components/ui/AppButton'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -168,9 +169,9 @@ export default function Urssaf() {
         <h1 className="text-2xl font-bold">Urssaf</h1>
         <div className="flex gap-4 items-center">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
-          <button className="btn btn-primary" onClick={() => openCreateModal()}>
+          <AppButton onClick={() => openCreateModal()}>
             Ajouter une cotisation
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -300,12 +301,9 @@ export default function Urssaf() {
                                 </button>
                               </>
                             ) : (
-                              <button
-                                className="btn btn-sm btn-primary"
-                                onClick={() => openCreateModal(t.trimester)}
-                              >
+                              <AppButton size="sm" onClick={() => openCreateModal(t.trimester)}>
                                 Déclarer
-                              </button>
+                              </AppButton>
                             )}
                           </div>
                         </td>
@@ -495,12 +493,11 @@ export default function Urssaf() {
               </div>
 
               <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
+                <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                   type="submit"
-                  className="btn btn-primary"
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
@@ -510,7 +507,7 @@ export default function Urssaf() {
                   ) : (
                     'Déclarer'
                   )}
-                </button>
+                </AppButton>
               </div>
             </form>
           </div>

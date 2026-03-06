@@ -21,7 +21,7 @@ const variantClasses: Record<AppButtonVariant, string> = {
 }
 
 const sizeClasses: Record<AppButtonSize, string> = {
-  default: 'h-9 px-[18px] text-sm',
+  default: 'h-9.5 px-[18px] text-sm',
   sm: 'h-8 px-3 text-sm',
   'icon-sm': 'h-8 w-8 p-0 text-sm',
 }

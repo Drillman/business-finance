@@ -1254,12 +1254,11 @@ export default function Expenses() {
               )}
 
               <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
+                <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                   type="submit"
-                  className="btn btn-primary"
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
@@ -1269,7 +1268,7 @@ export default function Expenses() {
                   ) : (
                     'Créer'
                   )}
-                </button>
+                </AppButton>
               </div>
             </form>
           </div>

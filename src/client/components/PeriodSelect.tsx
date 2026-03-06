@@ -69,7 +69,7 @@ function SelectorDropdown({
                   role="option"
                   aria-selected={selected}
                   data-option-value={option.value}
-                  className={`flex w-full items-center justify-between rounded-md px-3 text-left text-[13px] transition-colors ${selected ? 'h-9 bg-[var(--color-primary)]/10 font-semibold text-[var(--color-primary)]' : 'h-9 text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}
+                  className={`flex w-full items-center justify-between rounded-md px-3 text-left text-[13px] transition-colors ${selected ? 'h-9.5 bg-[var(--color-primary)]/10 font-semibold text-[var(--color-primary)]' : 'h-9.5 text-[var(--text-primary)] hover:bg-[var(--bg-hover)]'}`}
                   onClick={() => onSelect(option.value)}
                 >
                   <span>{option.label}</span>
@@ -108,7 +108,7 @@ function PeriodSelectShell({
   isOpen = false,
 }: PeriodSelectShellProps) {
   return (
-    <div className={`group inline-flex h-9 items-stretch rounded-lg bg-[var(--card-bg)] transition-colors ${isOpen ? 'border-[1.5px] border-[var(--color-primary)]' : 'border border-[var(--border-default)] focus-within:border-[1.5px] focus-within:border-[var(--color-primary)]'}`}>
+    <div className={`group inline-flex h-10 items-stretch rounded-lg bg-[var(--card-bg)] transition-colors ${isOpen ? 'border-[1.5px] border-[var(--color-primary)]' : 'border border-[var(--border-default)] focus-within:border-[1.5px] focus-within:border-[var(--color-primary)]'}`}>
       <button
         type="button"
         className="flex w-9 items-center justify-center rounded-l-lg text-[var(--text-secondary)] transition-colors cursor-pointer disabled:cursor-not-allowed hover:bg-[var(--bg-hover)] hover:text-[var(--text-primary)] active:bg-[var(--bg-active)] active:text-[var(--text-primary)] disabled:opacity-30"

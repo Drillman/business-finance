@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import {
   useTaxPayments,
   useCreateTaxPayment,
@@ -14,6 +14,7 @@ import { ConfirmDialog } from '../components/ConfirmDialog'
 import { YearSelect } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
+import { AppButton } from '../components/ui/AppButton'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -33,7 +34,7 @@ function formatCurrency(amount: string | number): string {
 
 function formatMonth(month: number): string {
   const date = new Date(2024, month - 1, 1)
-  return date.toLocaleDateString('fr-FR', { month: 'short' })
+  return date.toLocaleDateString('fr-FR', { month: 'long' })
 }
 
 function formatPeriodMonth(periodMonth: string): string {
@@ -67,19 +68,20 @@ const monthlyColumns: DataTableColumn[] = [
   { key: 'collected', label: 'Collectée', className: 'w-30 text-right' },
   { key: 'recoverable', label: 'Récupérable', className: 'w-30 text-right' },
   { key: 'net', label: 'Nette', className: 'w-30 text-right' },
-  { key: 'payment', label: 'Paiement', className: 'w-25 text-center' },
+  { key: 'payment', label: 'Paiement', className: 'w-30 text-center' },
 ]
 
 const paymentColumns: DataTableColumn[] = [
   { key: 'period', label: 'Période' },
   { key: 'amount', label: 'Montant', className: 'w-30 text-right' },
   { key: 'status', label: 'Statut', className: 'w-25 text-center' },
-  { key: 'payment-date', label: 'Date paiement', className: 'w-32.5 text-right' },
-  { key: 'reference', label: 'Référence', className: 'w-30 text-right' },
-  { key: 'actions', label: 'Actions', className: 'w-20 text-center' },
+  { key: 'payment-date', label: 'Date paiement', className: 'w-35 text-right' },
+  { key: 'reference', label: 'Référence', className: 'w-35 text-right' },
+  { key: 'actions', label: 'Actions', className: 'w-25 text-center' },
 ]
 
 export default function TVA() {
+  const navigate = useNavigate()
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPayment, setEditingPayment] = useState<TaxPayment | null>(null)
@@ -181,15 +183,15 @@ export default function TVA() {
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="text-3xl font-bold tracking-tight text-(--text-primary)">TVA</h1>
-          <Link to="/tva/declaration" className="btn btn-outline">
+          <AppButton variant="outline" onClick={() => navigate('/tva/declaration')}>
             Assistant déclaration
-          </Link>
+          </AppButton>
         </div>
         <div className="flex flex-wrap items-center gap-3">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
-          <button className="btn btn-primary shadow-[0_8px_20px_-12px_rgba(37,99,235,0.75)]" onClick={openCreateModal}>
+          <AppButton className="shadow-[0_8px_20px_-12px_rgba(37,99,235,0.75)]" onClick={openCreateModal}>
             Ajouter un paiement
-          </button>
+          </AppButton>
         </div>
       </div>
 
@@ -526,12 +528,11 @@ export default function TVA() {
                 </div>
 
                 <div className="modal-action border-t border-(--border-default) mt-6 -mx-7 px-7 pt-4 pb-1">
-                  <button type="button" className="btn" onClick={closeModal}>
+                  <AppButton type="button" variant="outline" onClick={closeModal}>
                     Annuler
-                  </button>
-                  <button
+                  </AppButton>
+                  <AppButton
                     type="submit"
-                    className="btn btn-primary"
                     disabled={isSubmitting}
                   >
                     {isSubmitting ? (
@@ -541,7 +542,7 @@ export default function TVA() {
                     ) : (
                       'Creer'
                     )}
-                  </button>
+                  </AppButton>
                 </div>
               </form>
             </div>
