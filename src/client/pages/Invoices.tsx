@@ -11,8 +11,8 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, Sparkles, Euro } from 'lucide-react'
-import { ConfirmDialog } from '../components/ConfirmDialog'
+import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, Sparkles } from 'lucide-react'
+import { ActionModal } from '../components/ui/ActionModal'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
 import { YearSelect } from '../components/PeriodSelect'
@@ -291,6 +291,13 @@ export default function Invoices() {
     const rate = parseFloat(formData.taxRate) || 0
     return ht * (1 + rate / 100)
   }, [formData.amountHt, formData.taxRate])
+
+  const deleteInvoice = useMemo(() => {
+    if (!deleteConfirmId) return null
+    return invoicesData?.data.find((invoice) => invoice.id === deleteConfirmId) ?? null
+  }, [deleteConfirmId, invoicesData])
+
+  const deleteInvoiceNumber = deleteInvoice?.invoiceNumber || '-'
 
   return (
     <div className="space-y-7">
@@ -747,10 +754,10 @@ export default function Invoices() {
       )}
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
+      <ActionModal
         isOpen={deleteConfirmId !== null}
-        title="Supprimer la facture"
-        message="Êtes-vous sûr de vouloir supprimer cette facture ? Cette action est irréversible."
+        title="Supprimer la facture ?"
+        message={`Cette action est irréversible. La facture ${deleteInvoiceNumber} et toutes les données associées seront définitivement supprimées.`}
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
         variant="danger"

@@ -1827,6 +1827,7 @@
                   "type": "ref",
                   "ref": "SOfYp",
                   "name": "addBtn",
+                  "fill": "$accent-primary",
                   "descendants": {
                     "NQavs": {
                       "iconFontName": "plus"
@@ -12747,6 +12748,1217 @@
                   ]
                 }
               ]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "iNprg",
+      "x": 3018,
+      "y": 1000,
+      "name": "Popup/AddInvoice",
+      "width": 520,
+      "fill": "$bg-card",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000025",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32,
+        "spread": -4
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "58veu",
+          "name": "PopupHeader",
+          "width": "fill_container",
+          "padding": [
+            24,
+            28,
+            0,
+            28
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jZWGu",
+              "name": "titleWrap",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "OEqkm",
+                  "name": "title",
+                  "fill": "$text-primary",
+                  "content": "Ajouter une facture",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 22,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.3
+                },
+                {
+                  "type": "text",
+                  "id": "eD4ZV",
+                  "name": "subtitle",
+                  "fill": "$text-secondary",
+                  "content": "Remplissez les informations de la facture",
+                  "fontFamily": "Inter",
+                  "fontSize": 13
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "UeN4V",
+              "name": "closeBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "#00000000",
+              "cornerRadius": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "WdzvG",
+                  "name": "closeIcon",
+                  "width": 18,
+                  "height": 18,
+                  "iconFontName": "x",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "kaSy0",
+          "name": "FormBody",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": [
+            20,
+            28
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "tORru",
+              "name": "Field/Client",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "HK0GF",
+                  "name": "f1label",
+                  "fill": "$text-primary",
+                  "content": "Client",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "62w7i",
+                  "name": "selectInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vuIF6",
+                      "name": "f1val",
+                      "fill": "$text-tertiary",
+                      "content": "Sélectionner un client",
+                      "fontFamily": "Inter",
+                      "fontSize": 14
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "zaahT",
+                      "name": "f1icon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "chevron-down",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "k0Tg3",
+              "name": "Field/NFacture",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "eVY53",
+                  "name": "f2label",
+                  "fill": "$text-primary",
+                  "content": "N° Facture",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "mrgf8",
+                  "name": "inputRow",
+                  "width": "fill_container",
+                  "gap": 8,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "bpCQs",
+                      "name": "textInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "5p5qX",
+                          "name": "f2val",
+                          "fill": "$text-primary",
+                          "content": "FA-20260301-001",
+                          "fontFamily": "Inter",
+                          "fontSize": 14
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "9AQwS",
+                      "name": "generateBtn",
+                      "width": 40,
+                      "height": 40,
+                      "fill": "$accent-primary",
+                      "cornerRadius": 8,
+                      "justifyContent": "center",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "icon_font",
+                          "id": "jUe4r",
+                          "name": "f2btnIcon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "sparkles",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-on-accent"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "r8czR",
+              "name": "Field/Description",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "8vajJ",
+                  "name": "f3label",
+                  "fill": "$text-primary",
+                  "content": "Description",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "O83nF",
+                  "name": "selectInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "kLd9y",
+                      "name": "f3val",
+                      "fill": "$text-primary",
+                      "content": "Développement web",
+                      "fontFamily": "Inter",
+                      "fontSize": 14
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "uNT1Y",
+                      "name": "f3icon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "chevron-down",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "HZfTd",
+              "name": "DateRow",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "0G2YE",
+                  "name": "Field/DateFacturation",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "0ggnD",
+                      "name": "f4label",
+                      "fill": "$text-primary",
+                      "content": "Date de facturation",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "MzlQW",
+                      "name": "dateInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "bZmtQ",
+                          "name": "f4val",
+                          "fill": "$text-primary",
+                          "content": "06/03/2026",
+                          "fontFamily": "Inter",
+                          "fontSize": 14
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "sCRZt",
+                          "name": "f4icon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "calendar",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "N1bMC",
+                  "name": "Field/DatePaiement",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "frame",
+                      "id": "ENup8",
+                      "name": "labelRow",
+                      "gap": 6,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "Cqocb",
+                          "name": "f5label",
+                          "fill": "$text-primary",
+                          "content": "Date de paiement",
+                          "fontFamily": "Inter",
+                          "fontSize": 13,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "text",
+                          "id": "TccCZ",
+                          "name": "f5opt",
+                          "fill": "$text-tertiary",
+                          "content": "(optionnel)",
+                          "fontFamily": "Inter",
+                          "fontSize": 12
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "W9ngp",
+                      "name": "dateInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "3B9rN",
+                          "name": "f5val",
+                          "fill": "$text-tertiary",
+                          "content": "Sélectionner une date",
+                          "fontFamily": "Inter",
+                          "fontSize": 14
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "CkWq7",
+                          "name": "f5icon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "calendar",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "DQM14",
+              "name": "AmountRow",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "UrYhm",
+                  "name": "Field/MontantHT",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ruBsB",
+                      "name": "f6label",
+                      "fill": "$text-primary",
+                      "content": "Montant HT",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "hI0js",
+                      "name": "currencyInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "DLzRF",
+                          "name": "f6val",
+                          "fill": "$text-primary",
+                          "textGrowth": "fixed-width",
+                          "width": "fill_container",
+                          "content": "5 000,00",
+                          "fontFamily": "Inter",
+                          "fontSize": 14
+                        },
+                        {
+                          "type": "frame",
+                          "id": "1ALOQ",
+                          "name": "suffix",
+                          "height": "fill_container",
+                          "fill": "$bg-page",
+                          "cornerRadius": [
+                            0,
+                            8,
+                            8,
+                            0
+                          ],
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": {
+                              "left": 1
+                            },
+                            "fill": "$border-default"
+                          },
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "1ZYAk",
+                              "name": "f6euro",
+                              "fill": "$text-secondary",
+                              "content": "€",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "500"
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "3IhIR",
+                  "name": "Field/TauxTVA",
+                  "width": 160,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "NN4rq",
+                      "name": "f7label",
+                      "fill": "$text-primary",
+                      "content": "Taux TVA",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "ghLrp",
+                      "name": "selectInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "krgXp",
+                          "name": "f7val",
+                          "fill": "$text-primary",
+                          "content": "20%",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "500"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "ZjlrC",
+                          "name": "f7icon",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-down",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "wGT5R",
+              "name": "Field/Note",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "yTGtO",
+                  "name": "labelRow",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "j28bm",
+                      "name": "f8label",
+                      "fill": "$text-primary",
+                      "content": "Note",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "GyRdc",
+                      "name": "f8opt",
+                      "fill": "$text-tertiary",
+                      "content": "(optionnel)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "TskzU",
+                  "name": "textInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Chx8E",
+                      "name": "f8val",
+                      "fill": "$text-tertiary",
+                      "content": "Ajouter une note...",
+                      "fontFamily": "Inter",
+                      "fontSize": 14
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "fRK7N",
+              "name": "TTCPreview",
+              "width": "fill_container",
+              "fill": "$bg-highlight",
+              "cornerRadius": 8,
+              "padding": [
+                12,
+                16
+              ],
+              "justifyContent": "space_between",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "text",
+                  "id": "qchZn",
+                  "name": "ttcLabel",
+                  "fill": "$text-secondary",
+                  "content": "Montant TTC",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "text",
+                  "id": "nwi93",
+                  "name": "ttcValue",
+                  "fill": "$text-primary",
+                  "content": "6 000,00 €",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "cBrpH",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$border-default"
+        },
+        {
+          "type": "frame",
+          "id": "PxSud",
+          "name": "PopupFooter",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            28,
+            24,
+            28
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "HNdW2",
+              "type": "ref",
+              "ref": "N1Uyd",
+              "name": "cancelBtn",
+              "descendants": {
+                "yVTsz": {
+                  "content": "Annuler"
+                }
+              }
+            },
+            {
+              "id": "cxtbl",
+              "type": "ref",
+              "ref": "SOfYp",
+              "name": "submitBtn",
+              "descendants": {
+                "NQavs": {
+                  "iconFontName": "check"
+                },
+                "YRQl4": {
+                  "content": "Ajouter la facture"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "rD83J",
+      "x": 3618,
+      "y": 1000,
+      "name": "Modal/Danger",
+      "width": 420,
+      "fill": "$bg-card",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000025",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32,
+        "spread": -4
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "Fvom4",
+          "name": "body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            32,
+            32,
+            24,
+            32
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "ysis7",
+              "name": "iconCircle",
+              "width": 56,
+              "height": 56,
+              "fill": "$error-light",
+              "cornerRadius": 100,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "8nakN",
+                  "name": "icon",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "trash-2",
+                  "iconFontFamily": "lucide",
+                  "fill": "$accent-error"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "mfP7B",
+              "name": "title",
+              "fill": "$text-primary",
+              "content": "Supprimer la facture ?",
+              "textAlign": "center",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "600",
+              "letterSpacing": -0.3
+            },
+            {
+              "type": "text",
+              "id": "c7aO2",
+              "name": "desc",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": 340,
+              "content": "Cette action est irréversible. La facture FA-20260301-001 et toutes les données associées seront définitivement supprimées.",
+              "lineHeight": 1.5,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "HLp6Z",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$border-default"
+        },
+        {
+          "type": "frame",
+          "id": "4a4mM",
+          "name": "footer",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            28,
+            24,
+            28
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "GZLM3",
+              "type": "ref",
+              "ref": "N1Uyd",
+              "name": "cancelBtn",
+              "descendants": {
+                "yVTsz": {
+                  "content": "Annuler"
+                }
+              }
+            },
+            {
+              "id": "dmuTN",
+              "type": "ref",
+              "ref": "SOfYp",
+              "fill": "$accent-error",
+              "name": "deleteBtn",
+              "descendants": {
+                "NQavs": {
+                  "iconFontName": "trash-2"
+                },
+                "YRQl4": {
+                  "content": "Supprimer"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Xjny2",
+      "x": 4088,
+      "y": 1000,
+      "name": "Modal/Warning",
+      "width": 420,
+      "fill": "$bg-card",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000025",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32,
+        "spread": -4
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "XwevM",
+          "name": "body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            32,
+            32,
+            24,
+            32
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "in74i",
+              "name": "iconCircle",
+              "width": 56,
+              "height": 56,
+              "fill": "$warning-light",
+              "cornerRadius": 100,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "FaWf9",
+                  "name": "icon2",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "triangle-alert",
+                  "iconFontFamily": "lucide",
+                  "fill": "$accent-warning"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "wqk03",
+              "name": "title2",
+              "fill": "$text-primary",
+              "content": "Modifications non enregistrées",
+              "textAlign": "center",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "600",
+              "letterSpacing": -0.3
+            },
+            {
+              "type": "text",
+              "id": "6gQmU",
+              "name": "desc2",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": 340,
+              "content": "Vous avez des modifications non enregistrées. Si vous quittez maintenant, toutes vos modifications seront perdues.",
+              "lineHeight": 1.5,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "7qmpu",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$border-default"
+        },
+        {
+          "type": "frame",
+          "id": "9oanY",
+          "name": "footer",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            28,
+            24,
+            28
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "xcdQY",
+              "type": "ref",
+              "ref": "N1Uyd",
+              "name": "cancelBtn2",
+              "descendants": {
+                "yVTsz": {
+                  "content": "Rester"
+                }
+              }
+            },
+            {
+              "id": "HplTb",
+              "type": "ref",
+              "ref": "SOfYp",
+              "fill": "$accent-warning",
+              "name": "warnBtn",
+              "descendants": {
+                "NQavs": {
+                  "iconFontName": "log-out"
+                },
+                "YRQl4": {
+                  "content": "Quitter sans sauvegarder"
+                }
+              }
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "EVFIB",
+      "x": 4558,
+      "y": 1000,
+      "name": "Modal/Validation",
+      "width": 420,
+      "fill": "$bg-card",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000025",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32,
+        "spread": -4
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "jukKi",
+          "name": "body",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 16,
+          "padding": [
+            32,
+            32,
+            24,
+            32
+          ],
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "jcUN0",
+              "name": "iconCircle",
+              "width": 56,
+              "height": 56,
+              "fill": "$success-light",
+              "cornerRadius": 100,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "V38Kv",
+                  "name": "icon3",
+                  "width": 26,
+                  "height": 26,
+                  "iconFontName": "circle-check",
+                  "iconFontFamily": "lucide",
+                  "fill": "$accent-success"
+                }
+              ]
+            },
+            {
+              "type": "text",
+              "id": "el41B",
+              "name": "title3",
+              "fill": "$text-primary",
+              "content": "Confirmer l'envoi ?",
+              "textAlign": "center",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "600",
+              "letterSpacing": -0.3
+            },
+            {
+              "type": "text",
+              "id": "SrJvu",
+              "name": "desc3",
+              "fill": "$text-secondary",
+              "textGrowth": "fixed-width",
+              "width": 340,
+              "content": "La facture FA-20260301-001 d'un montant de 6 000,00 € TTC sera envoyée au client Acme Corp.",
+              "lineHeight": 1.5,
+              "textAlign": "center",
+              "fontFamily": "Inter",
+              "fontSize": 14
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "btgSd",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$border-default"
+        },
+        {
+          "type": "frame",
+          "id": "IKTWR",
+          "name": "footer",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            28,
+            24,
+            28
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "hzQRq",
+              "type": "ref",
+              "ref": "N1Uyd",
+              "name": "cancelBtn3",
+              "descendants": {
+                "yVTsz": {
+                  "content": "Annuler"
+                }
+              }
+            },
+            {
+              "id": "vB6Wx",
+              "type": "ref",
+              "ref": "SOfYp",
+              "fill": "$accent-success",
+              "name": "confirmBtn",
+              "descendants": {
+                "NQavs": {
+                  "iconFontName": "send"
+                },
+                "YRQl4": {
+                  "content": "Envoyer"
+                }
+              }
             }
           ]
         }
