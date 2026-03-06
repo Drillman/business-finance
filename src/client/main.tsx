@@ -16,6 +16,8 @@ const queryClient = new QueryClient({
   },
 })
 
+document.documentElement.setAttribute('data-theme', 'finances')
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <QueryClientProvider client={queryClient}>
