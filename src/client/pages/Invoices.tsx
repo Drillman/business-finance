@@ -11,7 +11,7 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, RefreshCw, Sparkle, Sparkles } from 'lucide-react'
+import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, Sparkles, Euro } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
@@ -34,6 +34,11 @@ function formatCurrency(amount: string | number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(num)
+}
+
+function normalizeTaxRateForSelect(taxRate: string): string {
+  const parsedRate = Number.parseFloat(taxRate)
+  return Number.isNaN(parsedRate) ? taxRate : parsedRate.toString()
 }
 
 const monthNames = [
@@ -185,7 +190,7 @@ export default function Invoices() {
       invoiceDate: invoice.invoiceDate,
       paymentDate: invoice.paymentDate || '',
       amountHt: invoice.amountHt,
-      taxRate: invoice.taxRate,
+      taxRate: normalizeTaxRateForSelect(invoice.taxRate),
       invoiceNumber: invoice.invoiceNumber || '',
       note: invoice.note || '',
     })
@@ -517,8 +522,8 @@ export default function Invoices() {
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="modal modal-open px-3 py-6 sm:px-4">
-          <div className="modal-box w-full max-w-xl overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)]">
+        <div className="modal modal-open">
+          <div className="modal-box my-6 w-[calc(100%-1.5rem)] max-w-xl overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)] sm:w-[calc(100%-2rem)]">
             <header className="px-6 pb-3 pt-5">
               <div className="flex items-start justify-between gap-3">
                 <div>
@@ -621,16 +626,21 @@ export default function Invoices() {
                   </div>
 
                   <div>
-                    <label className={modalFieldLabelClass}>Montant HT (EUR) *</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      className={modalInputClass}
-                      value={formData.amountHt}
-                      onChange={(e) => updateFormField('amountHt', e.target.value)}
-                      required
-                    />
+                    <label className={modalFieldLabelClass}>Montant HT *</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className={[modalInputClass, 'pr-9'].join(' ')}
+                        value={formData.amountHt}
+                        onChange={(e) => updateFormField('amountHt', e.target.value)}
+                        required
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-(--text-secondary)">
+                        €
+                      </span>
+                    </div>
                   </div>
 
                   <div>
@@ -691,8 +701,8 @@ export default function Invoices() {
 
       {/* Payment Modal */}
       {isPaymentModalOpen && paymentInvoice && (
-        <div className="modal modal-open px-3 py-6 sm:px-4">
-          <div className="modal-box w-full max-w-105 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)]">
+        <div className="modal modal-open">
+          <div className="modal-box my-6 w-[calc(100%-1.5rem)] max-w-105 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)] sm:w-[calc(100%-2rem)]">
             <header className="px-5 pb-2 pt-4">
               <div className="flex items-start justify-between gap-3">
                 <h3 className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">Enregistrer le paiement</h3>
@@ -732,7 +742,7 @@ export default function Invoices() {
               </div>
             </div>
           </div>
-          <div className="modal-backdrop bg-[#0F172A]/50 backdrop-blur-[1px]" onClick={closePaymentModal}></div>
+          <div className="modal-backdrop bg-[#18223a]/40 backdrop-blur-[1px]" onClick={closePaymentModal}></div>
         </div>
       )}
 
