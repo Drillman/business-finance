@@ -15,7 +15,7 @@ import { Pencil, Trash2, CreditCard, Ban, RotateCcw } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
-import { YearSelect } from '../components/YearSelect'
+import { YearSelect } from '../components/PeriodSelect'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {

@@ -11,7 +11,7 @@ import {
 import type { TaxPayment, CreateTaxPaymentInput } from '@shared/types'
 import { Pencil, Trash2, Check, Clock, AlertTriangle, AlertCircle, CalendarClock, Minus } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { YearSelect } from '../components/YearSelect'
+import { YearSelect } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {

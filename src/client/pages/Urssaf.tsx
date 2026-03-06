@@ -8,7 +8,7 @@ import {
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { YearSelect, YEARS } from '../components/YearSelect'
+import { YearSelect, YEARS } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 
 function formatDate(dateString: string): string {

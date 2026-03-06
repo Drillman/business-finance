@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { useYearlyDashboard } from '../hooks/useDashboard'
 import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
-import { YearSelect } from '../components/YearSelect'
+import { YearSelect } from '../components/PeriodSelect'
 import { ArrowUpRight, Landmark, Receipt, Wallet } from 'lucide-react'
 
 function formatCurrency(amount: string | number): string {

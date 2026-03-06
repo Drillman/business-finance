@@ -633,90 +633,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "pfKPT",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "B766e",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "jpRl3",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "YP3KJ",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "e3eqR",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "okWpw",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "o9wqH",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "jRwpD",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 }
               ]
             },
@@ -1882,90 +1802,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "Qb7ex",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "M5faB",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "95e7y",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "TvCnv",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "eKQpn",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "JrS85",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "BXIc0",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "a3FDy",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 },
                 {
                   "id": "pJcSf",
@@ -3108,90 +2948,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "lw1WY",
-                  "name": "monthSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "JVipV",
-                      "name": "monthPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "qaClb",
-                          "name": "monthPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "BOt77",
-                      "name": "monthText",
-                      "width": 120,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "5uIl2",
-                          "name": "monthLabel",
-                          "fill": "$text-primary",
-                          "content": "Mars 2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "dGGl3",
-                      "name": "monthNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "0eNCc",
-                          "name": "monthNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "SIi1g",
+                  "type": "ref",
+                  "ref": "tLYyA",
+                  "name": "monthSelector"
                 },
                 {
                   "id": "vqMaE",
@@ -4377,90 +4137,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "yTQfn",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "FQH6P",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "ZZ35L",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "zx1FG",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "Q02xF",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "mQbZc",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "IXK3t",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "upPfU",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 },
                 {
                   "id": "6Cijh",
@@ -5438,90 +5118,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "R9hZz",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "4aB6Z",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "o40cf",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "zbD4z",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "dc034",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "1rI9F",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "ltwok",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "EBBOM",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 },
                 {
                   "id": "2iHWg",
@@ -6464,90 +6064,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "NOxmr",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "0pFFd",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "J7xGa",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "3G1Eb",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "7agHi",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "E5KIC",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "a7j0x",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "5VHkM",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 }
               ]
             },
@@ -7904,90 +7424,10 @@
                   ]
                 },
                 {
-                  "type": "frame",
-                  "id": "ujLVS",
-                  "name": "yearSelector",
-                  "height": 36,
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "1F45g",
-                      "name": "yearPrev",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "tnRlw",
-                          "name": "yearPrevIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-left",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "Kf9mg",
-                      "name": "yearText",
-                      "width": 80,
-                      "height": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "right": 1,
-                          "left": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "jWtLh",
-                          "name": "yearLabel",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 14,
-                          "fontWeight": "600"
-                        }
-                      ]
-                    },
-                    {
-                      "type": "frame",
-                      "id": "l29iZ",
-                      "name": "yearNext",
-                      "width": 36,
-                      "height": "fill_container",
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "icon_font",
-                          "id": "DW8XU",
-                          "name": "yearNextIcon",
-                          "width": 16,
-                          "height": 16,
-                          "iconFontName": "chevron-right",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-secondary"
-                        }
-                      ]
-                    }
-                  ]
+                  "id": "WAtXo",
+                  "type": "ref",
+                  "ref": "DNGUP",
+                  "name": "yearSelector"
                 },
                 {
                   "id": "7EDzQ",
@@ -11293,6 +10733,1152 @@
           ]
         }
       ]
+    },
+    {
+      "type": "frame",
+      "id": "DNGUP",
+      "x": 2238,
+      "y": 0,
+      "name": "Component/YearSelector",
+      "reusable": true,
+      "height": 36,
+      "cornerRadius": 8,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "children": [
+        {
+          "type": "frame",
+          "id": "WKfpx",
+          "name": "yearPrev",
+          "width": 36,
+          "height": "fill_container",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "spZCE",
+              "name": "yearPrevIcon",
+              "width": 16,
+              "height": 16,
+              "iconFontName": "chevron-left",
+              "iconFontFamily": "lucide",
+              "fill": "$text-secondary"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "FsWZT",
+          "name": "yearText",
+          "width": 80,
+          "height": "fill_container",
+          "stroke": {
+            "align": "inside",
+            "thickness": {
+              "right": 1,
+              "left": 1
+            },
+            "fill": "$border-default"
+          },
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "r4NuB",
+              "name": "yearLabel",
+              "fill": "$text-primary",
+              "content": "2026",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Clh2S",
+          "name": "yearNext",
+          "width": 36,
+          "height": "fill_container",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "Voabq",
+              "name": "yearNextIcon",
+              "width": 16,
+              "height": 16,
+              "iconFontName": "chevron-right",
+              "iconFontFamily": "lucide",
+              "fill": "$text-secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "tLYyA",
+      "x": 2238,
+      "y": 80,
+      "name": "Component/MonthSelector",
+      "reusable": true,
+      "height": 36,
+      "cornerRadius": 8,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "children": [
+        {
+          "type": "frame",
+          "id": "TUilN",
+          "name": "monthPrev",
+          "width": 36,
+          "height": "fill_container",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "gmd0r",
+              "name": "monthPrevIcon",
+              "width": 16,
+              "height": 16,
+              "iconFontName": "chevron-left",
+              "iconFontFamily": "lucide",
+              "fill": "$text-secondary"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Ou2kl",
+          "name": "monthText",
+          "width": 120,
+          "height": "fill_container",
+          "stroke": {
+            "align": "inside",
+            "thickness": {
+              "right": 1,
+              "left": 1
+            },
+            "fill": "$border-default"
+          },
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "text",
+              "id": "Upms5",
+              "name": "monthLabel",
+              "fill": "$text-primary",
+              "content": "Mars 2026",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 14,
+              "fontWeight": "600"
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "urx7H",
+          "name": "monthNext",
+          "width": 36,
+          "height": "fill_container",
+          "justifyContent": "center",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "icon_font",
+              "id": "NUaEt",
+              "name": "monthNextIcon",
+              "width": 16,
+              "height": 16,
+              "iconFontName": "chevron-right",
+              "iconFontFamily": "lucide",
+              "fill": "$text-secondary"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "0SKKn",
+      "x": 2238,
+      "y": 150,
+      "name": "Selector States",
+      "width": 700,
+      "fill": "$bg-page",
+      "cornerRadius": 16,
+      "layout": "vertical",
+      "gap": 40,
+      "padding": 40,
+      "children": [
+        {
+          "type": "frame",
+          "id": "S6uql",
+          "name": "YearSelector States",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "hFz7e",
+              "name": "yearSectionTitle",
+              "fill": "$text-primary",
+              "content": "YearSelector",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "YzMr2",
+              "name": "yearGrid",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "DTzDv",
+                  "name": "defaultRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "0XSWN",
+                      "name": "label1",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Default",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "xe8FM",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "name": "def1"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "nwPSi",
+                  "name": "hoverPrevRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "y2JWa",
+                      "name": "label2",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Hover (prev)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "xrcLz",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "name": "hov1",
+                      "descendants": {
+                        "WKfpx": {
+                          "fill": "$bg-hover",
+                          "cornerRadius": [
+                            8,
+                            0,
+                            0,
+                            8
+                          ]
+                        },
+                        "spZCE": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "QJpzH",
+                  "name": "hoverNextRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "pslCp",
+                      "name": "label3",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Hover (next)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "P1Nsh",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "name": "hov2",
+                      "descendants": {
+                        "Clh2S": {
+                          "fill": "$bg-hover",
+                          "cornerRadius": [
+                            0,
+                            8,
+                            8,
+                            0
+                          ]
+                        },
+                        "Voabq": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Ogzr1",
+                  "name": "pressedRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SRPWM",
+                      "name": "label4",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Pressed",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "rd4LL",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "name": "press1",
+                      "descendants": {
+                        "WKfpx": {
+                          "fill": "$bg-active",
+                          "cornerRadius": [
+                            8,
+                            0,
+                            0,
+                            8
+                          ]
+                        },
+                        "spZCE": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "AQcan",
+                  "name": "focusRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Aal4d",
+                      "name": "label5",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Focus",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "6IMM2",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1.5,
+                        "fill": "$border-focus"
+                      },
+                      "name": "focus1",
+                      "descendants": {
+                        "FsWZT": {
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": {
+                              "right": 1,
+                              "left": 1
+                            },
+                            "fill": "$border-focus"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "kEU5N",
+                  "name": "disabledRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Gy7GE",
+                      "name": "label6",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Disabled arrow",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "imBKm",
+                      "type": "ref",
+                      "ref": "DNGUP",
+                      "name": "dis1",
+                      "descendants": {
+                        "WKfpx": {
+                          "opacity": 0.3
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "vVdov",
+                  "name": "dropdownOpenRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vglrg",
+                      "name": "label7",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Dropdown open",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "VuL4b",
+                      "name": "dropdownWrap",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "id": "zGA5z",
+                          "type": "ref",
+                          "ref": "DNGUP",
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1.5,
+                            "fill": "$border-focus"
+                          },
+                          "name": "focusSel",
+                          "descendants": {
+                            "FsWZT": {
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": {
+                                  "right": 1,
+                                  "left": 1
+                                },
+                                "fill": "$border-focus"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "frame",
+                          "id": "wCbEM",
+                          "name": "yearDropdown",
+                          "width": 152,
+                          "fill": "$bg-card",
+                          "cornerRadius": 10,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$border-default"
+                          },
+                          "effect": [
+                            {
+                              "type": "shadow",
+                              "shadowType": "outer",
+                              "color": "#0000001A",
+                              "offset": {
+                                "x": 0,
+                                "y": 4
+                              },
+                              "blur": 12,
+                              "spread": -2
+                            },
+                            {
+                              "type": "shadow",
+                              "shadowType": "outer",
+                              "color": "#0000000D",
+                              "offset": {
+                                "x": 0,
+                                "y": 2
+                              },
+                              "blur": 4
+                            }
+                          ],
+                          "layout": "vertical",
+                          "padding": 4,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "XiWu4",
+                              "name": "yearOpt2026",
+                              "width": "fill_container",
+                              "height": 36,
+                              "fill": "$accent-primary-light",
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "uDRH9",
+                                  "name": "optText1",
+                                  "fill": "$accent-primary",
+                                  "content": "2026",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "yVvt8",
+                                  "name": "optCheck1",
+                                  "width": 14,
+                                  "height": 14,
+                                  "iconFontName": "check",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "$accent-primary"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "mLHnV",
+                              "name": "yearOpt2025",
+                              "width": "fill_container",
+                              "height": 36,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "GmHyx",
+                                  "name": "optText2",
+                                  "fill": "$text-primary",
+                                  "content": "2025",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "pFm9N",
+          "name": "MonthSelector States",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 24,
+          "children": [
+            {
+              "type": "text",
+              "id": "TUfQW",
+              "name": "monthSectionTitle",
+              "fill": "$text-primary",
+              "content": "MonthSelector",
+              "fontFamily": "Space Grotesk",
+              "fontSize": 20,
+              "fontWeight": "700"
+            },
+            {
+              "type": "frame",
+              "id": "IhWJx",
+              "name": "monthGrid",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 20,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "bsVJZ",
+                  "name": "mDefaultRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "1QtVS",
+                      "name": "ml1",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Default",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "s11Jz",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "name": "md1"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "imJOq",
+                  "name": "mHoverPrevRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "qDobn",
+                      "name": "ml2",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Hover (prev)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "lyszg",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "name": "mh1",
+                      "descendants": {
+                        "TUilN": {
+                          "fill": "$bg-hover",
+                          "cornerRadius": [
+                            8,
+                            0,
+                            0,
+                            8
+                          ]
+                        },
+                        "gmd0r": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "O9wbh",
+                  "name": "mHoverNextRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SoBz5",
+                      "name": "ml3",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Hover (next)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "ppSpI",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "name": "mh2",
+                      "descendants": {
+                        "urx7H": {
+                          "fill": "$bg-hover",
+                          "cornerRadius": [
+                            0,
+                            8,
+                            8,
+                            0
+                          ]
+                        },
+                        "NUaEt": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "Z1eDP",
+                  "name": "mPressedRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "QLxWr",
+                      "name": "ml4",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Pressed",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "eNCqW",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "name": "mp1",
+                      "descendants": {
+                        "TUilN": {
+                          "fill": "$bg-active",
+                          "cornerRadius": [
+                            8,
+                            0,
+                            0,
+                            8
+                          ]
+                        },
+                        "gmd0r": {
+                          "fill": "$text-primary"
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "hHbxM",
+                  "name": "mFocusRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "s0cIK",
+                      "name": "ml5",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Focus",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "tYfJJ",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1.5,
+                        "fill": "$border-focus"
+                      },
+                      "name": "mf1",
+                      "descendants": {
+                        "Ou2kl": {
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": {
+                              "right": 1,
+                              "left": 1
+                            },
+                            "fill": "$border-focus"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NVmTJ",
+                  "name": "mDisabledRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "42IV0",
+                      "name": "ml6",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Disabled arrow",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "id": "yzFzw",
+                      "type": "ref",
+                      "ref": "tLYyA",
+                      "name": "mdis1",
+                      "descendants": {
+                        "urx7H": {
+                          "opacity": 0.3
+                        }
+                      }
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "OC8gk",
+                  "name": "mDropdownOpenRow",
+                  "width": "fill_container",
+                  "gap": 16,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Z8aiE",
+                      "name": "ml7",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Dropdown open",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "beLwq",
+                      "name": "monthDropdownWrap",
+                      "layout": "vertical",
+                      "gap": 4,
+                      "children": [
+                        {
+                          "id": "mTLOj",
+                          "type": "ref",
+                          "ref": "tLYyA",
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1.5,
+                            "fill": "$border-focus"
+                          },
+                          "name": "mfSel",
+                          "descendants": {
+                            "Ou2kl": {
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": {
+                                  "right": 1,
+                                  "left": 1
+                                },
+                                "fill": "$border-focus"
+                              }
+                            }
+                          }
+                        },
+                        {
+                          "type": "frame",
+                          "id": "c6u9h",
+                          "name": "monthDropdown",
+                          "clip": true,
+                          "width": 192,
+                          "height": 260,
+                          "fill": "$bg-card",
+                          "cornerRadius": 10,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$border-default"
+                          },
+                          "effect": [
+                            {
+                              "type": "shadow",
+                              "shadowType": "outer",
+                              "color": "#0000001A",
+                              "offset": {
+                                "x": 0,
+                                "y": 4
+                              },
+                              "blur": 12,
+                              "spread": -2
+                            },
+                            {
+                              "type": "shadow",
+                              "shadowType": "outer",
+                              "color": "#0000000D",
+                              "offset": {
+                                "x": 0,
+                                "y": 2
+                              },
+                              "blur": 4
+                            }
+                          ],
+                          "layout": "vertical",
+                          "padding": 4,
+                          "children": [
+                            {
+                              "type": "frame",
+                              "id": "0glp6",
+                              "name": "mOpt-mars2026",
+                              "width": "fill_container",
+                              "height": 34,
+                              "fill": "$accent-primary-light",
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "justifyContent": "space_between",
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "tsViz",
+                                  "name": "mt1",
+                                  "fill": "$accent-primary",
+                                  "content": "mars 2026",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13,
+                                  "fontWeight": "600"
+                                },
+                                {
+                                  "type": "icon_font",
+                                  "id": "rX4DO",
+                                  "name": "mc1",
+                                  "width": 14,
+                                  "height": 14,
+                                  "iconFontName": "check",
+                                  "iconFontFamily": "lucide",
+                                  "fill": "$accent-primary"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "QQkgM",
+                              "name": "mOpt-fev2026",
+                              "width": "fill_container",
+                              "height": 34,
+                              "fill": "$bg-hover",
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "genCI",
+                                  "name": "mt2",
+                                  "fill": "$text-primary",
+                                  "content": "fevrier 2026",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "t4Qxz",
+                              "name": "mOpt-jan2026",
+                              "width": "fill_container",
+                              "height": 34,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ThocI",
+                                  "name": "mt3",
+                                  "fill": "$text-primary",
+                                  "content": "janvier 2026",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "HRaMX",
+                              "name": "mOpt-dec2025",
+                              "width": "fill_container",
+                              "height": 34,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "8bFVk",
+                                  "name": "mt4",
+                                  "fill": "$text-primary",
+                                  "content": "decembre 2025",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "yLMKZ",
+                              "name": "mOpt-nov2025",
+                              "width": "fill_container",
+                              "height": 34,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "u2PVB",
+                                  "name": "mt5",
+                                  "fill": "$text-primary",
+                                  "content": "novembre 2025",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "zUMlE",
+                              "name": "mOpt-oct2025",
+                              "width": "fill_container",
+                              "height": 34,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "3Jlyx",
+                                  "name": "mt6",
+                                  "fill": "$text-primary",
+                                  "content": "octobre 2025",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            },
+                            {
+                              "type": "frame",
+                              "id": "OABGN",
+                              "name": "mOpt-sep2025",
+                              "width": "fill_container",
+                              "height": 34,
+                              "cornerRadius": 6,
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "5KUGx",
+                                  "name": "mt7",
+                                  "fill": "$text-tertiary",
+                                  "content": "septembre 2025",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 13
+                                }
+                              ]
+                            }
+                          ]
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      ]
     }
   ],
   "variables": {
@@ -11603,6 +12189,22 @@
           "value": "#F6F7FA"
         }
       ]
+    },
+    "accent-primary-light": {
+      "type": "color",
+      "value": "#EFF6FF"
+    },
+    "bg-active": {
+      "type": "color",
+      "value": "#E4E4E7"
+    },
+    "bg-hover": {
+      "type": "color",
+      "value": "#F4F4F5"
+    },
+    "border-focus": {
+      "type": "color",
+      "value": "#2563EB"
     }
   }
 }

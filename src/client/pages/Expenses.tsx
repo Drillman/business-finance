@@ -7,9 +7,10 @@ import {
   useRecurringExpenses,
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
+import { MonthSelect } from '../components/PeriodSelect'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -345,19 +346,6 @@ export default function Expenses() {
     return calculatedValues.tax * (rate / 100)
   }, [calculatedValues.tax, formData.taxRecoveryRate])
 
-  const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = []
-    for (const year of [2026, 2025, 2024]) {
-      for (let month = 12; month >= 1; month--) {
-        const date = new Date(year, month - 1, 1)
-        const value = `${year}-${month.toString().padStart(2, '0')}`
-        const label = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
-        options.push({ value, label })
-      }
-    }
-    return options
-  }, [])
-
   const monthSelectOptions = useMemo(() => {
     const options: { value: string; label: string }[] = []
     for (const year of [2024, 2025, 2026, 2027]) {
@@ -408,41 +396,11 @@ export default function Expenses() {
             <label className="label">
               <span className="label-text">Mois</span>
             </label>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn btn-square btn-sm"
-                onClick={() => {
-                  const [year, month] = selectedMonth.split('-').map(Number)
-                  const prevDate = new Date(year, month - 2, 1)
-                  setSelectedMonth(`${prevDate.getFullYear()}-${(prevDate.getMonth() + 1).toString().padStart(2, '0')}`)
-                }}
-                title="Mois précédent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <select
-                className="select select-bordered"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-              >
-                {monthOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="btn btn-square btn-sm"
-                onClick={() => {
-                  const [year, month] = selectedMonth.split('-').map(Number)
-                  const nextDate = new Date(year, month, 1)
-                  setSelectedMonth(`${nextDate.getFullYear()}-${(nextDate.getMonth() + 1).toString().padStart(2, '0')}`)
-                }}
-                title="Mois suivant"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
+            <MonthSelect
+              value={selectedMonth}
+              onChange={setSelectedMonth}
+              years={[2026, 2025, 2024]}
+            />
           </div>
           
           {/* Monthly Summary */}

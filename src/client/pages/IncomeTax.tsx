@@ -10,7 +10,7 @@ import { useSettings, useUpdateSettings } from '../hooks/useSettings'
 import type { IncomeTaxPayment, CreateIncomeTaxPaymentInput } from '@shared/types'
 import { Pencil, Trash2 } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
-import { YearSelect, YEARS } from '../components/YearSelect'
+import { YearSelect, YEARS } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { MathInput } from '../components/MathInput'
 
