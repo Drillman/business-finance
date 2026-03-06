@@ -11,7 +11,7 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus } from 'lucide-react'
+import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, RefreshCw, Sparkle, Sparkles } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
@@ -71,6 +71,12 @@ const defaultFormData: InvoiceFormData = {
   invoiceNumber: '',
   note: '',
 }
+
+const modalFieldLabelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-tertiary)'
+const modalInputClass =
+  'h-10 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
+const modalTextareaClass =
+  'w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 py-2 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
 
 export default function Invoices() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -511,216 +517,222 @@ export default function Invoices() {
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">
-              {editingInvoice ? 'Modifier la facture' : 'Nouvelle facture'}
-            </h3>
-
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
+        <div className="modal modal-open px-3 py-6 sm:px-4">
+          <div className="modal-box w-full max-w-xl overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)]">
+            <header className="px-6 pb-3 pt-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                    {editingInvoice ? 'Modifier la facture' : 'Nouvelle facture'}
+                  </h3>
+                  <p className="mt-1 text-xs text-(--text-secondary)">
+                    Renseignez les informations de facturation et de paiement client.
+                  </p>
+                </div>
+                <AppButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={closeModal}
+                  title="Fermer"
+                  className="text-(--text-secondary)"
+                >
+                  <X className="h-4 w-4" />
+                </AppButton>
               </div>
-            )}
+            </header>
 
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Client *</span>
-                  </label>
-                  <ComboSelect
-                    value={formData.client}
-                    options={clientsData?.clients || []}
-                    onChange={(value) => updateFormField('client', value)}
-                    placeholder="Sélectionner un client..."
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">N° Facture</span>
-                  </label>
-                  <div className="join w-full">
-                    <input
-                      type="text"
-                      className="input input-bordered join-item flex-1"
-                      value={formData.invoiceNumber}
-                      onChange={(e) => updateFormField('invoiceNumber', e.target.value)}
-                      placeholder="FAC-YYYYMM-XXX"
-                    />
-                    <button
-                      type="button"
-                      className="btn join-item"
-                      onClick={async () => {
-                        const { data } = await refetchNextNumber()
-                        if (data?.invoiceNumber) {
-                          updateFormField('invoiceNumber', data.invoiceNumber)
-                        }
-                      }}
-                      title="Générer automatiquement"
-                    >
-                      Auto
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Description</span>
-                  </label>
-                  <ComboSelect
-                    value={formData.description}
-                    options={descriptionsData?.descriptions || []}
-                    onChange={(value) => updateFormField('description', value)}
-                    placeholder="Sélectionner une description..."
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Date de facturation *</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    value={formData.invoiceDate}
-                    onChange={(e) => updateFormField('invoiceDate', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Date de paiement</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    value={formData.paymentDate}
-                    onChange={(e) => updateFormField('paymentDate', e.target.value)}
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Montant HT (€) *</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="input input-bordered w-full"
-                    value={formData.amountHt}
-                    onChange={(e) => updateFormField('amountHt', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux TVA (%) *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.taxRate}
-                    onChange={(e) => updateFormField('taxRate', e.target.value)}
-                  >
-                    <option value="0">0% (Exonéré)</option>
-                    <option value="5.5">5.5%</option>
-                    <option value="10">10%</option>
-                    <option value="20">20% (Taux normal)</option>
-                  </select>
-                </div>
-
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Note</span>
-                  </label>
-                  <textarea
-                    className="textarea textarea-bordered w-full"
-                    value={formData.note}
-                    onChange={(e) => updateFormField('note', e.target.value)}
-                    placeholder="Notes supplémentaires..."
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              {/* Calculated TTC */}
-              {formData.amountHt && (
-                <div className="mt-4 p-4 bg-base-200 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Montant TTC calculé :</span>
-                    <span className="text-xl font-bold">{formatCurrency(calculatedTtc)}</span>
-                  </div>
+            <div className="px-6 pb-6 pt-2">
+              {error && (
+                <div className="mb-4 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                  {error}
                 </div>
               )}
 
-              <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : editingInvoice ? (
-                    'Enregistrer'
-                  ) : (
-                    'Créer'
-                  )}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Client *</label>
+                    <ComboSelect
+                      value={formData.client}
+                      options={clientsData?.clients || []}
+                      onChange={(value) => updateFormField('client', value)}
+                      placeholder="Sélectionner un client..."
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>N° Facture</label>
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <input
+                        type="text"
+                        className={[modalInputClass, 'min-w-0 flex-1'].join(' ')}
+                        value={formData.invoiceNumber}
+                        onChange={(e) => updateFormField('invoiceNumber', e.target.value)}
+                        placeholder="FAC-YYYYMM-XXX"
+                      />
+                      <AppButton
+                        type="button"
+                        size="icon-sm"
+                        className="h-10 w-10"
+                        onClick={async () => {
+                          const { data } = await refetchNextNumber()
+                          if (data?.invoiceNumber) {
+                            updateFormField('invoiceNumber', data.invoiceNumber)
+                          }
+                        }}
+                        title="Générer automatiquement"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                      </AppButton>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Description</label>
+                    <ComboSelect
+                      value={formData.description}
+                      options={descriptionsData?.descriptions || []}
+                      onChange={(value) => updateFormField('description', value)}
+                      placeholder="Sélectionner une description..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Date de facturation *</label>
+                    <input
+                      type="date"
+                      className={modalInputClass}
+                      value={formData.invoiceDate}
+                      onChange={(e) => updateFormField('invoiceDate', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Date de paiement</label>
+                    <input
+                      type="date"
+                      className={modalInputClass}
+                      value={formData.paymentDate}
+                      onChange={(e) => updateFormField('paymentDate', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Montant HT (EUR) *</label>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className={modalInputClass}
+                      value={formData.amountHt}
+                      onChange={(e) => updateFormField('amountHt', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Taux TVA (%) *</label>
+                    <select
+                      className={modalInputClass}
+                      value={formData.taxRate}
+                      onChange={(e) => updateFormField('taxRate', e.target.value)}
+                    >
+                      <option value="0">0% (Exonéré)</option>
+                      <option value="5.5">5.5%</option>
+                      <option value="10">10%</option>
+                      <option value="20">20% (Taux normal)</option>
+                    </select>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Note</label>
+                    <textarea
+                      className={[modalTextareaClass, 'h-10 resize-none overflow-hidden'].join(' ')}
+                      value={formData.note}
+                      onChange={(e) => updateFormField('note', e.target.value)}
+                      placeholder="Notes supplémentaires..."
+                      rows={1}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-lg border border-(--border-default) bg-(--color-base-200)/70 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-(--text-secondary)">Montant TTC calculé :</span>
+                    <span className="font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
+                      {formatCurrency(calculatedTtc)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <AppButton type="button" variant="outline" onClick={closeModal}>
+                    Annuler
+                  </AppButton>
+                  <AppButton type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    {createMutation.isPending || updateMutation.isPending ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : editingInvoice ? (
+                      'Enregistrer'
+                    ) : (
+                      'Créer'
+                    )}
+                  </AppButton>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
+          <div className="modal-backdrop bg-[#0F172A]/50 backdrop-blur-[1px]" onClick={closeModal}></div>
         </div>
       )}
 
       {/* Payment Modal */}
       {isPaymentModalOpen && paymentInvoice && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-sm">
-            <h3 className="font-bold text-lg mb-4">Enregistrer le paiement</h3>
-            <p className="text-base-content/70 mb-4">
+        <div className="modal modal-open px-3 py-6 sm:px-4">
+          <div className="modal-box w-full max-w-105 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)]">
+            <header className="px-5 pb-2 pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">Enregistrer le paiement</h3>
+                <AppButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={closePaymentModal}
+                  title="Fermer"
+                  className="text-(--text-secondary)"
+                >
+                  <X className="h-4 w-4" />
+                </AppButton>
+              </div>
+            </header>
+
+            <div className="px-5 pb-5 pt-2">
+              <p className="mb-4 text-sm text-(--text-secondary)">
               Facture <span className="font-mono">{paymentInvoice.invoiceNumber || '-'}</span> pour{' '}
               <span className="font-medium">{paymentInvoice.client}</span>
-            </p>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Date de paiement</span>
-              </label>
+              </p>
+              <label className={modalFieldLabelClass}>Date de paiement</label>
               <input
                 type="date"
-                className="input input-bordered w-full"
+                className={modalInputClass}
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
               />
-            </div>
-            <div className="modal-action">
-              <button type="button" className="btn" onClick={closePaymentModal}>
-                Annuler
-              </button>
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={handleConfirmPayment}
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  'Confirmer'
-                )}
-              </button>
+
+              <div className="mt-5 flex justify-end gap-2">
+                <AppButton type="button" variant="outline" onClick={closePaymentModal}>
+                  Annuler
+                </AppButton>
+                <AppButton type="button" onClick={handleConfirmPayment} disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? <span className="loading loading-spinner loading-sm" /> : 'Confirmer'}
+                </AppButton>
+              </div>
             </div>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closePaymentModal}></div>
+          <div className="modal-backdrop bg-[#0F172A]/50 backdrop-blur-[1px]" onClick={closePaymentModal}></div>
         </div>
       )}
 
