@@ -1984,57 +1984,6 @@
             },
             {
               "type": "frame",
-              "id": "3CUoP",
-              "name": "Filters",
-              "width": "fill_container",
-              "gap": 16,
-              "alignItems": "center",
-              "children": [
-                {
-                  "type": "text",
-                  "id": "96YQN",
-                  "name": "filterLabel",
-                  "fill": "$text-secondary",
-                  "content": "Client :",
-                  "fontFamily": "Inter",
-                  "fontSize": 14,
-                  "fontWeight": "500"
-                },
-                {
-                  "type": "frame",
-                  "id": "9XmD3",
-                  "name": "filterInput",
-                  "width": 240,
-                  "height": 38,
-                  "fill": "$bg-card",
-                  "cornerRadius": 8,
-                  "stroke": {
-                    "align": "inside",
-                    "thickness": 1,
-                    "fill": "$border-default"
-                  },
-                  "padding": [
-                    0,
-                    12
-                  ],
-                  "alignItems": "center",
-                  "children": [
-                    {
-                      "type": "text",
-                      "id": "a8hBV",
-                      "name": "filterPlaceholder",
-                      "fill": "$text-tertiary",
-                      "content": "Filtrer par client...",
-                      "fontFamily": "Inter",
-                      "fontSize": 13,
-                      "fontWeight": "normal"
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
               "id": "Hta4Y",
               "name": "MonthSection",
               "width": "fill_container",

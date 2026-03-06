@@ -7,10 +7,13 @@ import {
   useRecurringExpenses,
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { ArrowUpDown, ChevronDown, ChevronUp, Pencil, Plus, Repeat2, Trash2, Wallet } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { MonthSelect } from '../components/PeriodSelect'
+import { AppButton } from '../components/ui/AppButton'
+import { KpiCard } from '../components/ui/KpiCard'
+import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -52,6 +55,54 @@ const recurrenceLabels: Record<RecurrencePeriod, string> = {
   monthly: 'Mensuelle',
   quarterly: 'Trimestrielle',
   yearly: 'Annuelle',
+}
+
+const fixedExpenseColumns: FinanceTableColumn[] = [
+  { key: 'description', label: 'Description', className: 'w-[320px]' },
+  { key: 'payment-day', label: 'Jour', className: 'w-[92px] text-center' },
+  { key: 'amount-ht', label: 'Montant HT', className: 'w-[170px] text-right' },
+  { key: 'amount-ttc', label: 'Montant TTC', className: 'w-[170px] text-right' },
+]
+
+const variableExpenseColumns: FinanceTableColumn[] = [
+  { key: 'description', label: 'Description', className: 'w-[300px]' },
+  { key: 'date', label: 'Date', className: 'w-[130px]' },
+  { key: 'amount-ht', label: 'Montant HT', className: 'w-[130px] text-right' },
+  { key: 'tax', label: 'TVA', className: 'w-[120px] text-right' },
+  { key: 'recoverable', label: 'Recuperable', className: 'w-[150px] text-right' },
+  { key: 'amount-ttc', label: 'TTC', className: 'w-[130px] text-right' },
+  { key: 'actions', label: 'Actions', className: 'w-[108px] text-right' },
+]
+
+type FixedExpenseStatus = 'termine' | 'en-cours' | 'a-venir'
+type FixedSortKey = 'description' | 'amountTtc' | 'paymentDay' | 'status' | 'recurrence'
+type SortDirection = 'asc' | 'desc'
+
+const fixedStatusOrder: Record<FixedExpenseStatus, number> = {
+  'a-venir': 0,
+  'en-cours': 1,
+  termine: 2,
+}
+
+function getFixedExpenseStatus(expense: Expense, currentMonth: string): FixedExpenseStatus {
+  const startMonth = expense.startMonth?.slice(0, 7) ?? ''
+  const endMonth = expense.endMonth?.slice(0, 7) ?? ''
+
+  if (startMonth && startMonth > currentMonth) {
+    return 'a-venir'
+  }
+
+  if (endMonth && endMonth < currentMonth) {
+    return 'termine'
+  }
+
+  return 'en-cours'
+}
+
+function getFixedExpenseStatusTooltip(expense: Expense): string {
+  const startLabel = expense.startMonth ? formatMonth(expense.startMonth) : 'Non defini'
+  const endLabel = expense.endMonth ? formatMonth(expense.endMonth) : 'En cours'
+  return `Debut: ${startLabel} | Fin: ${endLabel}`
 }
 
 interface ExpenseFormData {
@@ -100,6 +151,10 @@ export default function Expenses() {
   const [formData, setFormData] = useState<ExpenseFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [fixedSort, setFixedSort] = useState<{ key: FixedSortKey; direction: SortDirection }>({
+    key: 'status',
+    direction: 'asc',
+  })
 
   const { showSuccess, showError } = useSnackbar()
 
@@ -118,6 +173,12 @@ export default function Expenses() {
   const createMutation = useCreateExpense()
   const updateMutation = useUpdateExpense()
   const deleteMutation = useDeleteExpense()
+  const currentMonthKey = getCurrentMonth()
+
+  const nonFixedExpenses = useMemo(
+    () => expensesData?.data.filter((expense) => expense.category !== 'fixed') ?? [],
+    [expensesData],
+  )
 
   // Calculate variable expenses summary for the selected month (excluding fixed category)
   const variableExpensesSummary = useMemo(() => {
@@ -171,7 +232,7 @@ export default function Expenses() {
 
   // Combined summary for KPIs (fixed + variable expenses)
   const combinedSummary = useMemo(() => {
-    const variableCount = expensesData?.data.filter(e => e.category !== 'fixed').length || 0
+    const variableCount = nonFixedExpenses.length
     return {
       totalHt: variableExpensesSummary.totalHt + fixedExpensesSummary.totalHt,
       totalTax: variableExpensesSummary.totalTax + fixedExpensesSummary.totalTax,
@@ -179,7 +240,7 @@ export default function Expenses() {
       totalRecoverable: variableExpensesSummary.totalRecoverable + fixedExpensesSummary.totalRecoverable,
       count: variableCount + fixedExpensesSummary.count,
     }
-  }, [variableExpensesSummary, fixedExpensesSummary, expensesData])
+  }, [variableExpensesSummary, fixedExpensesSummary, nonFixedExpenses])
 
   // Calculate all fixed expenses summary
   const allFixedSummary = useMemo(() => {
@@ -215,6 +276,74 @@ export default function Expenses() {
       yearlyTotal,
     }
   }, [allFixedData])
+
+  const sortedFixedExpenses = useMemo(() => {
+    if (!allFixedData?.data) return []
+
+    const sorted = [...allFixedData.data]
+    const directionFactor = fixedSort.direction === 'asc' ? 1 : -1
+
+    sorted.sort((a, b) => {
+      if (fixedSort.key === 'status') {
+        const statusA = getFixedExpenseStatus(a, currentMonthKey)
+        const statusB = getFixedExpenseStatus(b, currentMonthKey)
+        const rankDiff = fixedStatusOrder[statusA] - fixedStatusOrder[statusB]
+        if (rankDiff !== 0) return rankDiff * directionFactor
+
+        const startA = a.startMonth?.slice(0, 7) ?? ''
+        const startB = b.startMonth?.slice(0, 7) ?? ''
+        return startA.localeCompare(startB, 'fr') * directionFactor
+      }
+
+      if (fixedSort.key === 'description') {
+        return a.description.localeCompare(b.description, 'fr') * directionFactor
+      }
+
+      if (fixedSort.key === 'amountTtc') {
+        const amountA = parseFloat(a.amountHt) + parseFloat(a.taxAmount)
+        const amountB = parseFloat(b.amountHt) + parseFloat(b.taxAmount)
+        return (amountA - amountB) * directionFactor
+      }
+
+      if (fixedSort.key === 'paymentDay') {
+        const dayA = a.paymentDay ?? 0
+        const dayB = b.paymentDay ?? 0
+        return (dayA - dayB) * directionFactor
+      }
+
+      const recA = a.recurrencePeriod ?? ''
+      const recB = b.recurrencePeriod ?? ''
+      return recA.localeCompare(recB, 'fr') * directionFactor
+    })
+
+    return sorted
+  }, [allFixedData, fixedSort, currentMonthKey])
+
+  const toggleFixedSort = (key: FixedSortKey) => {
+    setFixedSort((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        }
+      }
+
+      return {
+        key,
+        direction: 'asc',
+      }
+    })
+  }
+
+  const renderSortIcon = (key: FixedSortKey) => {
+    if (fixedSort.key !== key) {
+      return <ArrowUpDown className="h-3.5 w-3.5 text-(--text-tertiary)" />
+    }
+
+    return fixedSort.direction === 'asc'
+      ? <ChevronUp className="h-3.5 w-3.5 text-(--text-secondary)" />
+      : <ChevronDown className="h-3.5 w-3.5 text-(--text-secondary)" />
+  }
 
   const openCreateModal = (isFixed: boolean = false) => {
     setEditingExpense(null)
@@ -360,29 +489,55 @@ export default function Expenses() {
   }, [])
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Dépenses</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => openCreateModal(activeTab === 'fixed')}
-        >
-          {activeTab === 'fixed' ? 'Ajouter une charge fixe' : 'Ajouter une dépense'}
-        </button>
+    <div className="space-y-7">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
+            Dépenses
+          </h1>
+          <p className="mt-1 text-sm text-(--text-secondary)">
+            Pilotage des charges ponctuelles et des charges fixes
+          </p>
+        </div>
+
+        <div className="ml-auto flex shrink-0 flex-wrap items-center gap-3 self-start">
+          {activeTab === 'monthly' ? (
+            <MonthSelect
+              value={selectedMonth}
+              onChange={setSelectedMonth}
+              years={[2027, 2026, 2025, 2024]}
+            />
+          ) : null}
+          <AppButton
+            startIcon={<Plus className="h-4 w-4" />}
+            onClick={() => openCreateModal(activeTab === 'fixed')}
+          >
+            {activeTab === 'fixed' ? 'Ajouter une charge fixe' : 'Ajouter une dépense'}
+          </AppButton>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div role="tablist" className="tabs tabs-boxed mb-6">
+      <div className="inline-flex h-10 items-center gap-1 rounded-lg border border-(--border-default) bg-(--color-base-200) p-1">
         <button
-          role="tab"
-          className={`tab ${activeTab === 'monthly' ? 'tab-active' : ''}`}
+          type="button"
+          className={[
+            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
+            activeTab === 'monthly'
+              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+              : 'text-(--text-secondary) hover:text-(--text-primary)',
+          ].join(' ')}
           onClick={() => setActiveTab('monthly')}
         >
           Par mois
         </button>
         <button
-          role="tab"
-          className={`tab ${activeTab === 'fixed' ? 'tab-active' : ''}`}
+          type="button"
+          className={[
+            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
+            activeTab === 'fixed'
+              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+              : 'text-(--text-secondary) hover:text-(--text-primary)',
+          ].join(' ')}
           onClick={() => setActiveTab('fixed')}
         >
           Charges fixes ({allFixedSummary?.count || 0})
@@ -391,303 +546,354 @@ export default function Expenses() {
 
       {activeTab === 'monthly' && (
         <>
-          {/* Month Selector */}
-          <div className="form-control mb-6">
-            <label className="label">
-              <span className="label-text">Mois</span>
-            </label>
-            <MonthSelect
-              value={selectedMonth}
-              onChange={setSelectedMonth}
-              years={[2026, 2025, 2024]}
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <KpiCard
+              title="Total TTC du mois"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalTtc)}
+              description={`${combinedSummary.count} depense(s)`}
+              accentColor="#818CF8"
+            />
+            <KpiCard
+              title="TVA recuperable"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
+              description="Deduction possible"
+              accentColor="#34D399"
+              valueClassName="text-[#047857]"
+            />
+            <KpiCard
+              title="Charges fixes actives"
+              value={isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : fixedExpensesSummary.count}
+              description={isLoadingActiveFixed ? 'Chargement...' : `${formatCurrency(fixedExpensesSummary.totalTtc)} TTC`}
+              accentColor="#A78BFA"
+            />
+            <KpiCard
+              title="Dépenses ponctuelles"
+              value={isLoadingExpenses ? <span className="loading loading-spinner loading-sm" /> : nonFixedExpenses.length}
+              description={isLoadingExpenses ? 'Chargement...' : `${formatCurrency(variableExpensesSummary.totalTtc)} TTC`}
+              accentColor="#FBBF24"
+              valueClassName="text-[#B45309]"
             />
           </div>
-          
-          {/* Monthly Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Total HT</div>
-              <div className="stat-value text-lg">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalHt)
-                )}
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Charges fixes du mois
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  {formatMonth(`${selectedMonth}-01`)} - {fixedExpensesSummary.count} charge(s) active(s)
+                </p>
               </div>
-              <div className="stat-desc">{combinedSummary.count} dépense(s)</div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">TVA récupérable</div>
-              <div className="stat-value text-lg text-success">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalRecoverable)
-                )}
+              <div className="text-right">
+                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                  {formatCurrency(fixedExpensesSummary.totalTtc)} TTC
+                </div>
+                <div className="text-xs text-(--text-secondary)">{formatCurrency(fixedExpensesSummary.totalHt)} HT</div>
               </div>
             </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Total TTC</div>
-              <div className="stat-value text-lg">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalTtc)
-                )}
+
+            {isLoadingActiveFixed ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : fixedExpensesSummary.count === 0 ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <p className="text-sm text-(--text-secondary)">Aucune charge fixe active pour cette période.</p>
+              </div>
+            ) : (
+              <FinanceTable columns={fixedExpenseColumns} minWidthClassName="min-w-[780px]">
+                {activeFixedData?.data.map((expense, index) => {
+                  const ht = parseFloat(expense.amountHt)
+                  const ttc = ht + parseFloat(expense.taxAmount)
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 text-sm font-medium text-(--text-primary) md:px-4">{expense.description}</td>
+                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ht)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
+                    </tr>
+                  )
+                })}
+              </FinanceTable>
+            )}
+          </section>
+
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Dépenses ponctuelles
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  {nonFixedExpenses.length} dépense(s) sur la période sélectionnée
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                  {formatCurrency(variableExpensesSummary.totalTtc)} TTC
+                </div>
+                <div className="text-xs text-(--text-secondary)">
+                  {formatCurrency(variableExpensesSummary.totalRecoverable)} récupérable
+                </div>
               </div>
             </div>
-          </div>
 
-          {/* Fixed Expenses Summary Card */}
-          <div className="card bg-base-100 shadow mb-6">
-            <div className="card-body">
-              <h2 className="card-title text-base">Charges fixes du mois</h2>
-              {isLoadingActiveFixed ? (
-                <div className="flex justify-center py-4">
-                  <span className="loading loading-spinner loading-sm"></span>
-                </div>
-              ) : fixedExpensesSummary.count === 0 ? (
-                <p className="text-base-content/60">Aucune charge fixe active pour ce mois.</p>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-base-content/70">{fixedExpensesSummary.count} charge(s) fixe(s)</span>
-                    <div className="text-right">
-                      <span className="text-xl font-bold">{formatCurrency(fixedExpensesSummary.totalTtc)} TTC</span> / <span className="text-sm text-base-content/70">{formatCurrency(fixedExpensesSummary.totalHt)} HT</span>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Jour</th>
-                          <th className="text-right">Montant HT</th>
-                          <th className="text-right">Montant TTC</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeFixedData?.data.map((expense) => {
-                          const ht = parseFloat(expense.amountHt)
-                          const ttc = ht + parseFloat(expense.taxAmount)
-                          return (
-                            <tr key={expense.id}>
-                              <td>{expense.description}</td>
-                              <td>{expense.paymentDay}</td>
-                              <td className="text-right font-mono">{formatCurrency(ht)}</td>
-                              <td className="text-right font-mono">{formatCurrency(ttc)}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
-            </div>
-          </div>
-
-
-          {/* Non-recurring Expense List */}
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h2 className="card-title text-base">Dépenses ponctuelles</h2>
-              {isLoadingExpenses ? (
-                <div className="flex justify-center py-8">
-                  <span className="loading loading-spinner loading-lg"></span>
-                </div>
-              ) : !expensesData?.data.filter(e => e.category !== 'fixed').length ? (
-                <p className="text-base-content/60">Aucune dépense ponctuelle pour cette période.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th className="text-right">Montant HT</th>
-                        <th className="text-right">TVA</th>
-                        <th className="text-right">Récupérable</th>
-                        <th className="text-right">TTC</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {expensesData.data.filter(e => e.category !== 'fixed').map((expense) => {
-                        const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
-                        return (
-                          <tr key={expense.id} className="hover">
-                            <td>
-                              <div className="font-medium">{expense.description}</div>
-                              {expense.note && (
-                                <div className="text-sm text-base-content/60 truncate max-w-xs">
-                                  {expense.note}
-                                </div>
-                              )}
-                            </td>
-                            <td>{formatDate(expense.date)}</td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(expense.amountHt)}
-                            </td>
-                            <td className="text-right font-mono text-base-content/60">
-                              {formatCurrency(expense.taxAmount)}
-                            </td>
-                            <td className="text-right font-mono">
-                              <span className="text-success">{formatCurrency(taxRecovery)}</span>
-                              <span className="text-xs text-base-content/50 ml-1">
-                                ({parseFloat(expense.taxRecoveryRate)}%)
-                              </span>
-                            </td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount))}
-                            </td>
-                            <td>
-                              <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square"
-                                  onClick={() => openEditModal(expense)}
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square text-error"
-                                  onClick={() => setDeleteConfirmId(expense.id)}
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                    <tfoot>
-                      <tr className="font-bold border-t-2">
-                        <td colSpan={2}>Total</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalHt)}</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalTax)}</td>
-                        <td className="text-right font-mono text-success">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalTtc)}</td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
-                </div>
-              )}
-            </div>
-          </div>
+            {isLoadingExpenses ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : !nonFixedExpenses.length ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
+              </div>
+            ) : (
+              <FinanceTable columns={variableExpenseColumns} minWidthClassName="min-w-[1030px]">
+                {nonFixedExpenses.map((expense, index) => {
+                  const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 md:px-4">
+                        <div className="font-medium text-(--text-primary)">{expense.description}</div>
+                        {expense.note && (
+                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">
+                            {expense.note}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 text-sm text-(--text-primary) md:px-4">{formatDate(expense.date)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(expense.amountHt)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-secondary) md:px-4">{formatCurrency(expense.taxAmount)}</td>
+                      <td className="px-3 text-right font-mono text-sm md:px-4">
+                        <span className="text-[#15803D]">{formatCurrency(taxRecovery)}</span>
+                        <span className="ml-1 text-[11px] text-(--text-tertiary)">({parseFloat(expense.taxRecoveryRate)}%)</span>
+                      </td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">
+                        {formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount))}
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <div className="flex justify-end gap-1">
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => openEditModal(expense)}
+                            title="Modifier"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </AppButton>
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmId(expense.id)}
+                            title="Supprimer"
+                            className="text-(--color-error) hover:bg-[#FEE2E2]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AppButton>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                <tr className="h-12 border-t-2 border-(--border-default) bg-(--card-bg) font-semibold">
+                  <td colSpan={2} className="px-3 text-sm text-(--text-primary) md:px-4">Total</td>
+                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalHt)}</td>
+                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTax)}</td>
+                  <td className="px-3 text-right font-mono text-sm text-[#15803D] md:px-4">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
+                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTtc)}</td>
+                  <td className="px-3 md:px-4" />
+                </tr>
+              </FinanceTable>
+            )}
+          </section>
         </>
       )}
 
       {activeTab === 'fixed' && (
         <>
-          {/* Fixed Expenses Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Charges fixes</div>
-              <div className="stat-value text-lg">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  allFixedSummary?.count || 0
-                )}
-              </div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Coût mensuel estimé</div>
-              <div className="stat-value text-lg text-base-content/70">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(allFixedSummary?.monthlyTotal || 0)
-                )}
-              </div>
-              <div className="stat-desc">TTC</div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Coût annuel estimé</div>
-              <div className="stat-value text-lg text-base-content/70">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(allFixedSummary?.yearlyTotal || 0)
-                )}
-              </div>
-              <div className="stat-desc">TTC</div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <KpiCard
+              title="Charges fixes"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : allFixedSummary?.count || 0}
+              description="Actives dans votre plan de charges"
+              accentColor="#A78BFA"
+            />
+            <KpiCard
+              title="Coût mensuel estime"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.monthlyTotal || 0)}
+              description="Projection TTC"
+              accentColor="#3B82F6"
+            />
+            <KpiCard
+              title="Coût annuel estime"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.yearlyTotal || 0)}
+              description="Projection TTC"
+              accentColor="#F59E0B"
+              valueClassName="text-[#B45309]"
+            />
           </div>
 
-          {/* Fixed Expenses List */}
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              {isLoadingAllFixed ? (
-                <div className="flex justify-center py-8">
-                  <span className="loading loading-spinner loading-lg"></span>
-                </div>
-              ) : !allFixedData?.data.length ? (
-                <p className="text-base-content/60">Aucune charge fixe enregistrée.</p>
-              ) : (
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Bibliothèque des charges fixes
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  Visualisez et modifiez toutes les charges récurrentes
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#4338CA]">
+                <Repeat2 className="h-3.5 w-3.5" />
+                {allFixedSummary?.count || 0} actif(s)
+              </div>
+            </div>
+
+            {isLoadingAllFixed ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : !allFixedData?.data.length ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <Wallet className="mx-auto h-8 w-8 text-(--text-tertiary)" />
+                <p className="mt-3 text-sm text-(--text-secondary)">Aucune charge fixe enregistrée.</p>
+              </div>
+            ) : (
+              <div className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
                 <div className="overflow-x-auto">
-                  <table className="table">
+                  <table className="w-full table-fixed border-collapse">
                     <thead>
-                      <tr>
-                        <th>Description</th>
-                        <th className="text-right">Montant TTC</th>
-                        <th>Jour</th>
-                        <th>Début</th>
-                        <th>Fin</th>
-                        <th>Périodicité</th>
-                        <th>Actions</th>
+                      <tr className="h-10 border-b border-(--border-default) bg-(--color-base-200) text-left">
+                        <th className="w-55 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1"
+                            onClick={() => toggleFixedSort('description')}
+                          >
+                            Description
+                            {renderSortIcon('description')}
+                          </button>
+                        </th>
+                        <th className="w-30 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          <button
+                            type="button"
+                            className="ml-auto inline-flex items-center gap-1"
+                            onClick={() => toggleFixedSort('amountTtc')}
+                          >
+                            Montant TTC
+                            {renderSortIcon('amountTtc')}
+                          </button>
+                        </th>
+                        <th className="w-18 px-3 text-center text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          <button
+                            type="button"
+                            className="mx-auto inline-flex items-center gap-1"
+                            onClick={() => toggleFixedSort('paymentDay')}
+                          >
+                            Jour
+                            {renderSortIcon('paymentDay')}
+                          </button>
+                        </th>
+                        <th className="w-48 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1"
+                            onClick={() => toggleFixedSort('status')}
+                          >
+                            Statut
+                            {renderSortIcon('status')}
+                          </button>
+                        </th>
+                        <th className="w-30 px-3 text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1"
+                            onClick={() => toggleFixedSort('recurrence')}
+                          >
+                            Periodicite
+                            {renderSortIcon('recurrence')}
+                          </button>
+                        </th>
+                        <th className="w-24 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-secondary) md:px-4 md:text-xs">
+                          Actions
+                        </th>
                       </tr>
                     </thead>
                     <tbody>
-                      {allFixedData.data.map((expense) => {
+                      {sortedFixedExpenses.map((expense, index) => {
                         const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
+                        const status = getFixedExpenseStatus(expense, currentMonthKey)
+                        const statusTooltip = getFixedExpenseStatusTooltip(expense)
+                        const statusLabel = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
+                        const statusClassName =
+                          status === 'termine'
+                            ? 'bg-[#F3F4F6] text-[#6B7280]'
+                            : status === 'a-venir'
+                              ? 'bg-[#FEF3C7] text-[#92400E]'
+                              : 'bg-[#DCFCE7] text-[#15803D]'
+
                         return (
-                          <tr key={expense.id} className="hover">
-                            <td>
-                              <div className="font-medium">{expense.description}</div>
+                          <tr
+                            key={expense.id}
+                            className={[
+                              'h-12 border-b border-(--border-default) align-middle',
+                              index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                            ].join(' ')}
+                          >
+                            <td className="px-3 md:px-4">
+                              <div className="font-medium text-(--text-primary)">{expense.description}</div>
                               {expense.note && (
-                                <div className="text-sm text-base-content/60 truncate max-w-xs">
-                                  {expense.note}
-                                </div>
+                                <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
                               )}
                             </td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(ttc)}
+                            <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
+                            <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
+                            <td className="px-3 text-sm md:px-4">
+                              <span className="group relative inline-flex">
+                                <span className={`inline-flex w-fit cursor-help rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName}`}>
+                                  {statusLabel}
+                                </span>
+                                <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100">
+                                  {statusTooltip}
+                                </span>
+                              </span>
                             </td>
-                            <td>{expense.paymentDay}</td>
-                            <td>{expense.startMonth ? formatMonth(expense.startMonth) : '-'}</td>
-                            <td>
-                              {expense.endMonth ? (
-                                formatMonth(expense.endMonth)
-                              ) : (
-                                <span className="badge badge-success badge-sm">En cours</span>
-                              )}
-                            </td>
-                            <td>
-                              <span className="badge badge-accent badge-sm">
+                            <td className="px-3 md:px-4">
+                              <span className="inline-flex rounded-full bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4338CA]">
                                 {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
                               </span>
                             </td>
-                            <td>
-                              <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square"
+                            <td className="px-3 md:px-4">
+                              <div className="flex justify-end gap-1">
+                                <AppButton
+                                  size="icon-sm"
+                                  variant="ghost"
                                   onClick={() => openEditModal(expense)}
                                   title="Modifier"
                                 >
                                   <Pencil className="h-4 w-4" />
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square text-error"
+                                </AppButton>
+                                <AppButton
+                                  size="icon-sm"
+                                  variant="ghost"
                                   onClick={() => setDeleteConfirmId(expense.id)}
                                   title="Supprimer"
+                                  className="text-(--color-error) hover:bg-[#FEE2E2]"
                                 >
                                   <Trash2 className="h-4 w-4" />
-                                </button>
+                                </AppButton>
                               </div>
                             </td>
                           </tr>
@@ -696,9 +902,9 @@ export default function Expenses() {
                     </tbody>
                   </table>
                 </div>
-              )}
-            </div>
-          </div>
+              </div>
+            )}
+          </section>
         </>
       )}
 
