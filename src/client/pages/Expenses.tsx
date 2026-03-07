@@ -621,9 +621,6 @@ export default function Expenses() {
           <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
             Dépenses
           </h1>
-          <p className="mt-1 text-sm text-(--text-secondary)">
-            Pilotage des charges ponctuelles et des charges fixes
-          </p>
         </div>
 
         <div className="ml-auto flex shrink-0 flex-wrap items-center gap-3 self-start">

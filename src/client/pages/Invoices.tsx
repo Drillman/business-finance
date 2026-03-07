@@ -314,9 +314,6 @@ export default function Invoices() {
           <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
             Factures
           </h1>
-          <p className="mt-1 text-sm text-(--text-secondary)">
-            Suivi de la facturation et des paiements clients
-          </p>
         </div>
         <div className="ml-auto flex shrink-0 items-center gap-3 self-start">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />

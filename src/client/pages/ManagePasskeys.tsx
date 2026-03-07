@@ -83,7 +83,7 @@ export default function ManagePasskeys() {
 
   if (!supportsPasskey) {
     return (
-      <div className="p-6">
+      <div>
         <h1 className="text-2xl font-bold mb-6">Gérer les Passkeys</h1>
         <div className="alert alert-warning">
           Votre navigateur ne supporte pas les passkeys.
@@ -93,7 +93,7 @@ export default function ManagePasskeys() {
   }
 
   return (
-    <div className="p-6">
+    <div>
       <h1 className="text-2xl font-bold mb-6">Gérer les Passkeys</h1>
 
       {error && (

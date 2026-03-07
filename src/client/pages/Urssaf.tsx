@@ -190,9 +190,6 @@ export default function Urssaf() {
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
           <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Urssaf</h1>
-          <p className="mt-1 text-sm text-(--text-secondary)">
-            Suivi trimestriel des cotisations et déclarations
-          </p>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
