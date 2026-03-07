@@ -7,12 +7,15 @@ import {
   useRecurringExpenses,
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
-import { ArrowUpDown, ChevronDown, ChevronUp, Pencil, Plus, Repeat2, Trash2, Wallet } from 'lucide-react'
+import { ArrowUpDown, Check, ChevronDown, ChevronUp, Pencil, Plus, Repeat2, Trash2, Wallet, X } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { MonthSelect } from '../components/PeriodSelect'
 import { AppButton } from '../components/ui/AppButton'
+import { Checkbox } from '../components/ui/Checkbox'
 import { KpiCard } from '../components/ui/KpiCard'
+import { Radio } from '../components/ui/Radio'
+import { Switch } from '../components/ui/Switch'
 import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
 function formatDate(dateString: string): string {
@@ -565,6 +568,18 @@ export default function Expenses() {
     return options
   }, [])
 
+  const modalTitle = editingExpense
+    ? (formData.isRecurring ? 'Modifier la charge fixe' : 'Modifier la depense')
+    : (formData.isRecurring ? 'Nouvelle charge fixe' : 'Nouvelle depense')
+
+  const modalSubtitle = formData.isRecurring
+    ? 'Remplissez les informations de la charge fixe'
+    : 'Remplissez les informations de la depense'
+
+  const submitLabel = editingExpense
+    ? 'Enregistrer les modifications'
+    : (formData.isRecurring ? 'Ajouter la charge fixe' : 'Ajouter la depense')
+
   return (
     <div className="space-y-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
@@ -731,7 +746,7 @@ export default function Expenses() {
                 <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
               </div>
             ) : (
-              <DataTable columns={variableExpenseColumns} minWidthClassName="min-w-[990px]">
+              <DataTable columns={variableExpenseColumns} minWidthClassName="min-w-[980px]">
                 {nonFixedExpenses.map((expense, index) => {
                   const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
                   return (
@@ -920,138 +935,170 @@ export default function Expenses() {
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">
-              {editingExpense
-                ? (formData.isRecurring ? 'Modifier la charge fixe' : 'Modifier la dépense')
-                : (formData.isRecurring ? 'Nouvelle charge fixe' : 'Nouvelle dépense')}
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            onClick={closeModal}
+            aria-label="Fermer"
+          />
 
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
+          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-(--border-default) bg-(--card-bg) shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center justify-between px-7 pt-6 pb-0">
+              <div>
+                <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold tracking-[-0.02em] text-(--text-primary)">
+                  {modalTitle}
+                </h3>
+                <p className="mt-1 text-[13px] text-(--text-secondary)">{modalSubtitle}</p>
               </div>
-            )}
+
+              <button
+                type="button"
+                onClick={closeModal}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
+                aria-label="Fermer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Description *</span>
-                  </label>
+              <div className="max-h-[65vh] space-y-4.5 overflow-y-auto px-7 py-5">
+                {error && (
+                  <div className="rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Description *</label>
                   <input
                     type="text"
-                    className="input input-bordered w-full"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.description}
                     onChange={(e) => updateFormField('description', e.target.value)}
-                    placeholder="Description de la dépense..."
+                    placeholder="Description de la depense..."
                     required
                   />
                 </div>
 
-                {/* Toggle for expense type - only show when creating */}
                 {!editingExpense && (
-                  <div className="form-control md:col-span-2">
-                    <label className="label cursor-pointer justify-start gap-3">
+                  <Switch
+                    checked={formData.isRecurring}
+                    onChange={(e) => {
+                      updateFormField('isRecurring', e.target.checked)
+                      updateFormField('category', e.target.checked ? 'fixed' : 'one-time')
+                    }}
+                    label="Charge fixe (recurrente)"
+                  />
+                )}
+
+                {!formData.isRecurring ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Date *</label>
                       <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={formData.isRecurring}
-                        onChange={(e) => {
-                          updateFormField('isRecurring', e.target.checked)
-                          updateFormField('category', e.target.checked ? 'fixed' : 'one-time')
-                        }}
+                        type="date"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        value={formData.date}
+                        onChange={(e) => updateFormField('date', e.target.value)}
+                        required
                       />
-                      <span className="label-text">Charge fixe (récurrente)</span>
-                    </label>
-                  </div>
-                )}
+                    </div>
 
-                {/* Date field for non-recurring */}
-                {!formData.isRecurring && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Date *</span>
-                    </label>
-                    <input
-                      type="date"
-                      className="input input-bordered w-full"
-                      value={formData.date}
-                      onChange={(e) => updateFormField('date', e.target.value)}
-                      required
-                    />
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
+                      <select
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        value={formData.category}
+                        onChange={(e) => updateFormField('category', e.target.value)}
+                      >
+                        {Object.entries(categoryLabels).map(([value, label]) => (
+                          <option key={value} value={value}>
+                            {label}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   </div>
-                )}
-
-                {/* Fields for recurring expenses */}
-                {formData.isRecurring && (
+                ) : (
                   <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Mois de début *</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.startMonth}
-                        onChange={(e) => updateFormField('startMonth', e.target.value)}
-                        required
-                      >
-                        {monthSelectOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de debut *</label>
+                        <select
+                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                          value={formData.startMonth}
+                          onChange={(e) => updateFormField('startMonth', e.target.value)}
+                          required
+                        >
+                          {monthSelectOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de fin</label>
+                        <select
+                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                          value={formData.endMonth}
+                          onChange={(e) => updateFormField('endMonth', e.target.value)}
+                        >
+                          <option value="">En cours (pas de fin)</option>
+                          {monthSelectOptions.map((option) => (
+                            <option key={option.value} value={option.value}>
+                              {option.label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Mois de fin (optionnel)</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.endMonth}
-                        onChange={(e) => updateFormField('endMonth', e.target.value)}
-                      >
-                        <option value="">En cours (pas de fin)</option>
-                        {monthSelectOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Jour de paiement *</label>
+                        <select
+                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                          value={formData.paymentDay}
+                          onChange={(e) => updateFormField('paymentDay', e.target.value)}
+                          required
+                        >
+                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
+                            <option key={day} value={day}>
+                              {day}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Periodicite *</label>
+                        <select
+                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                          value={formData.recurrencePeriod}
+                          onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
+                          required
+                        >
+                          {Object.entries(recurrenceLabels).map(([value, label]) => (
+                            <option key={value} value={value}>
+                              {label}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Jour de paiement *</span>
-                      </label>
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
                       <select
-                        className="select select-bordered w-full"
-                        value={formData.paymentDay}
-                        onChange={(e) => updateFormField('paymentDay', e.target.value)}
-                        required
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        value={formData.category}
+                        onChange={(e) => updateFormField('category', e.target.value)}
                       >
-                        {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                          <option key={day} value={day}>
-                            {day}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Périodicité *</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.recurrencePeriod}
-                        onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
-                        required
-                      >
-                        {Object.entries(recurrenceLabels).map(([value, label]) => (
+                        {Object.entries(categoryLabels).map(([value, label]) => (
                           <option key={value} value={value}>
                             {label}
                           </option>
@@ -1061,218 +1108,170 @@ export default function Expenses() {
                   </>
                 )}
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Catégorie *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.category}
-                    onChange={(e) => updateFormField('category', e.target.value)}
-                  >
-                    {Object.entries(categoryLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Intra-EU checkbox - only for non-recurring expenses */}
                 {!formData.isRecurring && (
-                  <div className="form-control md:col-span-2">
-                    <label className="label cursor-pointer justify-start gap-3">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary"
-                        checked={formData.isIntraEu}
-                        onChange={(e) => {
-                          updateFormField('isIntraEu', e.target.checked)
-                          // When intra-EU is checked, set tax amount to 0 (auto-liquidation)
-                          if (e.target.checked) {
-                            updateFormField('taxAmount', '0')
-                            updateFormField('taxRate', '0')
-                          }
-                        }}
-                      />
-                      <div>
-                        <span className="label-text font-medium">Achat intracommunautaire (intra-UE)</span>
-                        <span className="label-text-alt block text-xs text-base-content/60">
-                          Auto-liquidation TVA - La TVA sera declaree mais non payee au fournisseur
-                        </span>
-                      </div>
-                    </label>
-                  </div>
+                  <Checkbox
+                    checked={formData.isIntraEu}
+                    onChange={(e) => {
+                      updateFormField('isIntraEu', e.target.checked)
+                      if (e.target.checked) {
+                        updateFormField('taxAmount', '0')
+                        updateFormField('taxRate', '0')
+                      }
+                    }}
+                    label="Achat intracommunautaire (intra-UE)"
+                    description="Auto-liquidation TVA"
+                    alignTop
+                  />
                 )}
 
-                {/* Amount input mode toggle */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Mode de saisie du montant</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <label className="label cursor-pointer gap-2">
-                      <input
-                        type="radio"
-                        name="inputMode"
-                        className="radio radio-primary"
-                        checked={formData.inputMode === 'ttc'}
-                        onChange={() => updateFormField('inputMode', 'ttc')}
-                      />
-                      <span className="label-text">TTC (toutes taxes comprises)</span>
-                    </label>
-                    <label className="label cursor-pointer gap-2">
-                      <input
-                        type="radio"
-                        name="inputMode"
-                        className="radio radio-primary"
-                        checked={formData.inputMode === 'ht'}
-                        onChange={() => updateFormField('inputMode', 'ht')}
-                      />
-                      <span className="label-text">HT (hors taxes)</span>
-                    </label>
+                <div className="space-y-2">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Mode de saisie</label>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Radio
+                      name="inputMode"
+                      checked={formData.inputMode === 'ttc'}
+                      onChange={() => updateFormField('inputMode', 'ttc')}
+                      label="TTC (toutes taxes)"
+                    />
+                    <Radio
+                      name="inputMode"
+                      checked={formData.inputMode === 'ht'}
+                      onChange={() => updateFormField('inputMode', 'ht')}
+                      label="HT (hors taxes)"
+                    />
                   </div>
                 </div>
 
                 {formData.inputMode === 'ttc' ? (
-                  <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant TTC (€) *</span>
-                      </label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_160px]">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TTC (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.amountTtc}
                         onChange={(e) => updateFormField('amountTtc', e.target.value)}
                         required
                       />
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Taux TVA (%)</span>
-                      </label>
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Taux TVA</label>
                       <select
-                        className="select select-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.taxRate}
                         onChange={(e) => updateFormField('taxRate', e.target.value)}
                       >
-                        <option value="0">0% (Exonéré)</option>
+                        <option value="0">0% (Exonere)</option>
                         <option value="5.5">5.5%</option>
                         <option value="10">10%</option>
-                        <option value="20">20% (Taux normal)</option>
+                        <option value="20">20%</option>
                       </select>
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant HT (€) *</span>
-                      </label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant HT (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.amountHt}
                         onChange={(e) => updateFormField('amountHt', e.target.value)}
                         required
                       />
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant TVA (€)</span>
-                      </label>
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TVA (EUR)</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.taxAmount}
                         onChange={(e) => updateFormField('taxAmount', e.target.value)}
                       />
                     </div>
-                  </>
+                  </div>
                 )}
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux de récupération TVA (%)</span>
-                  </label>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Taux de recuperation TVA</label>
                   <select
-                    className="select select-bordered w-full"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.taxRecoveryRate}
                     onChange={(e) => updateFormField('taxRecoveryRate', e.target.value)}
                   >
-                    <option value="100">100% (Récupération totale)</option>
-                    <option value="80">80% (Récupération partielle)</option>
-                    <option value="0">0% (Non récupérable)</option>
+                    <option value="100">100% (Recuperation totale)</option>
+                    <option value="80">80% (Recuperation partielle)</option>
+                    <option value="0">0% (Non recuperable)</option>
                   </select>
                 </div>
 
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Note</span>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                    Note <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered w-full"
+                    className="min-h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
-                    placeholder="Notes supplémentaires..."
+                    placeholder="Notes supplementaires..."
                     rows={2}
                   />
                 </div>
+
+                {(formData.inputMode === 'ttc' ? formData.amountTtc : formData.amountHt) && (
+                  <div className="space-y-2 rounded-lg bg-[#EEF2FF] px-4 py-3.5">
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">Montant HT :</span>
+                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.ht)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">TVA :</span>
+                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.tax)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">Total TTC :</span>
+                      <span className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">{formatCurrency(calculatedValues.ttc)}</span>
+                    </div>
+                    {calculatedValues.tax > 0 && (
+                      <>
+                        <div className="h-px w-full bg-(--border-default)" />
+                        <div className="flex items-center justify-between text-[13px]">
+                          <span className="text-(--text-secondary)">TVA recuperable :</span>
+                          <span className="font-['Space_Grotesk'] text-base font-semibold text-(--color-success)">{formatCurrency(calculatedRecovery)}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Calculated totals */}
-              {(formData.inputMode === 'ttc' ? formData.amountTtc : formData.amountHt) && (
-                <div className="mt-4 p-4 bg-base-200 rounded-lg space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Montant HT :</span>
-                    <span className="font-medium">{formatCurrency(calculatedValues.ht)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">TVA :</span>
-                    <span className="font-medium">{formatCurrency(calculatedValues.tax)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Total TTC :</span>
-                    <span className="text-lg font-bold">{formatCurrency(calculatedValues.ttc)}</span>
-                  </div>
-                  {calculatedValues.tax > 0 && (
-                    <div className="flex justify-between items-center border-t border-base-300 pt-2 mt-2">
-                      <span className="text-base-content/70">TVA récupérable :</span>
-                      <span className="text-lg font-bold text-success">{formatCurrency(calculatedRecovery)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="modal-action">
+              <div className="h-px w-full bg-(--border-default)" />
+              <div className="flex items-center justify-end gap-3 px-7 pt-4 pb-6">
                 <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
                 </AppButton>
                 <AppButton
                   type="submit"
+                  startIcon={createMutation.isPending || updateMutation.isPending ? null : <Check className="h-4 w-4" />}
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : editingExpense ? (
-                    'Enregistrer'
+                    <span className="loading loading-spinner loading-sm" />
                   ) : (
-                    'Créer'
+                    submitLabel
                   )}
                 </AppButton>
               </div>
             </form>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
 
