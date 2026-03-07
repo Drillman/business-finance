@@ -15,6 +15,7 @@ import { AppButton } from '../components/ui/AppButton'
 import { Checkbox } from '../components/ui/Checkbox'
 import { KpiCard } from '../components/ui/KpiCard'
 import { Radio } from '../components/ui/Radio'
+import { Select } from '../components/ui/Select'
 import { Switch } from '../components/ui/Switch'
 import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
@@ -59,6 +60,11 @@ const recurrenceLabels: Record<RecurrencePeriod, string> = {
   quarterly: 'Trimestrielle',
   yearly: 'Annuelle',
 }
+
+const categoryOptions = Object.entries(categoryLabels).map(([value, label]) => ({
+  value,
+  label,
+}))
 
 const fixedExpenseColumns: DataTableColumn[] = [
   { key: 'description', label: 'Description', className: 'w-[320px]' },
@@ -1008,17 +1014,11 @@ export default function Expenses() {
 
                     <div className="space-y-1.5">
                       <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
-                      <select
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                      <Select
                         value={formData.category}
                         onChange={(e) => updateFormField('category', e.target.value)}
-                      >
-                        {Object.entries(categoryLabels).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
+                        options={categoryOptions}
+                      />
                     </div>
                   </div>
                 ) : (
@@ -1093,17 +1093,11 @@ export default function Expenses() {
 
                     <div className="space-y-1.5">
                       <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
-                      <select
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                      <Select
                         value={formData.category}
                         onChange={(e) => updateFormField('category', e.target.value)}
-                      >
-                        {Object.entries(categoryLabels).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
+                        options={categoryOptions}
+                      />
                     </div>
                   </>
                 )}
