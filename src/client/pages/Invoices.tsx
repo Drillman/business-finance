@@ -326,7 +326,7 @@ export default function Invoices() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-3">
         <KpiCard
           title={`CA HT ${selectedYear}`}
           value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(calculatedSummary?.totalHt || 0)}

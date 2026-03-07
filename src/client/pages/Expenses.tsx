@@ -672,7 +672,7 @@ export default function Expenses() {
 
       {activeTab === 'monthly' && (
         <>
-          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
             <KpiCard
               title="Total TTC du mois"
               value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalTtc)}

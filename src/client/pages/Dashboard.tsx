@@ -76,7 +76,7 @@ export default function Dashboard() {
           {/* Yearly KPIs */}
           <div className="mb-8">
             <h2 className="mb-4 text-lg font-semibold">Bilan {selectedYear}</h2>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
               <KpiCard
                 title="Chiffre d'affaires"
                 value={yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}

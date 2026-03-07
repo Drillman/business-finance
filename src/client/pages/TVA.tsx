@@ -15,6 +15,7 @@ import { YearSelect } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { AppButton } from '../components/ui/AppButton'
+import { KpiCard } from '../components/ui/KpiCard'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -197,52 +198,41 @@ export default function TVA() {
 
       {/* Annual Summary */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <div className="stat bg-base-100 rounded-box shadow border-l-[3px] border-l-(--kpi-blue,#818CF8)">
-          <div className="stat-title">TVA collectée</div>
-          <div className="stat-value text-lg text-(--text-primary)">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(summary?.tvaCollected || '0')
-            )}
-          </div>
-          <div className="stat-desc">Sur les factures payées</div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow border-l-[3px] border-l-(--kpi-emerald,#34D399)">
-          <div className="stat-title">TVA récupérable</div>
-          <div className="stat-value text-lg text-(--text-primary)">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(summary?.tvaRecoverable || '0')
-            )}
-          </div>
-          <div className="stat-desc">Sur les dépenses</div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow border-l-[3px] border-l-(--kpi-amber,#FBBF24)">
-          <div className="stat-title">TVA nette à payer</div>
-          <div className="stat-value text-lg text-(--text-primary)">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(summary?.netTva || '0')
-            )}
-          </div>
-          <div className="stat-desc">Collectée - Récupérable</div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow border-l-[3px] border-l-(--kpi-indigo,#A78BFA)">
-          <div className="stat-title">Solde restant</div>
-          <div className="stat-value text-lg text-(--text-primary)">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(summary?.balance || '0')
-            )}
-          </div>
-          <div className="stat-desc">
-            {isLoadingSummary ? '' : `Payé: ${formatCurrency(summary?.totalPaid || '0')}`}
-          </div>
-        </div>
+        <KpiCard
+          title="TVA collectée"
+          value={
+            isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.tvaCollected || '0')
+          }
+          description="Sur les factures payées"
+          accentColor="var(--kpi-blue, #818CF8)"
+          valueClassName="text-lg"
+        />
+        <KpiCard
+          title="TVA récupérable"
+          value={
+            isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.tvaRecoverable || '0')
+          }
+          description="Sur les dépenses"
+          accentColor="var(--kpi-emerald, #34D399)"
+          valueClassName="text-lg"
+        />
+        <KpiCard
+          title="TVA nette à payer"
+          value={
+            isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.netTva || '0')
+          }
+          description="Collectée - Récupérable"
+          accentColor="var(--kpi-amber, #FBBF24)"
+          valueColor={parseFloat(summary?.netTva || '0') > 0 ? 'var(--color-warning)' : 'var(--color-success)'}
+          valueClassName="text-lg"
+        />
+        <KpiCard
+          title="Solde restant"
+          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.balance || '0')}
+          description={isLoadingSummary ? '' : `Payé: ${formatCurrency(summary?.totalPaid || '0')}`}
+          accentColor="var(--kpi-indigo, #A78BFA)"
+          valueClassName="text-lg"
+        />
       </div>
 
       {/* Monthly Breakdown */}
