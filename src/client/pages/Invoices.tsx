@@ -19,6 +19,7 @@ import { YearSelect } from '../components/PeriodSelect'
 import { AppButton } from '../components/ui/AppButton'
 import { KpiCard } from '../components/ui/KpiCard'
 import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
+import { Select } from '../components/ui/Select'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -82,6 +83,13 @@ const modalInputClass =
   'h-10 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
 const modalTextareaClass =
   'w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 py-2 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
+
+const taxRateOptions = [
+  { value: '0', label: '0% (Exonere)' },
+  { value: '5.5', label: '5.5%' },
+  { value: '10', label: '10%' },
+  { value: '20', label: '20% (Taux normal)' },
+]
 
 export default function Invoices() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
@@ -652,16 +660,12 @@ export default function Invoices() {
 
                   <div>
                     <label className={modalFieldLabelClass}>Taux TVA (%) *</label>
-                    <select
-                      className={modalInputClass}
+                    <Select
+                      className="h-10"
                       value={formData.taxRate}
                       onChange={(e) => updateFormField('taxRate', e.target.value)}
-                    >
-                      <option value="0">0% (Exonéré)</option>
-                      <option value="5.5">5.5%</option>
-                      <option value="10">10%</option>
-                      <option value="20">20% (Taux normal)</option>
-                    </select>
+                      options={taxRateOptions}
+                    />
                   </div>
 
                   <div className="md:col-span-2">

@@ -66,6 +66,24 @@ const categoryOptions = Object.entries(categoryLabels).map(([value, label]) => (
   label,
 }))
 
+const recurrenceOptions = Object.entries(recurrenceLabels).map(([value, label]) => ({
+  value,
+  label,
+}))
+
+const taxRateOptions = [
+  { value: '0', label: '0% (Exonere)' },
+  { value: '5.5', label: '5.5%' },
+  { value: '10', label: '10%' },
+  { value: '20', label: '20%' },
+]
+
+const taxRecoveryRateOptions = [
+  { value: '100', label: '100% (Recuperation totale)' },
+  { value: '80', label: '80% (Recuperation partielle)' },
+  { value: '0', label: '0% (Non recuperable)' },
+]
+
 const fixedExpenseColumns: DataTableColumn[] = [
   { key: 'description', label: 'Description', className: 'w-[320px]' },
   { key: 'payment-day', label: 'Jour', className: 'w-[92px] text-center' },
@@ -574,6 +592,16 @@ export default function Expenses() {
     return options
   }, [])
 
+  const endMonthOptions = useMemo(
+    () => [{ value: '', label: 'En cours (pas de fin)' }, ...monthSelectOptions],
+    [monthSelectOptions],
+  )
+
+  const paymentDayOptions = useMemo(
+    () => Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+    [],
+  )
+
   const modalTitle = editingExpense
     ? (formData.isRecurring ? 'Modifier la charge fixe' : 'Modifier la depense')
     : (formData.isRecurring ? 'Nouvelle charge fixe' : 'Nouvelle depense')
@@ -1026,68 +1054,43 @@ export default function Expenses() {
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <label className="block text-[13px] font-medium text-(--text-primary)">Mois de debut *</label>
-                        <select
-                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        <Select
                           value={formData.startMonth}
                           onChange={(e) => updateFormField('startMonth', e.target.value)}
+                          options={monthSelectOptions}
                           required
-                        >
-                          {monthSelectOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="block text-[13px] font-medium text-(--text-primary)">Mois de fin</label>
-                        <select
-                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        <Select
                           value={formData.endMonth}
                           onChange={(e) => updateFormField('endMonth', e.target.value)}
-                        >
-                          <option value="">En cours (pas de fin)</option>
-                          {monthSelectOptions.map((option) => (
-                            <option key={option.value} value={option.value}>
-                              {option.label}
-                            </option>
-                          ))}
-                        </select>
+                          options={endMonthOptions}
+                        />
                       </div>
                     </div>
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
                         <label className="block text-[13px] font-medium text-(--text-primary)">Jour de paiement *</label>
-                        <select
-                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        <Select
                           value={formData.paymentDay}
                           onChange={(e) => updateFormField('paymentDay', e.target.value)}
+                          options={paymentDayOptions}
                           required
-                        >
-                          {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                            <option key={day} value={day}>
-                              {day}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
 
                       <div className="space-y-1.5">
                         <label className="block text-[13px] font-medium text-(--text-primary)">Periodicite *</label>
-                        <select
-                          className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        <Select
                           value={formData.recurrencePeriod}
                           onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
+                          options={recurrenceOptions}
                           required
-                        >
-                          {Object.entries(recurrenceLabels).map(([value, label]) => (
-                            <option key={value} value={value}>
-                              {label}
-                            </option>
-                          ))}
-                        </select>
+                        />
                       </div>
                     </div>
 
@@ -1153,16 +1156,11 @@ export default function Expenses() {
 
                     <div className="space-y-1.5">
                       <label className="block text-[13px] font-medium text-(--text-primary)">Taux TVA</label>
-                      <select
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                      <Select
                         value={formData.taxRate}
                         onChange={(e) => updateFormField('taxRate', e.target.value)}
-                      >
-                        <option value="0">0% (Exonere)</option>
-                        <option value="5.5">5.5%</option>
-                        <option value="10">10%</option>
-                        <option value="20">20%</option>
-                      </select>
+                        options={taxRateOptions}
+                      />
                     </div>
                   </div>
                 ) : (
@@ -1196,15 +1194,11 @@ export default function Expenses() {
 
                 <div className="space-y-1.5">
                   <label className="block text-[13px] font-medium text-(--text-primary)">Taux de recuperation TVA</label>
-                  <select
-                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                  <Select
                     value={formData.taxRecoveryRate}
                     onChange={(e) => updateFormField('taxRecoveryRate', e.target.value)}
-                  >
-                    <option value="100">100% (Recuperation totale)</option>
-                    <option value="80">80% (Recuperation partielle)</option>
-                    <option value="0">0% (Non recuperable)</option>
-                  </select>
+                    options={taxRecoveryRateOptions}
+                  />
                 </div>
 
                 <div className="space-y-1.5">
