@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import {
   useUrssafSummary,
   useCreateUrssafPayment,
@@ -6,11 +6,12 @@ import {
   useDeleteUrssafPayment,
 } from '../hooks/useUrssaf'
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
-import { Pencil, Trash2 } from 'lucide-react'
+import { Check, Pencil, Trash2, X } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { YearSelect, YEARS } from '../components/PeriodSelect'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { AppButton } from '../components/ui/AppButton'
+import { Select } from '../components/ui/Select'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -36,6 +37,16 @@ const trimesterLabels: Record<number, string> = {
   3: 'T3 (Juil-Sep)',
   4: 'T4 (Oct-Déc)',
 }
+
+const trimesterOptions = [1, 2, 3, 4].map((trimester) => ({
+  value: trimester.toString(),
+  label: trimesterLabels[trimester],
+}))
+
+const statusOptions = [
+  { value: 'pending', label: 'En attente' },
+  { value: 'paid', label: 'Payé' },
+]
 
 interface UrssafFormData {
   trimester: string
@@ -162,6 +173,13 @@ export default function Urssaf() {
       return updated
     })
   }
+
+  const parsedRevenue = parseFloat(formData.revenue) || 0
+  const parsedAmount = parseFloat(formData.amount) || 0
+  const urssafRate = summary?.urssafRate || 22
+  const calculatedAmount = parsedRevenue * (urssafRate / 100)
+  const modalTitle = editingPayment ? 'Modifier la cotisation Urssaf' : 'Nouvelle cotisation Urssaf'
+  const submitLabel = editingPayment ? 'Enregistrer' : 'Déclarer'
 
   return (
     <div>
@@ -350,168 +368,186 @@ export default function Urssaf() {
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-lg">
-            <h3 className="font-bold text-lg mb-4">
-              {editingPayment ? 'Modifier la cotisation Urssaf' : 'Nouvelle cotisation Urssaf'}
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            onClick={closeModal}
+            aria-label="Fermer"
+          />
 
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
+          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-(--border-default) bg-(--card-bg) shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center justify-between px-7 pt-6 pb-0">
+              <div>
+                <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold tracking-[-0.02em] text-(--text-primary)">
+                  {modalTitle}
+                </h3>
+                <p className="mt-1 text-[13px] text-(--text-secondary)">
+                  Déclarez vos cotisations trimestrielles
+                </p>
               </div>
-            )}
+
+              <button
+                type="button"
+                onClick={closeModal}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
+                aria-label="Fermer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Trimestre *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.trimester}
-                    onChange={(e) => updateFormField('trimester', e.target.value)}
-                    disabled={!!editingPayment}
-                  >
-                    {[1, 2, 3, 4].map((t) => (
-                      <option key={t} value={t}>
-                        {trimesterLabels[t]}
-                      </option>
-                    ))}
-                  </select>
+              <div className="max-h-[65vh] space-y-4.5 overflow-y-auto px-7 py-5">
+                {error && (
+                  <div className="rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                    {error}
+                  </div>
+                )}
+
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-(--text-primary)">Trimestre *</label>
+                    <Select
+                      className="h-10"
+                      value={formData.trimester}
+                      onChange={(e) => updateFormField('trimester', e.target.value)}
+                      options={trimesterOptions}
+                      disabled={!!editingPayment}
+                    />
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-(--text-primary)">Année *</label>
+                    <Select
+                      className="h-10"
+                      value={formData.year}
+                      onChange={(e) => updateFormField('year', e.target.value)}
+                      options={YEARS.map((year) => ({ value: year.toString(), label: year.toString() }))}
+                      disabled={!!editingPayment}
+                    />
+                  </div>
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Année *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.year}
-                    onChange={(e) => updateFormField('year', e.target.value)}
-                    disabled={!!editingPayment}
-                  >
-                    {YEARS.map((year) => (
-                      <option key={year} value={year}>
-                        {year}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Chiffre d'affaires (€) *</span>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                    Chiffre d'affaires (€) *
                   </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    className="input input-bordered w-full"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.revenue}
                     onChange={(e) => updateFormField('revenue', e.target.value)}
                     required
                   />
                 </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Montant cotisation (€) *</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="input input-bordered w-full"
-                    value={formData.amount}
-                    onChange={(e) => updateFormField('amount', e.target.value)}
-                    required
-                  />
-                  {summary && formData.revenue && (
-                    <label className="label">
-                      <span className="label-text-alt text-base-content/60">
-                        Estimation à {summary.urssafRate}%: {formatCurrency(parseFloat(formData.revenue) * (summary.urssafRate / 100))}
-                      </span>
-                    </label>
-                  )}
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Statut *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.status}
-                    onChange={(e) => updateFormField('status', e.target.value)}
-                  >
-                    <option value="pending">En attente</option>
-                    <option value="paid">Payé</option>
-                  </select>
-                </div>
-
-                {formData.status === 'paid' && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Date de paiement</span>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_180px]">
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-(--text-primary)">
+                      Montant cotisation (€) *
                     </label>
                     <input
-                      type="date"
-                      className="input input-bordered w-full"
-                      value={formData.paymentDate}
-                      onChange={(e) => updateFormField('paymentDate', e.target.value)}
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                      value={formData.amount}
+                      onChange={(e) => updateFormField('amount', e.target.value)}
+                      required
+                    />
+                    <p className="text-[11px] text-(--text-tertiary)">
+                      Estimation : {urssafRate}% du CA
+                    </p>
+                  </div>
+
+                  <div className="space-y-1.5">
+                    <label className="block text-[13px] font-medium text-(--text-primary)">Statut *</label>
+                    <Select
+                      className="h-10"
+                      value={formData.status}
+                      onChange={(e) => updateFormField('status', e.target.value)}
+                      options={statusOptions}
                     />
                   </div>
-                )}
+                </div>
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Référence</span>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Date de paiement</label>
+                  <input
+                    type="date"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                    value={formData.paymentDate}
+                    onChange={(e) => updateFormField('paymentDate', e.target.value)}
+                  />
+                </div>
+
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                    Référence <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
                   </label>
                   <input
                     type="text"
-                    className="input input-bordered w-full"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.reference}
                     onChange={(e) => updateFormField('reference', e.target.value)}
                     placeholder="Numéro de déclaration..."
                   />
                 </div>
 
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Note</span>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                    Note <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered w-full"
+                    className="min-h-16 w-full rounded-lg border border-(--border-default) bg-white px-3 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
                     placeholder="Notes supplémentaires..."
                     rows={2}
                   />
                 </div>
+
+                <div className="space-y-2 rounded-lg bg-[#EEF2FF] px-4 py-3.5">
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-(--text-secondary)">Chiffre d'affaires :</span>
+                    <span className="font-medium text-(--text-primary)">{formatCurrency(parsedRevenue)}</span>
+                  </div>
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-(--text-secondary)">Taux Urssaf :</span>
+                    <span className="font-medium text-(--text-primary)">{urssafRate}%</span>
+                  </div>
+                  <div className="h-px w-full bg-(--border-default)" />
+                  <div className="flex items-center justify-between text-[13px]">
+                    <span className="text-(--text-secondary)">Cotisation due :</span>
+                    <span className="font-['Space_Grotesk'] text-base font-semibold text-(--color-primary)">
+                      {formatCurrency(formData.amount ? parsedAmount : calculatedAmount)}
+                    </span>
+                  </div>
+                </div>
               </div>
 
-              <div className="modal-action">
+              <div className="h-px w-full bg-(--border-default)" />
+              <div className="flex items-center justify-end gap-3 px-7 pt-4 pb-6">
                 <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
                 </AppButton>
                 <AppButton
                   type="submit"
+                  startIcon={createMutation.isPending || updateMutation.isPending ? null : <Check className="h-4 w-4" />}
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : editingPayment ? (
-                    'Enregistrer'
+                    <span className="loading loading-spinner loading-sm" />
                   ) : (
-                    'Déclarer'
+                    submitLabel
                   )}
                 </AppButton>
               </div>
             </form>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
 

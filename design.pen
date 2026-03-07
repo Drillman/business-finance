@@ -4715,12 +4715,6 @@
                       "letterSpacing": -0.5
                     }
                   ]
-                },
-                {
-                  "id": "5VHkM",
-                  "type": "ref",
-                  "ref": "DNGUP",
-                  "name": "yearSelector"
                 }
               ]
             },
@@ -15723,6 +15717,798 @@
           "fill": "#FFFFFF",
           "width": 8,
           "height": 8
+        }
+      ]
+    },
+    {
+      "type": "frame",
+      "id": "Q0W4t",
+      "x": 3638,
+      "y": 1795,
+      "name": "Popup/AddUrssaf",
+      "width": 560,
+      "fill": "$bg-card",
+      "cornerRadius": 16,
+      "stroke": {
+        "align": "inside",
+        "thickness": 1,
+        "fill": "$border-default"
+      },
+      "effect": {
+        "type": "shadow",
+        "shadowType": "outer",
+        "color": "#00000025",
+        "offset": {
+          "x": 0,
+          "y": 8
+        },
+        "blur": 32,
+        "spread": -4
+      },
+      "layout": "vertical",
+      "children": [
+        {
+          "type": "frame",
+          "id": "2mKnb",
+          "name": "PopupHeader",
+          "width": "fill_container",
+          "padding": [
+            24,
+            28,
+            0,
+            28
+          ],
+          "justifyContent": "space_between",
+          "alignItems": "center",
+          "children": [
+            {
+              "type": "frame",
+              "id": "W8MOy",
+              "name": "titleWrap",
+              "layout": "vertical",
+              "gap": 4,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Oivem",
+                  "name": "title",
+                  "fill": "$text-primary",
+                  "content": "Nouvelle cotisation Urssaf",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 22,
+                  "fontWeight": "600",
+                  "letterSpacing": -0.3
+                },
+                {
+                  "type": "text",
+                  "id": "cMQTX",
+                  "name": "subtitle",
+                  "fill": "$text-secondary",
+                  "content": "Déclarez vos cotisations trimestrielles",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "bjITH",
+              "name": "closeBtn",
+              "width": 32,
+              "height": 32,
+              "fill": "#00000000",
+              "cornerRadius": 8,
+              "justifyContent": "center",
+              "alignItems": "center",
+              "children": [
+                {
+                  "type": "icon_font",
+                  "id": "iTqhI",
+                  "name": "closeIcon",
+                  "width": 18,
+                  "height": 18,
+                  "iconFontName": "x",
+                  "iconFontFamily": "lucide",
+                  "fill": "$text-secondary"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "SjXZ4",
+          "name": "FormBody",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 18,
+          "padding": [
+            20,
+            28
+          ],
+          "children": [
+            {
+              "type": "frame",
+              "id": "df0lV",
+              "name": "QuarterYearRow",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "Apvvd",
+                  "name": "Field/Trimestre",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "dpR5n",
+                      "name": "quarterLabel",
+                      "fill": "$text-primary",
+                      "content": "Trimestre *",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "WhbxH",
+                      "name": "selectInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "TB5gn",
+                          "name": "quarterVal",
+                          "fill": "$text-primary",
+                          "content": "T1 (Jan-Mar)",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "qntyp",
+                          "name": "chevron",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-down",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "vfjSk",
+                  "name": "Field/Annee",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "KKzZp",
+                      "name": "yearLabel",
+                      "fill": "$text-primary",
+                      "content": "Année *",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "7dzue",
+                      "name": "selectInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "RyIz5",
+                          "name": "yearVal",
+                          "fill": "$text-primary",
+                          "content": "2026",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "fdOBN",
+                          "name": "chevron",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-down",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "vyhjU",
+              "name": "Field/CA",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "GFBJo",
+                  "name": "caLabel",
+                  "fill": "$text-primary",
+                  "content": "Chiffre d’affaires (€) *",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "hcXOa",
+                  "name": "textInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "0S9yY",
+                      "name": "caVal",
+                      "fill": "$text-primary",
+                      "content": "15 000,00",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "9N7rR",
+              "name": "AmountRow",
+              "width": "fill_container",
+              "gap": 16,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "EgRT1",
+                  "name": "Field/Montant",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "mfeow",
+                      "name": "montantLabel",
+                      "fill": "$text-primary",
+                      "content": "Montant cotisation (€) *",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Rhd7Z",
+                      "name": "textInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "3bJrD",
+                          "name": "montantVal",
+                          "fill": "$text-primary",
+                          "content": "3 285,00",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "zA8Xx",
+                      "name": "hint",
+                      "fill": "$text-tertiary",
+                      "content": "Estimation : 21,9% du CA",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "4Ukwd",
+                  "name": "Field/Statut",
+                  "width": 180,
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "GTSQ1",
+                      "name": "statutLabel",
+                      "fill": "$text-primary",
+                      "content": "Statut *",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "TBQzH",
+                      "name": "selectInput",
+                      "width": "fill_container",
+                      "height": 40,
+                      "fill": "#FFFFFF",
+                      "cornerRadius": 8,
+                      "stroke": {
+                        "align": "inside",
+                        "thickness": 1,
+                        "fill": "$border-default"
+                      },
+                      "padding": [
+                        0,
+                        12
+                      ],
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "P0Xl2",
+                          "name": "statutVal",
+                          "fill": "$text-primary",
+                          "content": "Payé",
+                          "fontFamily": "Inter",
+                          "fontSize": 14,
+                          "fontWeight": "normal"
+                        },
+                        {
+                          "type": "icon_font",
+                          "id": "kWVqO",
+                          "name": "chevron",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "chevron-down",
+                          "iconFontFamily": "lucide",
+                          "fill": "$text-secondary"
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "VrUs8",
+              "name": "Field/DatePaiement",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "8Ddgx",
+                  "name": "dateLabel",
+                  "fill": "$text-primary",
+                  "content": "Date de paiement",
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "500"
+                },
+                {
+                  "type": "frame",
+                  "id": "p7lMM",
+                  "name": "dateInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "5hhoG",
+                      "name": "dateVal",
+                      "fill": "$text-primary",
+                      "content": "07/03/2026",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "icon_font",
+                      "id": "hE3p6",
+                      "name": "calendarIcon",
+                      "width": 16,
+                      "height": 16,
+                      "iconFontName": "calendar",
+                      "iconFontFamily": "lucide",
+                      "fill": "$text-secondary"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "Mi9fn",
+              "name": "Field/Reference",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "z7OSF",
+                  "name": "labelRow",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "gLlup",
+                      "name": "refLabel",
+                      "fill": "$text-primary",
+                      "content": "Référence",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "Wof9L",
+                      "name": "refOpt",
+                      "fill": "$text-tertiary",
+                      "content": "(optionnel)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "NKXHm",
+                  "name": "textInput",
+                  "width": "fill_container",
+                  "height": 40,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    12
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "eCPqp",
+                      "name": "refVal",
+                      "fill": "$text-tertiary",
+                      "content": "Numéro de déclaration...",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "mrc5R",
+              "name": "Field/Note",
+              "width": "fill_container",
+              "layout": "vertical",
+              "gap": 6,
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "dXJMn",
+                  "name": "labelRow",
+                  "gap": 6,
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "tD7RC",
+                      "name": "noteLabel",
+                      "fill": "$text-primary",
+                      "content": "Note",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "text",
+                      "id": "TblSp",
+                      "name": "noteOpt",
+                      "fill": "$text-tertiary",
+                      "content": "(optionnel)",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "ERZLD",
+                  "name": "textInput",
+                  "width": "fill_container",
+                  "height": 64,
+                  "fill": "#FFFFFF",
+                  "cornerRadius": 8,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    10,
+                    12
+                  ],
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "vRDwn",
+                      "name": "noteVal",
+                      "fill": "$text-tertiary",
+                      "content": "Notes supplémentaires...",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
+              "id": "9ecu5",
+              "name": "CalcSummary",
+              "width": "fill_container",
+              "fill": "$bg-highlight",
+              "cornerRadius": 8,
+              "layout": "vertical",
+              "gap": 8,
+              "padding": [
+                14,
+                16
+              ],
+              "children": [
+                {
+                  "type": "frame",
+                  "id": "awSQL",
+                  "name": "rowCA",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "SnSDw",
+                      "name": "rowCAl",
+                      "fill": "$text-secondary",
+                      "content": "Chiffre d’affaires :",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "87Tlt",
+                      "name": "rowCAv",
+                      "fill": "$text-primary",
+                      "content": "15 000,00 €",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "RJ7En",
+                  "name": "rowRate",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "jOtkd",
+                      "name": "rowRatel",
+                      "fill": "$text-secondary",
+                      "content": "Taux Urssaf :",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "rLQIb",
+                      "name": "rowRatev",
+                      "fill": "$text-primary",
+                      "content": "21,9%",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "3M0iw",
+                  "name": "divider",
+                  "width": "fill_container",
+                  "height": 1,
+                  "fill": "$border-default"
+                },
+                {
+                  "type": "frame",
+                  "id": "Pwv7z",
+                  "name": "rowTotal",
+                  "width": "fill_container",
+                  "justifyContent": "space_between",
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "Rnz06",
+                      "name": "rowTotall",
+                      "fill": "$text-secondary",
+                      "content": "Cotisation due :",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "b5eD1",
+                      "name": "rowTotalv",
+                      "fill": "$accent-primary",
+                      "content": "3 285,00 €",
+                      "fontFamily": "Space Grotesk",
+                      "fontSize": 16,
+                      "fontWeight": "600"
+                    }
+                  ]
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "V5RlX",
+          "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "$border-default"
+        },
+        {
+          "type": "frame",
+          "id": "ZteXg",
+          "name": "PopupFooter",
+          "width": "fill_container",
+          "gap": 12,
+          "padding": [
+            16,
+            28,
+            24,
+            28
+          ],
+          "justifyContent": "end",
+          "alignItems": "center",
+          "children": [
+            {
+              "id": "BUNnh",
+              "type": "ref",
+              "ref": "N1Uyd",
+              "name": "cancelBtn",
+              "descendants": {
+                "yVTsz": {
+                  "content": "Annuler"
+                }
+              }
+            },
+            {
+              "id": "WRFhV",
+              "type": "ref",
+              "ref": "SOfYp",
+              "name": "submitBtn",
+              "descendants": {
+                "NQavs": {
+                  "iconFontName": "check"
+                },
+                "YRQl4": {
+                  "content": "Déclarer"
+                }
+              }
+            }
+          ]
         }
       ]
     }
