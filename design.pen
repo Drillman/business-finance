@@ -7479,9 +7479,9 @@
           "width": "fill_container",
           "height": "fill_container",
           "layout": "vertical",
-          "gap": 28,
+          "gap": 24,
           "padding": [
-            32,
+            28,
             40
           ],
           "children": [
@@ -7507,9 +7507,8 @@
                       "fill": "$text-primary",
                       "content": "Configuration",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 28,
-                      "fontWeight": "600",
-                      "letterSpacing": -0.5
+                      "fontSize": 24,
+                      "fontWeight": "600"
                     }
                   ]
                 }
@@ -7517,422 +7516,200 @@
             },
             {
               "type": "frame",
-              "id": "XLcxr",
-              "name": "genCard",
+              "id": "7HwoG",
+              "name": "cardRow",
               "width": "fill_container",
-              "fill": "$bg-card",
-              "cornerRadius": 10,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "$border-default"
-              },
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000000A",
-                "offset": {
-                  "x": 0,
-                  "y": 1
-                },
-                "blur": 4
-              },
-              "layout": "vertical",
-              "gap": 20,
-              "padding": 24,
+              "gap": 24,
               "children": [
                 {
-                  "type": "text",
-                  "id": "GA1jA",
-                  "name": "genTitle",
-                  "fill": "$text-primary",
-                  "content": "Paramètres généraux",
-                  "fontFamily": "Space Grotesk",
-                  "fontSize": 16,
-                  "fontWeight": "600"
-                },
-                {
                   "type": "frame",
-                  "id": "RtPod",
-                  "name": "genFields",
+                  "id": "XLcxr",
+                  "name": "genCard",
                   "width": "fill_container",
-                  "gap": 24,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "xjTDk",
-                      "name": "field1",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "znzTK",
-                          "name": "f1label",
-                          "fill": "$text-primary",
-                          "content": "Abattement forfaitaire (%)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Mk6vl",
-                          "name": "f1input",
-                          "width": "fill_container",
-                          "height": 36,
-                          "fill": "$bg-card",
-                          "cornerRadius": 8,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "$border-default"
-                          },
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "c25Un",
-                              "name": "f1value",
-                              "fill": "$text-primary",
-                              "content": "34.00",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "jBUlh",
-                          "name": "f1help",
-                          "fill": "$text-tertiary",
-                          "content": "Abattement pour frais professionnels (34% pour BNC)",
-                          "fontFamily": "Inter",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
                     },
-                    {
-                      "type": "frame",
-                      "id": "d8iGm",
-                      "name": "field2",
-                      "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "F6tpz",
-                          "name": "f2label",
-                          "fill": "$text-primary",
-                          "content": "Salaire mensuel cible (€)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Y81qS",
-                          "name": "f2input",
-                          "width": "fill_container",
-                          "height": 36,
-                          "fill": "$bg-card",
-                          "cornerRadius": 8,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "$border-default"
-                          },
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "ZKRlN",
-                              "name": "f2value",
-                              "fill": "$text-primary",
-                              "content": "3000.00",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
-                            }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "fQhaH",
-                          "name": "f2help",
-                          "fill": "$text-tertiary",
-                          "content": "Objectif de rémunération mensuelle nette",
-                          "fontFamily": "Inter",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "frame",
-                  "id": "ECmH2",
-                  "name": "saveBtn",
-                  "width": "fill_container",
-                  "justifyContent": "end",
-                  "children": [
-                    {
-                      "id": "7Mvhd",
-                      "type": "ref",
-                      "ref": "SOfYp",
-                      "name": "saveBtnRef",
-                      "descendants": {
-                        "NQavs": {
-                          "iconFontName": "save"
-                        },
-                        "YRQl4": {
-                          "content": "Enregistrer"
-                        }
-                      }
-                    }
-                  ]
-                }
-              ]
-            },
-            {
-              "type": "frame",
-              "id": "ecExP",
-              "name": "ratesCard",
-              "width": "fill_container",
-              "fill": "$bg-card",
-              "cornerRadius": 10,
-              "stroke": {
-                "align": "inside",
-                "thickness": 1,
-                "fill": "$border-default"
-              },
-              "effect": {
-                "type": "shadow",
-                "shadowType": "outer",
-                "color": "#0000000A",
-                "offset": {
-                  "x": 0,
-                  "y": 1
-                },
-                "blur": 4
-              },
-              "layout": "vertical",
-              "gap": 20,
-              "padding": 24,
-              "children": [
-                {
-                  "type": "frame",
-                  "id": "5HXy0",
-                  "name": "ratesHeader",
-                  "width": "fill_container",
-                  "justifyContent": "space_between",
-                  "alignItems": "center",
+                    "blur": 4
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 20,
                   "children": [
                     {
                       "type": "text",
-                      "id": "CvY1P",
-                      "name": "ratesTitle",
+                      "id": "GA1jA",
+                      "name": "genTitle",
                       "fill": "$text-primary",
-                      "content": "Taux annuels",
+                      "content": "Paramètres généraux",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 16,
+                      "fontSize": 14,
                       "fontWeight": "600"
                     },
                     {
                       "type": "frame",
-                      "id": "IimDz",
-                      "name": "yearSelect",
-                      "height": 32,
-                      "fill": "$bg-card",
-                      "cornerRadius": 8,
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": 1,
-                        "fill": "$border-default"
-                      },
-                      "gap": 6,
-                      "padding": [
-                        0,
-                        12
-                      ],
-                      "justifyContent": "center",
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "nlv5U",
-                          "name": "yearSelectText",
-                          "fill": "$text-primary",
-                          "content": "2026",
-                          "fontFamily": "Space Grotesk",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "icon_font",
-                          "id": "CKNmu",
-                          "name": "yearSelectChev",
-                          "width": 14,
-                          "height": 14,
-                          "iconFontName": "chevron-down",
-                          "iconFontFamily": "lucide",
-                          "fill": "$text-tertiary"
-                        }
-                      ]
-                    }
-                  ]
-                },
-                {
-                  "type": "text",
-                  "id": "1uhwN",
-                  "name": "ratesDesc",
-                  "fill": "$text-secondary",
-                  "textGrowth": "fixed-width",
-                  "width": "fill_container",
-                  "content": "Configurez les taux Urssaf et d'impôt estimé par année.",
-                  "fontFamily": "Inter",
-                  "fontSize": 13,
-                  "fontWeight": "normal"
-                },
-                {
-                  "type": "frame",
-                  "id": "JBO6Z",
-                  "name": "ratesFields",
-                  "width": "fill_container",
-                  "gap": 24,
-                  "children": [
-                    {
-                      "type": "frame",
-                      "id": "13Bsv",
-                      "name": "rf1",
+                      "id": "RtPod",
+                      "name": "genFields",
                       "width": "fill_container",
                       "layout": "vertical",
-                      "gap": 6,
+                      "gap": 12,
                       "children": [
                         {
-                          "type": "text",
-                          "id": "HRT2M",
-                          "name": "rf1label",
-                          "fill": "$text-primary",
-                          "content": "Taux Urssaf (%)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
                           "type": "frame",
-                          "id": "9K21F",
-                          "name": "rf1input",
+                          "id": "xjTDk",
+                          "name": "field1",
                           "width": "fill_container",
-                          "height": 36,
-                          "fill": "$bg-card",
-                          "cornerRadius": 8,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "$border-default"
-                          },
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "alignItems": "center",
+                          "layout": "vertical",
+                          "gap": 4,
                           "children": [
                             {
                               "type": "text",
-                              "id": "Ex3Bm",
-                              "name": "rf1value",
+                              "id": "znzTK",
+                              "name": "f1label",
                               "fill": "$text-primary",
-                              "content": "22.00",
+                              "content": "Abattement forfaitaire (%)",
                               "fontFamily": "Inter",
-                              "fontSize": 14,
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Mk6vl",
+                              "name": "f1input",
+                              "width": "fill_container",
+                              "height": 32,
+                              "fill": "$bg-card",
+                              "cornerRadius": 8,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$border-default"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "c25Un",
+                                  "name": "f1value",
+                                  "fill": "$text-primary",
+                                  "content": "34.00",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "jBUlh",
+                              "name": "f1help",
+                              "fill": "$text-tertiary",
+                              "content": "Abattement pour frais professionnels (34% pour BNC)",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
                               "fontWeight": "normal"
                             }
                           ]
                         },
                         {
-                          "type": "text",
-                          "id": "05qm4",
-                          "name": "rf1help",
-                          "fill": "$text-tertiary",
-                          "content": "Taux de cotisations sociales pour micro-entrepreneur",
-                          "fontFamily": "Inter",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          "type": "frame",
+                          "id": "d8iGm",
+                          "name": "field2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "F6tpz",
+                              "name": "f2label",
+                              "fill": "$text-primary",
+                              "content": "Salaire mensuel cible (€)",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "Y81qS",
+                              "name": "f2input",
+                              "width": "fill_container",
+                              "height": 32,
+                              "fill": "$bg-card",
+                              "cornerRadius": 8,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$border-default"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "ZKRlN",
+                                  "name": "f2value",
+                                  "fill": "$text-primary",
+                                  "content": "3000.00",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "fQhaH",
+                              "name": "f2help",
+                              "fill": "$text-tertiary",
+                              "content": "Objectif de rémunération mensuelle nette",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
                         }
                       ]
                     },
                     {
                       "type": "frame",
-                      "id": "AAL7H",
-                      "name": "rf2",
+                      "id": "ECmH2",
+                      "name": "saveBtn",
                       "width": "fill_container",
-                      "layout": "vertical",
-                      "gap": 6,
+                      "justifyContent": "end",
+                      "alignItems": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "BK5q0",
-                          "name": "rf2label",
-                          "fill": "$text-primary",
-                          "content": "Taux d'impôt estimé (%)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "500"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "8o3e4",
-                          "name": "rf2input",
-                          "width": "fill_container",
-                          "height": 36,
-                          "fill": "$bg-card",
-                          "cornerRadius": 8,
-                          "stroke": {
-                            "align": "inside",
-                            "thickness": 1,
-                            "fill": "$border-default"
-                          },
-                          "padding": [
-                            0,
-                            12
-                          ],
-                          "alignItems": "center",
-                          "children": [
-                            {
-                              "type": "text",
-                              "id": "2Y34i",
-                              "name": "rf2value",
-                              "fill": "$text-primary",
-                              "content": "11.00",
-                              "fontFamily": "Inter",
-                              "fontSize": 14,
-                              "fontWeight": "normal"
+                          "id": "7Mvhd",
+                          "type": "ref",
+                          "ref": "SOfYp",
+                          "name": "saveBtnRef",
+                          "descendants": {
+                            "NQavs": {
+                              "iconFontName": "save"
+                            },
+                            "YRQl4": {
+                              "content": "Enregistrer"
                             }
-                          ]
-                        },
-                        {
-                          "type": "text",
-                          "id": "fdEVM",
-                          "name": "rf2help",
-                          "fill": "$text-tertiary",
-                          "content": "Taux marginal d'imposition estimé",
-                          "fontFamily": "Inter",
-                          "fontSize": 11,
-                          "fontWeight": "normal"
+                          }
                         }
                       ]
                     }
@@ -7940,24 +7717,259 @@
                 },
                 {
                   "type": "frame",
-                  "id": "Ont2K",
-                  "name": "ratesSave",
+                  "id": "ecExP",
+                  "name": "ratesCard",
                   "width": "fill_container",
-                  "justifyContent": "end",
+                  "fill": "$bg-card",
+                  "cornerRadius": 10,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": 1,
+                    "fill": "$border-default"
+                  },
+                  "effect": {
+                    "type": "shadow",
+                    "shadowType": "outer",
+                    "color": "#0000000A",
+                    "offset": {
+                      "x": 0,
+                      "y": 1
+                    },
+                    "blur": 4
+                  },
+                  "layout": "vertical",
+                  "gap": 16,
+                  "padding": 20,
                   "children": [
                     {
-                      "id": "ZQcvf",
-                      "type": "ref",
-                      "ref": "SOfYp",
-                      "name": "ratesSaveBtn",
-                      "descendants": {
-                        "NQavs": {
-                          "iconFontName": "save"
+                      "type": "frame",
+                      "id": "5HXy0",
+                      "name": "ratesHeader",
+                      "width": "fill_container",
+                      "justifyContent": "space_between",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "text",
+                          "id": "CvY1P",
+                          "name": "ratesTitle",
+                          "fill": "$text-primary",
+                          "content": "Taux annuels",
+                          "fontFamily": "Space Grotesk",
+                          "fontSize": 14,
+                          "fontWeight": "600"
                         },
-                        "YRQl4": {
-                          "content": "Enregistrer les taux"
+                        {
+                          "type": "frame",
+                          "id": "IimDz",
+                          "name": "yearSelect",
+                          "height": 28,
+                          "fill": "$bg-card",
+                          "cornerRadius": 8,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$border-default"
+                          },
+                          "gap": 6,
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "justifyContent": "center",
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "nlv5U",
+                              "name": "yearSelectText",
+                              "fill": "$text-primary",
+                              "content": "2026",
+                              "fontFamily": "Space Grotesk",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "icon_font",
+                              "id": "CKNmu",
+                              "name": "yearSelectChev",
+                              "width": 14,
+                              "height": 14,
+                              "iconFontName": "chevron-down",
+                              "iconFontFamily": "lucide",
+                              "fill": "$text-tertiary"
+                            }
+                          ]
                         }
-                      }
+                      ]
+                    },
+                    {
+                      "type": "text",
+                      "id": "1uhwN",
+                      "name": "ratesDesc",
+                      "fill": "$text-secondary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Configurez les taux Urssaf et d'impôt estimé par année.",
+                      "fontFamily": "Inter",
+                      "fontSize": 12,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "JBO6Z",
+                      "name": "ratesFields",
+                      "width": "fill_container",
+                      "layout": "vertical",
+                      "gap": 12,
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "13Bsv",
+                          "name": "rf1",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "HRT2M",
+                              "name": "rf1label",
+                              "fill": "$text-primary",
+                              "content": "Taux Urssaf (%)",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "9K21F",
+                              "name": "rf1input",
+                              "width": "fill_container",
+                              "height": 32,
+                              "fill": "$bg-card",
+                              "cornerRadius": 8,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$border-default"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "Ex3Bm",
+                                  "name": "rf1value",
+                                  "fill": "$text-primary",
+                                  "content": "22.00",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "05qm4",
+                              "name": "rf1help",
+                              "fill": "$text-tertiary",
+                              "content": "Taux de cotisations sociales pour micro-entrepreneur",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "type": "frame",
+                          "id": "AAL7H",
+                          "name": "rf2",
+                          "width": "fill_container",
+                          "layout": "vertical",
+                          "gap": 4,
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "BK5q0",
+                              "name": "rf2label",
+                              "fill": "$text-primary",
+                              "content": "Taux d'impôt estimé (%)",
+                              "fontFamily": "Inter",
+                              "fontSize": 12,
+                              "fontWeight": "500"
+                            },
+                            {
+                              "type": "frame",
+                              "id": "8o3e4",
+                              "name": "rf2input",
+                              "width": "fill_container",
+                              "height": 32,
+                              "fill": "$bg-card",
+                              "cornerRadius": 8,
+                              "stroke": {
+                                "align": "inside",
+                                "thickness": 1,
+                                "fill": "$border-default"
+                              },
+                              "padding": [
+                                0,
+                                12
+                              ],
+                              "alignItems": "center",
+                              "children": [
+                                {
+                                  "type": "text",
+                                  "id": "2Y34i",
+                                  "name": "rf2value",
+                                  "fill": "$text-primary",
+                                  "content": "11.00",
+                                  "fontFamily": "Inter",
+                                  "fontSize": 14,
+                                  "fontWeight": "normal"
+                                }
+                              ]
+                            },
+                            {
+                              "type": "text",
+                              "id": "fdEVM",
+                              "name": "rf2help",
+                              "fill": "$text-tertiary",
+                              "content": "Taux marginal d'imposition estimé",
+                              "fontFamily": "Inter",
+                              "fontSize": 10,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        }
+                      ]
+                    },
+                    {
+                      "type": "frame",
+                      "id": "Ont2K",
+                      "name": "ratesSave",
+                      "width": "fill_container",
+                      "justifyContent": "end",
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "id": "ZQcvf",
+                          "type": "ref",
+                          "ref": "SOfYp",
+                          "name": "ratesSaveBtn",
+                          "descendants": {
+                            "NQavs": {
+                              "iconFontName": "save"
+                            },
+                            "YRQl4": {
+                              "content": "Enregistrer les taux"
+                            }
+                          }
+                        }
+                      ]
                     }
                   ]
                 }
@@ -7965,8 +7977,9 @@
             },
             {
               "type": "frame",
-              "id": "QA1ov",
-              "name": "taxBracketsCard",
+              "id": "XL02m",
+              "name": "taxTable",
+              "clip": true,
               "width": "fill_container",
               "fill": "$bg-card",
               "cornerRadius": 10,
@@ -7986,14 +7999,16 @@
                 "blur": 4
               },
               "layout": "vertical",
-              "gap": 20,
-              "padding": 24,
               "children": [
                 {
                   "type": "frame",
                   "id": "yU3Vh",
                   "name": "taxHeader",
                   "width": "fill_container",
+                  "padding": [
+                    16,
+                    24
+                  ],
                   "justifyContent": "space_between",
                   "alignItems": "center",
                   "children": [
@@ -8004,7 +8019,7 @@
                       "fill": "$text-primary",
                       "content": "Tranches d'imposition",
                       "fontFamily": "Space Grotesk",
-                      "fontSize": 18,
+                      "fontSize": 16,
                       "fontWeight": "600"
                     },
                     {
@@ -8027,357 +8042,394 @@
                 },
                 {
                   "type": "frame",
-                  "id": "XL02m",
-                  "name": "taxTable",
-                  "clip": true,
+                  "id": "jQEDT",
+                  "name": "tableHeader",
                   "width": "fill_container",
-                  "cornerRadius": 8,
+                  "height": 42,
+                  "fill": "$table-header-bg",
                   "stroke": {
                     "align": "inside",
-                    "thickness": 1,
+                    "thickness": {
+                      "bottom": 1
+                    },
                     "fill": "$border-default"
                   },
-                  "layout": "vertical",
+                  "padding": [
+                    0,
+                    24
+                  ],
+                  "alignItems": "center",
                   "children": [
                     {
-                      "type": "frame",
-                      "id": "jQEDT",
-                      "name": "tableHeader",
+                      "type": "text",
+                      "id": "qH79C",
+                      "name": "h1",
+                      "fill": "$text-tertiary",
+                      "textGrowth": "fixed-width",
                       "width": "fill_container",
-                      "fill": "$table-header-bg",
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "alignItems": "center",
-                      "children": [
-                        {
-                          "type": "text",
-                          "id": "qH79C",
-                          "name": "h1",
-                          "fill": "$text-secondary",
-                          "content": "Minimum (€)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "text",
-                          "id": "c0qoC",
-                          "name": "h2",
-                          "fill": "$text-secondary",
-                          "content": "Maximum (€)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "text",
-                          "id": "YAGW3",
-                          "name": "h3",
-                          "fill": "$text-secondary",
-                          "content": "Taux (%)",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "600"
-                        },
-                        {
-                          "type": "text",
-                          "id": "iGWve",
-                          "name": "h4",
-                          "fill": "$text-secondary",
-                          "content": "Actions",
-                          "textAlign": "center",
-                          "fontFamily": "Inter",
-                          "fontSize": 13,
-                          "fontWeight": "600"
-                        }
-                      ]
+                      "content": "Minimum (€)",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "c0qoC",
+                      "name": "h2",
+                      "fill": "$text-tertiary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "Maximum (€)",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "YAGW3",
+                      "name": "h3",
+                      "fill": "$text-tertiary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "Taux (%)",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    },
+                    {
+                      "type": "text",
+                      "id": "iGWve",
+                      "name": "h4",
+                      "fill": "$text-tertiary",
+                      "textGrowth": "fixed-width",
+                      "width": 80,
+                      "content": "Actions",
+                      "textAlign": "center",
+                      "fontFamily": "Inter",
+                      "fontSize": 11,
+                      "fontWeight": "600",
+                      "letterSpacing": 0.8
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "rL3q5",
+                  "name": "row1",
+                  "width": "fill_container",
+                  "height": 48,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    24
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "37cbS",
+                      "name": "r1c1",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "0",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "62IDo",
+                      "name": "r1c2",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "11 294",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "LAAaq",
+                      "name": "r1c3",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "0",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
-                      "id": "rL3q5",
-                      "name": "row1",
-                      "width": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "top": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "alignItems": "center",
+                      "id": "D1OUA",
+                      "name": "r1act",
+                      "width": 80,
+                      "gap": 8,
+                      "justifyContent": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "37cbS",
-                          "name": "r1c1",
-                          "fill": "$text-primary",
-                          "content": "0",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "62IDo",
-                          "name": "r1c2",
-                          "fill": "$text-primary",
-                          "content": "11 294",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "LAAaq",
-                          "name": "r1c3",
-                          "fill": "$text-primary",
-                          "content": "0",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "D1OUA",
-                          "name": "r1act",
-                          "width": 80,
-                          "gap": 8,
-                          "justifyContent": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "16NFO",
-                              "name": "r1del",
-                              "width": 16,
-                              "height": 16,
-                              "iconFontName": "trash-2",
-                              "iconFontFamily": "lucide",
-                              "fill": "$accent-error"
-                            }
-                          ]
+                          "type": "icon_font",
+                          "id": "16NFO",
+                          "name": "r1del",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "trash-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "$accent-error"
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "CJ4i2",
+                  "name": "row2",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$table-row-alt",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    24
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "LTe4Q",
+                      "name": "r2c1",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "11 295",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "esl7X",
+                      "name": "r2c2",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "28 797",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "mscwY",
+                      "name": "r2c3",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "11",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
-                      "id": "CJ4i2",
-                      "name": "row2",
-                      "width": "fill_container",
-                      "fill": "$table-row-alt",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "top": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "alignItems": "center",
+                      "id": "l3gk2",
+                      "name": "r2act",
+                      "width": 80,
+                      "gap": 8,
+                      "justifyContent": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "LTe4Q",
-                          "name": "r2c1",
-                          "fill": "$text-primary",
-                          "content": "11 295",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "esl7X",
-                          "name": "r2c2",
-                          "fill": "$text-primary",
-                          "content": "28 797",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "mscwY",
-                          "name": "r2c3",
-                          "fill": "$text-primary",
-                          "content": "11",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "l3gk2",
-                          "name": "r2act",
-                          "width": 80,
-                          "gap": 8,
-                          "justifyContent": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "Mo20k",
-                              "name": "r2del",
-                              "width": 16,
-                              "height": 16,
-                              "iconFontName": "trash-2",
-                              "iconFontFamily": "lucide",
-                              "fill": "$accent-error"
-                            }
-                          ]
+                          "type": "icon_font",
+                          "id": "Mo20k",
+                          "name": "r2del",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "trash-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "$accent-error"
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "mhUKy",
+                  "name": "row3",
+                  "width": "fill_container",
+                  "height": 48,
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    24
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ameC6",
+                      "name": "r3c1",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "28 798",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "JiLov",
+                      "name": "r3c2",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "82 341",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "VxFTj",
+                      "name": "r3c3",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "30",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
-                      "id": "mhUKy",
-                      "name": "row3",
-                      "width": "fill_container",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "top": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "alignItems": "center",
+                      "id": "Lu8Ag",
+                      "name": "r3act",
+                      "width": 80,
+                      "gap": 8,
+                      "justifyContent": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "ameC6",
-                          "name": "r3c1",
-                          "fill": "$text-primary",
-                          "content": "28 798",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "JiLov",
-                          "name": "r3c2",
-                          "fill": "$text-primary",
-                          "content": "82 341",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "VxFTj",
-                          "name": "r3c3",
-                          "fill": "$text-primary",
-                          "content": "30",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "Lu8Ag",
-                          "name": "r3act",
-                          "width": 80,
-                          "gap": 8,
-                          "justifyContent": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "W9LS9",
-                              "name": "r3del",
-                              "width": 16,
-                              "height": 16,
-                              "iconFontName": "trash-2",
-                              "iconFontFamily": "lucide",
-                              "fill": "$accent-error"
-                            }
-                          ]
+                          "type": "icon_font",
+                          "id": "W9LS9",
+                          "name": "r3del",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "trash-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "$accent-error"
                         }
                       ]
+                    }
+                  ]
+                },
+                {
+                  "type": "frame",
+                  "id": "WVj3B",
+                  "name": "row4",
+                  "width": "fill_container",
+                  "height": 48,
+                  "fill": "$table-row-alt",
+                  "stroke": {
+                    "align": "inside",
+                    "thickness": {
+                      "bottom": 1
+                    },
+                    "fill": "$border-default"
+                  },
+                  "padding": [
+                    0,
+                    24
+                  ],
+                  "alignItems": "center",
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "B5JXE",
+                      "name": "r4c1",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "82 342",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "sCRVc",
+                      "name": "r4c2",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": "fill_container",
+                      "content": "177 106",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
+                    },
+                    {
+                      "type": "text",
+                      "id": "FJmGV",
+                      "name": "r4c3",
+                      "fill": "$text-primary",
+                      "textGrowth": "fixed-width",
+                      "width": 100,
+                      "content": "41",
+                      "textAlign": "right",
+                      "fontFamily": "Inter",
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "frame",
-                      "id": "WVj3B",
-                      "name": "row4",
-                      "width": "fill_container",
-                      "fill": "$table-row-alt",
-                      "stroke": {
-                        "align": "inside",
-                        "thickness": {
-                          "top": 1
-                        },
-                        "fill": "$border-default"
-                      },
-                      "gap": 12,
-                      "padding": [
-                        12,
-                        16
-                      ],
-                      "alignItems": "center",
+                      "id": "iGUd0",
+                      "name": "r4act",
+                      "width": 80,
+                      "gap": 8,
+                      "justifyContent": "center",
                       "children": [
                         {
-                          "type": "text",
-                          "id": "B5JXE",
-                          "name": "r4c1",
-                          "fill": "$text-primary",
-                          "content": "82 342",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "sCRVc",
-                          "name": "r4c2",
-                          "fill": "$text-primary",
-                          "content": "177 106",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "text",
-                          "id": "FJmGV",
-                          "name": "r4c3",
-                          "fill": "$text-primary",
-                          "content": "41",
-                          "fontFamily": "Inter",
-                          "fontSize": 14,
-                          "fontWeight": "normal"
-                        },
-                        {
-                          "type": "frame",
-                          "id": "iGUd0",
-                          "name": "r4act",
-                          "width": 80,
-                          "gap": 8,
-                          "justifyContent": "center",
-                          "children": [
-                            {
-                              "type": "icon_font",
-                              "id": "h2M1W",
-                              "name": "r4del",
-                              "width": 16,
-                              "height": 16,
-                              "iconFontName": "trash-2",
-                              "iconFontFamily": "lucide",
-                              "fill": "$accent-error"
-                            }
-                          ]
+                          "type": "icon_font",
+                          "id": "h2M1W",
+                          "name": "r4del",
+                          "width": 16,
+                          "height": 16,
+                          "iconFontName": "trash-2",
+                          "iconFontFamily": "lucide",
+                          "fill": "$accent-error"
                         }
                       ]
                     }

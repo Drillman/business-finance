@@ -2,6 +2,7 @@ import { useState, useEffect, type FormEvent } from 'react'
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Save, Loader2, CheckCircle, XCircle, Plus, Trash2, RotateCcw } from 'lucide-react'
+import { AppButton } from '../components/ui/AppButton'
 
 interface UserSettings {
   id: string
@@ -239,12 +240,6 @@ export default function Settings() {
     })
   }
 
-  const formatCurrency = (value: string) => {
-    const num = parseFloat(value)
-    if (isNaN(num)) return value
-    return new Intl.NumberFormat('fr-FR', { style: 'currency', currency: 'EUR', maximumFractionDigits: 0 }).format(num)
-  }
-
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -254,346 +249,289 @@ export default function Settings() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Configuration</h1>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between">
+        <h1 className="font-['Space_Grotesk'] text-[24px] font-semibold text-(--text-primary)">Configuration</h1>
+      </div>
 
       {successMessage && (
-        <div className="alert alert-success mb-4">
-          <CheckCircle className="h-5 w-5" />
+        <div className="flex items-center gap-2 rounded-lg border border-[#BBF7D0] bg-[#F0FDF4] px-3 py-2 text-sm text-[#166534]">
+          <CheckCircle className="h-4 w-4" />
           <span>{successMessage}</span>
         </div>
       )}
 
       {errorMessage && (
-        <div className="alert alert-error mb-4">
-          <XCircle className="h-5 w-5" />
+        <div className="flex items-center gap-2 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+          <XCircle className="h-4 w-4" />
           <span>{errorMessage}</span>
         </div>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title">Paramètres généraux</h2>
+      <div className="grid grid-cols-2 gap-6">
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
+        >
+          <div className="flex flex-col gap-4">
+            <h2 className="font-['Space_Grotesk'] text-sm font-semibold text-(--text-primary)">Paramètres généraux</h2>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Abattement forfaitaire (%)</span>
-                </label>
+            <div className="flex flex-col gap-3">
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-(--text-primary)">Abattement forfaitaire (%)</span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   max="100"
                   placeholder="34.00"
-                  className="input input-bordered w-full"
+                  className="h-8 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none focus:border-(--color-primary)"
                   value={revenueDeductionRate}
                   onChange={(e) => setRevenueDeductionRate(e.target.value)}
                   required
                 />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/60">
-                    Abattement pour frais professionnels (34% pour BNC)
-                  </span>
-                </label>
-              </div>
+                <span className="text-[10px] text-(--text-tertiary)">Abattement pour frais professionnels (34% pour BNC)</span>
+              </label>
 
-              <div className="form-control">
-                <label className="label">
-                  <span className="label-text">Salaire mensuel cible (€)</span>
-                </label>
+              <label className="flex flex-col gap-1">
+                <span className="text-xs font-medium text-(--text-primary)">Salaire mensuel cible (EUR)</span>
                 <input
                   type="number"
                   step="0.01"
                   min="0"
                   placeholder="3000.00"
-                  className="input input-bordered w-full"
+                  className="h-8 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none focus:border-(--color-primary)"
                   value={monthlySalary}
                   onChange={(e) => setMonthlySalary(e.target.value)}
                   required
                 />
-                <label className="label">
-                  <span className="label-text-alt text-base-content/60">
-                    Objectif de rémunération mensuelle nette
-                  </span>
-                </label>
-              </div>
+                <span className="text-[10px] text-(--text-tertiary)">Objectif de rémunération mensuelle nette</span>
+              </label>
             </div>
 
-            <div className="card-actions justify-end mt-4">
-              <button
+            <div className="flex justify-end">
+              <AppButton
                 type="submit"
-                className="btn btn-primary gap-2"
+                startIcon={updateMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                 disabled={updateMutation.isPending}
               >
-                {updateMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <Save className="h-4 w-4" />
-                )}
                 Enregistrer
-              </button>
+              </AppButton>
             </div>
           </div>
-        </div>
-      </form>
+        </form>
 
-      {/* Yearly Rates Configuration */}
-      <div className="card bg-base-100 shadow mt-6">
-        <div className="card-body">
-          <div className="flex justify-between items-center">
-            <h2 className="card-title">Taux annuels</h2>
-            <div className="flex gap-2 items-center">
-              <select
-                className="select select-bordered select-sm"
-                value={ratesYear}
-                onChange={(e) => setRatesYear(parseInt(e.target.value))}
-              >
-                <option value={2024}>2024</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-              </select>
-              {yearlyRatesData?.isCustom && (
-                <span className="badge badge-warning badge-sm">Personnalisé</span>
-              )}
-            </div>
-          </div>
-
-          <p className="text-sm text-base-content/60 mb-4">
-            Configurez les taux Urssaf et d'impôt estimé par année.
-          </p>
-
-          {isLoadingRates ? (
-            <div className="flex justify-center py-8">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux Urssaf (%)</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    placeholder="22.00"
-                    className="input input-bordered w-full"
-                    value={yearlyUrssafRate}
-                    onChange={(e) => {
-                      setYearlyUrssafRate(e.target.value)
-                      setRatesModified(true)
-                    }}
-                  />
-                  <label className="label">
-                    <span className="label-text-alt text-base-content/60">
-                      Taux de cotisations sociales pour micro-entrepreneur
-                    </span>
-                  </label>
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux d'impôt estimé (%)</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    max="100"
-                    placeholder="11.00"
-                    className="input input-bordered w-full"
-                    value={yearlyEstimatedTaxRate}
-                    onChange={(e) => {
-                      setYearlyEstimatedTaxRate(e.target.value)
-                      setRatesModified(true)
-                    }}
-                  />
-                  <label className="label">
-                    <span className="label-text-alt text-base-content/60">
-                      Taux marginal d'imposition estimé
-                    </span>
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-2 mt-4">
+        <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center justify-between gap-3">
+              <h2 className="font-['Space_Grotesk'] text-sm font-semibold text-(--text-primary)">Taux annuels</h2>
+              <div className="flex items-center gap-2">
+                <select
+                  className="h-7 rounded-lg border border-(--border-default) bg-(--card-bg) px-3 font-['Space_Grotesk'] text-xs font-medium text-(--text-primary)"
+                  value={ratesYear}
+                  onChange={(e) => setRatesYear(parseInt(e.target.value))}
+                >
+                  <option value={2024}>2024</option>
+                  <option value={2025}>2025</option>
+                  <option value={2026}>2026</option>
+                </select>
                 {yearlyRatesData?.isCustom && (
-                  <button
-                    type="button"
-                    className="btn btn-ghost btn-sm gap-2"
-                    onClick={() => resetYearlyRatesMutation.mutate(ratesYear)}
-                    disabled={resetYearlyRatesMutation.isPending}
-                  >
-                    {resetYearlyRatesMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <RotateCcw className="h-4 w-4" />
-                    )}
-                    Réinitialiser
-                  </button>
+                  <span className="inline-flex h-6 items-center rounded-full bg-[#FEF3C7] px-2 text-[10px] font-semibold text-[#92400E]">Personnalisé</span>
                 )}
-                <button
-                  type="button"
-                  className="btn btn-primary btn-sm gap-2"
-                  onClick={saveYearlyRates}
-                  disabled={!ratesModified || saveYearlyRatesMutation.isPending}
-                >
-                  {saveYearlyRatesMutation.isPending ? (
-                    <Loader2 className="h-4 w-4 animate-spin" />
-                  ) : (
-                    <Save className="h-4 w-4" />
-                  )}
-                  Enregistrer les taux
-                </button>
               </div>
-            </>
-          )}
+            </div>
+
+            <p className="text-xs text-(--text-secondary)">Configurez les taux Urssaf et d'impôt estimé par année.</p>
+
+            {isLoadingRates ? (
+              <div className="flex justify-center py-8">
+                <span className="loading loading-spinner loading-lg"></span>
+              </div>
+            ) : (
+              <>
+                <div className="flex flex-col gap-3">
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs font-medium text-(--text-primary)">Taux Urssaf (%)</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      placeholder="22.00"
+                      className="h-8 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none focus:border-(--color-primary)"
+                      value={yearlyUrssafRate}
+                      onChange={(e) => {
+                        setYearlyUrssafRate(e.target.value)
+                        setRatesModified(true)
+                      }}
+                    />
+                    <span className="text-[10px] text-(--text-tertiary)">Taux de cotisations sociales pour micro-entrepreneur</span>
+                  </label>
+
+                  <label className="flex flex-col gap-1">
+                    <span className="text-xs font-medium text-(--text-primary)">Taux d'impôt estimé (%)</span>
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      placeholder="11.00"
+                      className="h-8 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none focus:border-(--color-primary)"
+                      value={yearlyEstimatedTaxRate}
+                      onChange={(e) => {
+                        setYearlyEstimatedTaxRate(e.target.value)
+                        setRatesModified(true)
+                      }}
+                    />
+                    <span className="text-[10px] text-(--text-tertiary)">Taux marginal d'imposition estimé</span>
+                  </label>
+                </div>
+
+                <div className="flex flex-wrap justify-end gap-2">
+                  {yearlyRatesData?.isCustom && (
+                    <AppButton
+                      variant="ghost"
+                      startIcon={resetYearlyRatesMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                      onClick={() => resetYearlyRatesMutation.mutate(ratesYear)}
+                      disabled={resetYearlyRatesMutation.isPending}
+                    >
+                      Réinitialiser
+                    </AppButton>
+                  )}
+                  <AppButton
+                    startIcon={saveYearlyRatesMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                    onClick={saveYearlyRates}
+                    disabled={!ratesModified || saveYearlyRatesMutation.isPending}
+                  >
+                    Enregistrer les taux
+                  </AppButton>
+                </div>
+              </>
+            )}
+          </div>
         </div>
       </div>
 
-      {/* Tax Brackets Configuration */}
-      <div className="card bg-base-100 shadow mt-6">
-        <div className="card-body">
-          <div className="flex justify-between items-center">
-            <h2 className="card-title">Tranches d'imposition</h2>
-            <div className="flex gap-2 items-center">
-              <select
-                className="select select-bordered select-sm"
-                value={selectedYear}
-                onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-              >
-                <option value={2024}>2024</option>
-                <option value={2025}>2025</option>
-                <option value={2026}>2026</option>
-              </select>
-              {taxBracketsData?.isCustom && (
-                <span className="badge badge-warning badge-sm">Personnalisé</span>
-              )}
-            </div>
+      <section className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-wrap items-center justify-between gap-3 border-b border-(--border-default) px-6 py-4">
+          <div className="flex items-center gap-3">
+            <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">Tranches d'imposition</h2>
+            {taxBracketsData?.isCustom && (
+              <span className="inline-flex h-6 items-center rounded-full bg-[#FEF3C7] px-2 text-[10px] font-semibold text-[#92400E]">Personnalisé</span>
+            )}
           </div>
 
-          <p className="text-sm text-base-content/60 mb-4">
-            Configurez les tranches du barème progressif de l'impôt sur le revenu.
-            Laissez le maximum vide pour la dernière tranche.
-          </p>
+          <div className="flex items-center gap-2">
+            <select
+              className="h-8 rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary)"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
+            >
+              <option value={2024}>2024</option>
+              <option value={2025}>2025</option>
+              <option value={2026}>2026</option>
+            </select>
 
-          {isLoadingBrackets ? (
-            <div className="flex justify-center py-8">
-              <span className="loading loading-spinner loading-lg"></span>
-            </div>
-          ) : (
-            <>
-              <div className="overflow-x-auto">
-                <table className="table table-sm">
-                  <thead>
-                    <tr>
-                      <th>Minimum (€)</th>
-                      <th>Maximum (€)</th>
-                      <th>Taux (%)</th>
-                      <th className="w-16"></th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {editableBrackets.map((bracket, index) => (
-                      <tr key={index}>
-                        <td>
-                          <input
-                            type="number"
-                            step="1"
-                            min="0"
-                            className="input input-bordered input-sm w-full"
-                            value={bracket.minIncome}
-                            onChange={(e) => updateBracket(index, 'minIncome', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            step="1"
-                            min="0"
-                            className="input input-bordered input-sm w-full"
-                            value={bracket.maxIncome}
-                            onChange={(e) => updateBracket(index, 'maxIncome', e.target.value)}
-                            placeholder="∞"
-                          />
-                        </td>
-                        <td>
-                          <input
-                            type="number"
-                            step="0.1"
-                            min="0"
-                            max="100"
-                            className="input input-bordered input-sm w-24"
-                            value={bracket.rate}
-                            onChange={(e) => updateBracket(index, 'rate', e.target.value)}
-                          />
-                        </td>
-                        <td>
-                          <button
-                            type="button"
-                            className="btn btn-ghost btn-sm btn-square text-error"
-                            onClick={() => removeBracket(index)}
-                            disabled={editableBrackets.length <= 1}
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-
-              <div className="flex justify-between mt-4">
-                <button
-                  type="button"
-                  className="btn btn-outline btn-sm gap-2"
-                  onClick={addBracket}
-                >
-                  <Plus className="h-4 w-4" />
-                  Ajouter une tranche
-                </button>
-
-                <div className="flex gap-2">
-                  {taxBracketsData?.isCustom && (
-                    <button
-                      type="button"
-                      className="btn btn-ghost btn-sm gap-2"
-                      onClick={() => resetBracketsMutation.mutate()}
-                      disabled={resetBracketsMutation.isPending}
-                    >
-                      {resetBracketsMutation.isPending ? (
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                      ) : (
-                        <RotateCcw className="h-4 w-4" />
-                      )}
-                      Réinitialiser
-                    </button>
-                  )}
-                  <button
-                    type="button"
-                    className="btn btn-primary btn-sm gap-2"
-                    onClick={saveBrackets}
-                    disabled={!bracketsModified || saveBracketsMutation.isPending}
-                  >
-                    {saveBracketsMutation.isPending ? (
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                    ) : (
-                      <Save className="h-4 w-4" />
-                    )}
-                    Enregistrer les tranches
-                  </button>
-                </div>
-              </div>
-            </>
-          )}
+            <AppButton startIcon={<Plus className="h-4 w-4" />} onClick={addBracket}>
+              Ajouter
+            </AppButton>
+          </div>
         </div>
-      </div>
+
+        <div className="px-6 py-3 text-xs text-(--text-secondary)">
+          Configurez les tranches du barème progressif de l'impôt sur le revenu. Laissez le maximum vide pour la dernière tranche.
+        </div>
+
+        {isLoadingBrackets ? (
+          <div className="flex justify-center py-8">
+            <span className="loading loading-spinner loading-lg"></span>
+          </div>
+        ) : (
+          <>
+            <div className="overflow-x-auto">
+              <table className="w-full min-w-190 table-fixed border-collapse">
+                <thead>
+                  <tr className="h-10 border-y border-(--border-default) bg-(--color-base-200)">
+                    <th className="px-6 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Minimum (EUR)</th>
+                    <th className="px-6 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Maximum (EUR)</th>
+                    <th className="w-30 px-6 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Taux (%)</th>
+                    <th className="w-20 px-6 text-center text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {editableBrackets.map((bracket, index) => (
+                    <tr key={index} className={index % 2 === 1 ? 'h-12 border-b border-(--border-default) bg-(--color-base-200)/40' : 'h-12 border-b border-(--border-default)'}>
+                      <td className="px-6">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          className="h-8 w-full rounded-md border border-transparent bg-transparent px-2 text-sm text-(--text-primary) outline-none focus:border-(--border-default)"
+                          value={bracket.minIncome}
+                          onChange={(e) => updateBracket(index, 'minIncome', e.target.value)}
+                        />
+                      </td>
+                      <td className="px-6">
+                        <input
+                          type="number"
+                          step="1"
+                          min="0"
+                          className="h-8 w-full rounded-md border border-transparent bg-transparent px-2 text-right text-sm text-(--text-primary) outline-none focus:border-(--border-default)"
+                          value={bracket.maxIncome}
+                          onChange={(e) => updateBracket(index, 'maxIncome', e.target.value)}
+                          placeholder="∞"
+                        />
+                      </td>
+                      <td className="px-6">
+                        <input
+                          type="number"
+                          step="0.1"
+                          min="0"
+                          max="100"
+                          className="h-8 w-full rounded-md border border-transparent bg-transparent px-2 text-right text-sm text-(--text-primary) outline-none focus:border-(--border-default)"
+                          value={bracket.rate}
+                          onChange={(e) => updateBracket(index, 'rate', e.target.value)}
+                        />
+                      </td>
+                      <td className="px-6 text-center">
+                        <button
+                          type="button"
+                          className="inline-flex h-8 w-8 items-center justify-center rounded-md text-[#DC2626] transition-colors hover:bg-[#FEE2E2] disabled:cursor-not-allowed disabled:opacity-40"
+                          onClick={() => removeBracket(index)}
+                          disabled={editableBrackets.length <= 1}
+                          title="Supprimer"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="flex flex-wrap items-center justify-end gap-2 px-6 py-4">
+              {taxBracketsData?.isCustom && (
+                <AppButton
+                  variant="ghost"
+                  startIcon={resetBracketsMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <RotateCcw className="h-4 w-4" />}
+                  onClick={() => resetBracketsMutation.mutate()}
+                  disabled={resetBracketsMutation.isPending}
+                >
+                  Réinitialiser
+                </AppButton>
+              )}
+              <AppButton
+                startIcon={saveBracketsMutation.isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
+                onClick={saveBrackets}
+                disabled={!bracketsModified || saveBracketsMutation.isPending}
+              >
+                Enregistrer les tranches
+              </AppButton>
+            </div>
+          </>
+        )}
+      </section>
     </div>
   )
 }
