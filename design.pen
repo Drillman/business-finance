@@ -787,7 +787,8 @@
           "fill": "$text-secondary",
           "content": "Description",
           "fontFamily": "Inter",
-          "fontSize": 12
+          "fontSize": 12,
+          "fontWeight": "normal"
         }
       ]
     },
@@ -1694,7 +1695,8 @@
           "content": "8 500 €",
           "textAlign": "right",
           "fontFamily": "Inter",
-          "fontSize": 14
+          "fontSize": 14,
+          "fontWeight": "normal"
         },
         {
           "type": "text",
@@ -1706,7 +1708,8 @@
           "content": "1 870 €",
           "textAlign": "right",
           "fontFamily": "Inter",
-          "fontSize": 14
+          "fontSize": 14,
+          "fontWeight": "normal"
         },
         {
           "type": "text",
@@ -1718,7 +1721,8 @@
           "content": "850 €",
           "textAlign": "right",
           "fontFamily": "Inter",
-          "fontSize": 14
+          "fontSize": 14,
+          "fontWeight": "normal"
         },
         {
           "type": "text",
@@ -1730,7 +1734,8 @@
           "content": "1 700 €",
           "textAlign": "right",
           "fontFamily": "Inter",
-          "fontSize": 14
+          "fontSize": 14,
+          "fontWeight": "normal"
         },
         {
           "type": "text",
@@ -5900,6 +5905,132 @@
             },
             {
               "type": "frame",
+              "id": "TM1fD",
+              "name": "additionalIncomeCard",
+              "width": "fill_container",
+              "fill": "$bg-card",
+              "cornerRadius": 10,
+              "stroke": {
+                "align": "inside",
+                "thickness": 1,
+                "fill": "$border-default"
+              },
+              "effect": {
+                "type": "shadow",
+                "shadowType": "outer",
+                "color": "#0000000A",
+                "offset": {
+                  "x": 0,
+                  "y": 1
+                },
+                "blur": 4
+              },
+              "layout": "vertical",
+              "gap": 12,
+              "padding": 24,
+              "children": [
+                {
+                  "type": "text",
+                  "id": "Dm6ZF",
+                  "name": "cardTitle",
+                  "fill": "$text-primary",
+                  "content": "Revenu imposable supplémentaire",
+                  "fontFamily": "Space Grotesk",
+                  "fontSize": 16,
+                  "fontWeight": "600"
+                },
+                {
+                  "type": "text",
+                  "id": "r9Knp",
+                  "name": "cardDesc",
+                  "fill": "$text-secondary",
+                  "textGrowth": "fixed-width",
+                  "width": "fill_container",
+                  "content": "Ajoutez un montant supplémentaire à votre revenu imposable (ex: autres revenus, revenus fonciers). Vous pouvez utiliser des expressions mathématiques (ex: 1000 + 500).",
+                  "lineHeight": 1.5,
+                  "fontFamily": "Inter",
+                  "fontSize": 13,
+                  "fontWeight": "normal"
+                },
+                {
+                  "type": "frame",
+                  "id": "xKIUK",
+                  "name": "fieldGroup",
+                  "width": "fill_container",
+                  "layout": "vertical",
+                  "gap": 6,
+                  "children": [
+                    {
+                      "type": "text",
+                      "id": "ABFww",
+                      "name": "fieldLabel",
+                      "fill": "$text-secondary",
+                      "content": "Montant supplémentaire (€)",
+                      "fontFamily": "Inter",
+                      "fontSize": 13,
+                      "fontWeight": "500"
+                    },
+                    {
+                      "type": "frame",
+                      "id": "DURrc",
+                      "name": "inputRow",
+                      "width": "fill_container",
+                      "gap": 12,
+                      "alignItems": "center",
+                      "children": [
+                        {
+                          "type": "frame",
+                          "id": "RiVPY",
+                          "name": "fieldInput",
+                          "width": 280,
+                          "height": 40,
+                          "fill": "$bg-card",
+                          "cornerRadius": 8,
+                          "stroke": {
+                            "align": "inside",
+                            "thickness": 1,
+                            "fill": "$border-default"
+                          },
+                          "padding": [
+                            0,
+                            12
+                          ],
+                          "alignItems": "center",
+                          "children": [
+                            {
+                              "type": "text",
+                              "id": "DOpN3",
+                              "name": "fieldValue",
+                              "fill": "$text-primary",
+                              "content": "0",
+                              "fontFamily": "Inter",
+                              "fontSize": 14,
+                              "fontWeight": "normal"
+                            }
+                          ]
+                        },
+                        {
+                          "id": "wzU5m",
+                          "type": "ref",
+                          "ref": "SOfYp",
+                          "name": "validateBtn",
+                          "descendants": {
+                            "NQavs": {
+                              "iconFontName": "check"
+                            },
+                            "YRQl4": {
+                              "content": "Valider"
+                            }
+                          }
+                        }
+                      ]
+                    }
+                  ]
+                }
+              ]
+            },
+            {
+              "type": "frame",
               "id": "DgjSy",
               "name": "ContentRow",
               "width": "fill_container",
@@ -8980,7 +9111,8 @@
                                   "fill": "$text-primary",
                                   "content": "2025",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -9399,7 +9531,8 @@
                                   "fill": "$text-primary",
                                   "content": "fevrier 2026",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -9423,7 +9556,8 @@
                                   "fill": "$text-primary",
                                   "content": "janvier 2026",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -9447,7 +9581,8 @@
                                   "fill": "$text-primary",
                                   "content": "decembre 2025",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -9471,7 +9606,8 @@
                                   "fill": "$text-primary",
                                   "content": "novembre 2025",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -9495,7 +9631,8 @@
                                   "fill": "$text-primary",
                                   "content": "octobre 2025",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             },
@@ -9519,7 +9656,8 @@
                                   "fill": "$text-tertiary",
                                   "content": "septembre 2025",
                                   "fontFamily": "Inter",
-                                  "fontSize": 13
+                                  "fontSize": 13,
+                                  "fontWeight": "normal"
                                 }
                               ]
                             }
@@ -9636,7 +9774,8 @@
               "width": 500,
               "content": "Factures, dépenses, TVA, Urssaf — tout au même endroit.",
               "fontFamily": "Inter",
-              "fontSize": 16
+              "fontSize": 16,
+              "fontWeight": "normal"
             },
             {
               "type": "ellipse",
@@ -10214,7 +10353,8 @@
                   "fill": "$text-secondary",
                   "content": "Remplissez les informations de la facture",
                   "fontFamily": "Inter",
-                  "fontSize": 13
+                  "fontSize": 13,
+                  "fontWeight": "normal"
                 }
               ]
             },
@@ -10300,7 +10440,8 @@
                       "fill": "$text-tertiary",
                       "content": "Sélectionner un client",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "icon_font",
@@ -10368,7 +10509,8 @@
                           "fill": "$text-primary",
                           "content": "FA-20260301-001",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -10444,7 +10586,8 @@
                       "fill": "$text-primary",
                       "content": "Développement web",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     },
                     {
                       "type": "icon_font",
@@ -10512,7 +10655,8 @@
                           "fill": "$text-primary",
                           "content": "06/03/2026",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "icon_font",
@@ -10560,7 +10704,8 @@
                           "fill": "$text-tertiary",
                           "content": "(optionnel)",
                           "fontFamily": "Inter",
-                          "fontSize": 12
+                          "fontSize": 12,
+                          "fontWeight": "normal"
                         }
                       ]
                     },
@@ -10591,7 +10736,8 @@
                           "fill": "$text-tertiary",
                           "content": "Sélectionner une date",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "icon_font",
@@ -10658,7 +10804,8 @@
                           "width": "fill_container",
                           "content": "5 000,00",
                           "fontFamily": "Inter",
-                          "fontSize": 14
+                          "fontSize": 14,
+                          "fontWeight": "normal"
                         },
                         {
                           "type": "frame",
@@ -10798,7 +10945,8 @@
                       "fill": "$text-tertiary",
                       "content": "(optionnel)",
                       "fontFamily": "Inter",
-                      "fontSize": 12
+                      "fontSize": 12,
+                      "fontWeight": "normal"
                     }
                   ]
                 },
@@ -10828,7 +10976,8 @@
                       "fill": "$text-tertiary",
                       "content": "Ajouter une note...",
                       "fontFamily": "Inter",
-                      "fontSize": 14
+                      "fontSize": 14,
+                      "fontWeight": "normal"
                     }
                   ]
                 }
@@ -11012,7 +11161,8 @@
               "lineHeight": 1.5,
               "textAlign": "center",
               "fontFamily": "Inter",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -11157,7 +11307,8 @@
               "lineHeight": 1.5,
               "textAlign": "center",
               "fontFamily": "Inter",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             }
           ]
         },
@@ -11302,7 +11453,8 @@
               "lineHeight": 1.5,
               "textAlign": "center",
               "fontFamily": "Inter",
-              "fontSize": 14
+              "fontSize": 14,
+              "fontWeight": "normal"
             }
           ]
         },
