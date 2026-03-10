@@ -1,6 +1,9 @@
-import { useState, useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
+import { Info } from 'lucide-react'
 import { api } from '../api/client'
+import { YearSelect } from '../components/PeriodSelect'
+import { AppButton } from '../components/ui/AppButton'
 
 type InputMode = 'ht' | 'ttc'
 
@@ -16,6 +19,13 @@ function formatCurrency(amount: number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(amount)
+}
+
+function formatPercent(value: number): string {
+  return new Intl.NumberFormat('fr-FR', {
+    minimumFractionDigits: 1,
+    maximumFractionDigits: 1,
+  }).format(value)
 }
 
 export default function Calculator() {
@@ -77,15 +87,9 @@ export default function Calculator() {
     }
 
     const rate = parseFloat(taxRate) || 0
-    let newAmount: number
-
-    if (mode === 'ttc') {
-      // Converting from HT to TTC
-      newAmount = currentAmount * (1 + rate / 100)
-    } else {
-      // Converting from TTC to HT
-      newAmount = currentAmount / (1 + rate / 100)
-    }
+    const newAmount = mode === 'ttc'
+      ? currentAmount * (1 + rate / 100)
+      : currentAmount / (1 + rate / 100)
 
     setAmount(newAmount.toFixed(2))
     setInputMode(mode)
@@ -99,60 +103,54 @@ export default function Calculator() {
 
   if (isLoadingRates) {
     return (
-      <div className="flex justify-center items-center h-64">
+      <div className="flex h-64 items-center justify-center">
         <span className="loading loading-spinner loading-lg"></span>
       </div>
     )
   }
 
+  const totalRate = calculations.urssafRate + calculations.estimatedTaxRate
+  const netRate = calculations.amountHt > 0
+    ? (calculations.netRemaining / calculations.amountHt) * 100
+    : 100 - totalRate
+
   return (
     <div>
-      <div className="flex justify-between items-start mb-6">
-        <div>
-          <h1 className="text-2xl font-bold">Calculateur de prestation</h1>
-          <p className="text-base-content/70 mt-1">
-            Calcul rapide pour estimer le net restant après déductions sur une prestation.
-          </p>
-        </div>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-base-content/70">Année :</span>
-          <select
-            className="select select-bordered select-sm"
-            value={selectedYear}
-            onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-          >
-            <option value={2024}>2024</option>
-            <option value={2025}>2025</option>
-            <option value={2026}>2026</option>
-          </select>
-          {yearlyRates?.isCustom && (
-            <span className="badge badge-warning badge-sm">Personnalisé</span>
-          )}
+      <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Calculateur</h1>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Input Card */}
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title text-lg mb-4">Montant de la prestation</h2>
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-7 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <h2 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Saisie</h2>
 
-            {/* Input Mode Toggle */}
-            <div className="form-control mb-4">
-              <label className="label">
-                <span className="label-text">Type de montant</span>
-              </label>
-              <div className="join w-full">
+          <div className="mt-6 space-y-6">
+            <div>
+              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">Mode de saisie</label>
+              <div className="flex h-10 w-full rounded-lg border border-(--border-default) bg-(--color-base-200) p-1">
                 <button
                   type="button"
-                  className={`btn join-item flex-1 ${inputMode === 'ht' ? 'btn-primary' : 'btn-ghost'}`}
+                  className={[
+                    'flex-1 rounded-md text-[13px] font-medium transition-colors',
+                    inputMode === 'ht'
+                      ? 'bg-(--card-bg) font-semibold text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+                      : 'text-(--text-secondary) hover:text-(--text-primary)',
+                  ].join(' ')}
                   onClick={() => handleInputModeChange('ht')}
                 >
                   Montant HT
                 </button>
                 <button
                   type="button"
-                  className={`btn join-item flex-1 ${inputMode === 'ttc' ? 'btn-primary' : 'btn-ghost'}`}
+                  className={[
+                    'flex-1 rounded-md text-[13px] font-medium transition-colors',
+                    inputMode === 'ttc'
+                      ? 'bg-(--card-bg) font-semibold text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+                      : 'text-(--text-secondary) hover:text-(--text-primary)',
+                  ].join(' ')}
                   onClick={() => handleInputModeChange('ttc')}
                 >
                   Montant TTC
@@ -160,158 +158,158 @@ export default function Calculator() {
               </div>
             </div>
 
-            {/* Amount Input */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">
-                  Montant {inputMode === 'ht' ? 'HT' : 'TTC'} (€)
-                </span>
+            <div>
+              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">
+                Montant {inputMode === 'ht' ? 'HT' : 'TTC'} (EUR)
               </label>
               <input
                 type="number"
                 step="0.01"
                 min="0"
                 placeholder="0.00"
-                className="input input-bordered input-lg text-xl w-full"
+                className="h-10.5 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3.5 text-[15px] text-(--text-primary) focus:border-(--border-focus) focus:outline-none"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 autoFocus
               />
             </div>
 
-            {/* Tax Rate */}
-            <div className="form-control mt-4">
-              <label className="label">
-                <span className="label-text">Taux TVA</span>
-              </label>
+            <div>
+              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">Taux de TVA</label>
               <select
-                className="select select-bordered w-full"
+                className="h-10.5 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3.5 text-sm text-(--text-primary) focus:border-(--border-focus) focus:outline-none"
                 value={taxRate}
                 onChange={(e) => setTaxRate(e.target.value)}
               >
-                <option value="0">0% (Exonéré)</option>
+                <option value="0">0% (Exonere)</option>
                 <option value="5.5">5.5%</option>
                 <option value="10">10%</option>
                 <option value="20">20% (Taux normal)</option>
               </select>
             </div>
 
-            {/* Reset Button */}
-            <div className="mt-4">
-              <button
-                type="button"
-                className="btn btn-outline btn-sm"
-                onClick={handleReset}
-              >
-                Réinitialiser
-              </button>
+            <div>
+              <AppButton variant="outline" className="w-full" onClick={handleReset}>
+                Reinitialiser
+              </AppButton>
             </div>
           </div>
-        </div>
+        </section>
 
-        {/* Results Card */}
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title text-lg mb-4">Résultat</h2>
+        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+          <div className="space-y-3 p-7">
+            <h2 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Conversion HT / TTC</h2>
 
-            {/* Conversion Section */}
-            <div className="bg-base-200 rounded-lg p-4 mb-4">
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-base-content/70">Montant HT</span>
-                <span className="font-mono text-lg font-semibold">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
+                <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">MONTANT HT</p>
+                <p className="mt-1 font-['Space_Grotesk'] text-[22px] font-semibold text-(--text-primary)">
                   {formatCurrency(calculations.amountHt)}
-                </span>
+                </p>
               </div>
-              <div className="flex justify-between items-center mb-2">
-                <span className="text-base-content/70">TVA ({taxRate}%)</span>
-                <span className="font-mono text-info">
-                  + {formatCurrency(calculations.tvaAmount)}
-                </span>
-              </div>
-              <div className="divider my-2"></div>
-              <div className="flex justify-between items-center">
-                <span className="font-medium">Montant TTC</span>
-                <span className="font-mono text-lg font-bold">
+
+              <div className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
+                <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">MONTANT TTC</p>
+                <p className="mt-1 font-['Space_Grotesk'] text-[22px] font-semibold text-(--text-primary)">
                   {formatCurrency(calculations.amountTtc)}
-                </span>
+                </p>
               </div>
             </div>
 
-            {/* Deductions Section */}
-            <div className="space-y-3">
-              <h3 className="font-medium text-base-content/80">Déductions sur le CA HT</h3>
-
-              <div className="flex justify-between items-center">
-                <span className="text-base-content/70">
-                  Urssaf ({calculations.urssafRate}%)
-                </span>
-                <span className="font-mono text-warning">
-                  - {formatCurrency(calculations.urssafAmount)}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-base-content/70">
-                  Impôts estimés ({calculations.estimatedTaxRate}%)
-                </span>
-                <span className="font-mono text-error">
-                  - {formatCurrency(calculations.estimatedTax)}
-                </span>
-              </div>
-
-              <div className="divider my-2"></div>
-
-              <div className="flex justify-between items-center">
-                <span className="text-base-content/70">Total déductions</span>
-                <span className="font-mono">
-                  - {formatCurrency(calculations.totalDeductions)}
-                </span>
-              </div>
-            </div>
-
-            {/* Net Remaining */}
-            <div className="mt-4 p-4 bg-success/10 rounded-lg border border-success/30">
-              <div className="flex justify-between items-center">
-                <span className="text-lg font-medium">Net restant</span>
-                <span className="font-mono text-2xl font-bold text-success">
-                  {formatCurrency(calculations.netRemaining)}
-                </span>
-              </div>
-              <div className="text-sm text-base-content/60 mt-1">
-                {calculations.amountHt > 0
-                  ? `${((calculations.netRemaining / calculations.amountHt) * 100).toFixed(1)}% du CA HT`
-                  : '0% du CA HT'}
-              </div>
+            <div className="flex items-center justify-between pt-2">
+              <span className="text-sm text-(--text-secondary)">TVA ({taxRate}%)</span>
+              <span className="text-sm font-semibold text-(--text-primary)">{formatCurrency(calculations.tvaAmount)}</span>
             </div>
           </div>
-        </div>
-      </div>
 
-      {/* Info Card */}
-      <div className="card bg-base-100 shadow mt-6">
-        <div className="card-body">
-          <h2 className="card-title text-lg">Informations ({selectedYear})</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-            <div>
-              <span className="text-base-content/70">Taux Urssaf {selectedYear} :</span>
-              <span className="font-semibold ml-2">{calculations.urssafRate}%</span>
+          <div className="h-px w-full bg-(--border-default)"></div>
+
+          <div className="space-y-4 p-7">
+            <h3 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Deductions</h3>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-(--text-secondary)">Urssaf ({calculations.urssafRate}%)</span>
+              <span className="text-sm font-semibold text-(--color-error)">- {formatCurrency(calculations.urssafAmount)}</span>
             </div>
-            <div>
-              <span className="text-base-content/70">Taux d'impôt estimé {selectedYear} :</span>
-              <span className="font-semibold ml-2">{calculations.estimatedTaxRate}%</span>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-(--text-secondary)">Impot estime ({calculations.estimatedTaxRate}%)</span>
+              <span className="text-sm font-semibold text-(--color-error)">- {formatCurrency(calculations.estimatedTax)}</span>
             </div>
-            <div>
-              <span className="text-base-content/70">Pourcentage net :</span>
-              <span className="font-semibold ml-2">
-                {(100 - calculations.urssafRate - calculations.estimatedTaxRate).toFixed(1)}%
+
+            <div className="h-px w-full bg-(--border-default)"></div>
+
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-(--text-primary)">Total deductions</span>
+              <span className="text-sm font-bold text-(--color-error)">- {formatCurrency(calculations.totalDeductions)}</span>
+            </div>
+          </div>
+
+          <div className="rounded-b-[10px] bg-[#ECFDF5] p-7">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-semibold text-(--color-success)">Net restant</span>
+              <span className="font-['Space_Grotesk'] text-[26px] font-bold text-(--color-success)">
+                {formatCurrency(calculations.netRemaining)}
               </span>
             </div>
+            <p className="text-right text-[13px] text-(--color-success)">
+              {formatPercent(calculations.amountHt > 0 ? (calculations.netRemaining / calculations.amountHt) * 100 : 0)}% du montant HT
+            </p>
           </div>
-          <p className="text-base-content/60 text-sm mt-2">
-            Ces taux sont configurables par année dans les paramètres. Le calcul est basé sur le montant HT.
-          </p>
-        </div>
+        </section>
       </div>
+
+      <section className="mt-6 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-7 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-wrap items-center gap-3">
+          <Info className="h-4.5 w-4.5 text-(--color-info)" />
+          <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">
+            Taux configures pour {selectedYear}
+          </h2>
+          {yearlyRates?.isCustom ? (
+            <span className="inline-flex h-6 items-center rounded-full bg-[#EEF2FF] px-2.5 text-[11px] font-semibold text-(--color-info)">
+              Personnalise
+            </span>
+          ) : (
+            <span className="inline-flex h-6 items-center rounded-full bg-[#F5F7FB] px-2.5 text-[11px] font-semibold text-(--text-secondary)">
+              Defaut
+            </span>
+          )}
+        </div>
+
+        <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TAUX URSSAF</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
+              {formatPercent(calculations.urssafRate)}%
+            </p>
+            <p className="mt-1 text-xs text-(--text-secondary)">Cotisations sociales</p>
+          </article>
+
+          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TAUX IMPOT ESTIME</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
+              {formatPercent(calculations.estimatedTaxRate)}%
+            </p>
+            <p className="mt-1 text-xs text-(--text-secondary)">Versement liberatoire</p>
+          </article>
+
+          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TOTAL PRELEVE</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--color-error)">
+              {formatPercent(totalRate)}%
+            </p>
+            <p className="mt-1 text-xs text-(--text-secondary)">Sur le montant HT</p>
+          </article>
+
+          <article className="rounded-lg border border-(--border-default) bg-[#F0FDF4] p-4">
+            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">NET RESTANT</p>
+            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--color-success)">
+              {formatPercent(netRate)}%
+            </p>
+            <p className="mt-1 text-xs text-(--text-secondary)">Du montant HT</p>
+          </article>
+        </div>
+      </section>
     </div>
   )
 }
