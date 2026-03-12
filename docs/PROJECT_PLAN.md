@@ -1,9 +1,11 @@
 # Business Finance Tracker - Project Plan
 
 ## Overview
+
 A full-stack web application to replace the current Excel-based business finance tracking system. French UI with English codebase.
 
 ## Tech Stack
+
 - **Frontend**: React + TypeScript + TailwindCSS + DaisyUI + TanStack Query
 - **Backend**: Fastify + TypeScript
 - **Database**: PostgreSQL + Drizzle ORM
@@ -17,7 +19,8 @@ A full-stack web application to replace the current Excel-based business finance
 
 Since this application handles sensitive financial data and will be deployed publicly, security is paramount.
 
-### Authentication & Authorization
+### Authentication & Authorization 
+
 - **Password Security**: bcrypt with cost factor 12+ for password hashing
 - **Passkeys (WebAuthn)**: Phishing-resistant passwordless authentication
   - Support device biometrics (Touch ID, Face ID, Windows Hello)
@@ -29,6 +32,7 @@ Since this application handles sensitive financial data and will be deployed pub
 - **Account Lockout**: Temporary lockout after repeated failed login attempts
 
 ### API Security
+
 - **Input Validation**: Zod schemas for all API inputs (never trust client data)
 - **SQL Injection Prevention**: Drizzle ORM with parameterized queries (never raw SQL with user input)
 - **CORS Configuration**: Strict origin whitelist, no wildcards in production
@@ -36,24 +40,28 @@ Since this application handles sensitive financial data and will be deployed pub
 - **Request Size Limits**: Cap request body size to prevent DoS
 
 ### Data Protection
+
 - **HTTPS Only**: TLS/SSL required in production (use Let's Encrypt or similar)
 - **Environment Variables**: All secrets in `.env` files, never committed to git
 - **Database Security**: Strong passwords, connection via SSL, restricted network access
 - **Data Isolation**: All queries filtered by `user_id` to prevent data leakage between users
 
 ### Frontend Security
+
 - **XSS Prevention**: React's default escaping + CSP headers
 - **CSRF Protection**: SameSite cookies + CSRF tokens for state-changing operations
 - **Sensitive Data**: Never store tokens in localStorage (use httpOnly cookies)
 - **Input Sanitization**: Sanitize any user input before display
 
 ### Infrastructure Security
+
 - **Docker Security**: Non-root user in containers, minimal base images
 - **Network Isolation**: Database not exposed to public network
 - **Secrets Management**: Use Docker secrets or environment files
 - **Regular Updates**: Keep dependencies updated for security patches
 
 ### Monitoring & Logging
+
 - **Audit Logging**: Log authentication events and sensitive operations
 - **Error Handling**: Generic error messages to users, detailed logs server-side
 - **No Sensitive Data in Logs**: Never log passwords, tokens, or financial details
@@ -93,173 +101,191 @@ business-finance/
 ### Core Tables
 
 **users**
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| email | varchar(255) | Unique, indexed |
+
+| Column        | Type         | Notes                                      |
+| ------------- | ------------ | ------------------------------------------ |
+| id            | uuid         | Primary key                                |
+| email         | varchar(255) | Unique, indexed                            |
 | password_hash | varchar(255) | bcrypt hash, nullable (passkey-only users) |
-| created_at | timestamp | |
-| updated_at | timestamp | |
+| created_at    | timestamp    |                                            |
+| updated_at    | timestamp    |                                            |
 
 **passkeys** (WebAuthn credentials)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key |
-| credential_id | bytea | Unique, WebAuthn credential ID |
-| public_key | bytea | COSE public key |
-| counter | bigint | Signature counter (replay protection) |
-| device_name | varchar(255) | User-friendly name (e.g., "MacBook Pro") |
-| transports | varchar[] | Array: usb, nfc, ble, internal, hybrid |
-| created_at | timestamp | |
-| last_used_at | timestamp | |
+
+| Column        | Type         | Notes                                    |
+| ------------- | ------------ | ---------------------------------------- |
+| id            | uuid         | Primary key                              |
+| user_id       | uuid         | Foreign key                              |
+| credential_id | bytea        | Unique, WebAuthn credential ID           |
+| public_key    | bytea        | COSE public key                          |
+| counter       | bigint       | Signature counter (replay protection)    |
+| device_name   | varchar(255) | User-friendly name (e.g., "MacBook Pro") |
+| transports    | varchar[]    | Array: usb, nfc, ble, internal, hybrid   |
+| created_at    | timestamp    |                                          |
+| last_used_at  | timestamp    |                                          |
 
 **invoices** (Chiffre d'affaire)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key, indexed |
-| client | varchar(255) | |
-| description | text | |
-| invoice_date | date | |
-| payment_date | date | Nullable |
-| amount_ht | decimal(12,2) | Amount without tax |
-| tax_rate | decimal(5,2) | e.g., 20.00 for 20% |
-| amount_ttc | decimal(12,2) | Amount with tax |
-| invoice_number | varchar(50) | |
-| note | text | Nullable |
-| created_at | timestamp | |
+
+| Column         | Type          | Notes                |
+| -------------- | ------------- | -------------------- |
+| id             | uuid          | Primary key          |
+| user_id        | uuid          | Foreign key, indexed |
+| client         | varchar(255)  |                      |
+| description    | text          |                      |
+| invoice_date   | date          |                      |
+| payment_date   | date          | Nullable             |
+| amount_ht      | decimal(12,2) | Amount without tax   |
+| tax_rate       | decimal(5,2)  | e.g., 20.00 for 20%  |
+| amount_ttc     | decimal(12,2) | Amount with tax      |
+| invoice_number | varchar(50)   |                      |
+| note           | text          | Nullable             |
+| created_at     | timestamp     |                      |
 
 **expenses** (Business expenses - unified)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key, indexed |
-| description | varchar(255) | |
-| date | date | |
-| amount_ht | decimal(12,2) | |
-| tax_amount | decimal(12,2) | |
-| tax_recovery_rate | decimal(5,2) | 80 or 100 |
-| category | varchar(50) | fixed, one-time, etc. |
-| is_recurring | boolean | |
-| recurrence_period | varchar(20) | monthly, yearly, null |
-| note | text | Nullable |
-| created_at | timestamp | |
+
+| Column            | Type          | Notes                 |
+| ----------------- | ------------- | --------------------- |
+| id                | uuid          | Primary key           |
+| user_id           | uuid          | Foreign key, indexed  |
+| description       | varchar(255)  |                       |
+| date              | date          |                       |
+| amount_ht         | decimal(12,2) |                       |
+| tax_amount        | decimal(12,2) |                       |
+| tax_recovery_rate | decimal(5,2)  | 80 or 100             |
+| category          | varchar(50)   | fixed, one-time, etc. |
+| is_recurring      | boolean       |                       |
+| recurrence_period | varchar(20)   | monthly, yearly, null |
+| note              | text          | Nullable              |
+| created_at        | timestamp     |                       |
 
 **tax_payments** (TVA payments)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key |
-| status | varchar(20) | pending, paid |
-| amount | decimal(12,2) | |
-| reference | varchar(100) | |
-| payment_date | date | Nullable |
-| note | text | Nullable |
-| period_start | date | |
-| period_end | date | |
+
+| Column       | Type          | Notes         |
+| ------------ | ------------- | ------------- |
+| id           | uuid          | Primary key   |
+| user_id      | uuid          | Foreign key   |
+| status       | varchar(20)   | pending, paid |
+| amount       | decimal(12,2) |               |
+| reference    | varchar(100)  |               |
+| payment_date | date          | Nullable      |
+| note         | text          | Nullable      |
+| period_start | date          |               |
+| period_end   | date          |               |
 
 **urssaf_payments**
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key |
-| trimester | int | 1-4 |
-| year | int | |
-| revenue | decimal(12,2) | |
-| amount | decimal(12,2) | |
-| status | varchar(20) | pending, paid |
-| payment_date | date | Nullable |
-| reference | varchar(100) | |
-| note | text | Nullable |
+
+| Column       | Type          | Notes         |
+| ------------ | ------------- | ------------- |
+| id           | uuid          | Primary key   |
+| user_id      | uuid          | Foreign key   |
+| trimester    | int           | 1-4           |
+| year         | int           |               |
+| revenue      | decimal(12,2) |               |
+| amount       | decimal(12,2) |               |
+| status       | varchar(20)   | pending, paid |
+| payment_date | date          | Nullable      |
+| reference    | varchar(100)  |               |
+| note         | text          | Nullable      |
 
 **income_tax_payments** (Impots)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key |
-| year | int | |
-| amount | decimal(12,2) | |
-| status | varchar(20) | pending, paid |
-| payment_date | date | Nullable |
-| reference | varchar(100) | |
-| note | text | Nullable |
+
+| Column       | Type          | Notes         |
+| ------------ | ------------- | ------------- |
+| id           | uuid          | Primary key   |
+| user_id      | uuid          | Foreign key   |
+| year         | int           |               |
+| amount       | decimal(12,2) |               |
+| status       | varchar(20)   | pending, paid |
+| payment_date | date          | Nullable      |
+| reference    | varchar(100)  |               |
+| note         | text          | Nullable      |
 
 **settings** (Base configuration)
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key, unique |
-| urssaf_rate | decimal(5,2) | e.g., 22.00 |
-| estimated_tax_rate | decimal(5,2) | |
-| revenue_deduction_rate | decimal(5,2) | For taxable income calc |
-| monthly_salary | decimal(12,2) | |
-| created_at | timestamp | |
-| updated_at | timestamp | |
+
+| Column                 | Type          | Notes                   |
+| ---------------------- | ------------- | ----------------------- |
+| id                     | uuid          | Primary key             |
+| user_id                | uuid          | Foreign key, unique     |
+| urssaf_rate            | decimal(5,2)  | e.g., 22.00             |
+| estimated_tax_rate     | decimal(5,2)  |                         |
+| revenue_deduction_rate | decimal(5,2)  | For taxable income calc |
+| monthly_salary         | decimal(12,2) |                         |
+| created_at             | timestamp     |                         |
+| updated_at             | timestamp     |                         |
 
 **tax_brackets**
-| Column | Type | Notes |
-|--------|------|-------|
-| id | uuid | Primary key |
-| user_id | uuid | Foreign key, nullable (null = official) |
-| year | int | |
-| min_income | decimal(12,2) | |
-| max_income | decimal(12,2) | Nullable for top bracket |
-| rate | decimal(5,2) | |
-| is_custom | boolean | |
+
+| Column     | Type          | Notes                                   |
+| ---------- | ------------- | --------------------------------------- |
+| id         | uuid          | Primary key                             |
+| user_id    | uuid          | Foreign key, nullable (null = official) |
+| year       | int           |                                         |
+| min_income | decimal(12,2) |                                         |
+| max_income | decimal(12,2) | Nullable for top bracket                |
+| rate       | decimal(5,2)  |                                         |
+| is_custom  | boolean       |                                         |
 
 ---
 
 ## Features & Pages
 
 ### 1. Dashboard (Tableau de bord)
+
 - Current month overview: revenue, taxes owed, Urssaf owed, net remaining
 - Quick access to key metrics
 - Alerts for upcoming payments
 
 ### 2. Invoices (Chiffre d'affaire)
+
 - List all invoices with filtering (by month, client, status)
 - Add/edit/delete invoices
 - Monthly summary view: revenue, tax total, Urssaf, impots, remaining
 - Invoice number auto-generation
 
 ### 3. Expenses (Depenses)
+
 - Unified expense management (replaces scattered expense tracking)
 - Categories: fixed monthly, one-time, tax-deductible
 - Mark recurring expenses (insurance, health insurance)
 - Track tax recovery eligibility (80% vs 100%)
 
 ### 4. TVA (Taxes)
+
 - Overview: taxes collected vs taxes to recover
 - Monthly breakdown
 - Record tax payments with status tracking
 - Calculate net TVA owed
 
 ### 5. Urssaf
+
 - Quarterly view of revenue and Urssaf amounts
 - Payment tracking with status
 - Annual overview
 - Auto-calculate based on configured rate
 
 ### 6. Business Account (Compte entreprise)
+
 - Enter current balance
 - Show pending obligations (unpaid Urssaf, TVA, etc.)
 - Reserve for next month salary
 - Display available funds
 
 ### 7. Income Tax (Impots)
+
 - Estimate personal income tax from business revenue
 - Use official French tax brackets (with manual override option)
 - Track current tax obligations
 - Support custom adjustments
 
 ### 8. Calculator (Calcul prestation)
+
 - Quick calculation tool
 - Input amount HT or TTC
 - Show: Urssaf deduction, estimated tax, net remaining
 - Useful for quoting clients
 
 ### 9. Settings (Configuration)
+
 - Urssaf rate configuration
 - Estimated tax rate for year
 - Revenue deduction rate for tax calculation
@@ -272,6 +298,7 @@ business-finance/
 ## Implementation Phases
 
 ### Phase 1: Project Setup [COMPLETE]
+
 1. ~~Initialize npm project with TypeScript~~
 2. ~~Setup React frontend with Vite + TailwindCSS + DaisyUI~~
 3. ~~Setup Fastify API with TypeScript~~
@@ -281,6 +308,7 @@ business-finance/
 7. ~~**Security**: Configure Helmet.js, CORS, rate limiting~~
 
 ### Phase 2: Authentication [COMPLETE]
+
 1. ~~Implement user registration/login API (email + password)~~
 2. ~~JWT token generation and validation~~
 3. ~~Password hashing with bcrypt (cost factor 12)~~
@@ -294,6 +322,7 @@ business-finance/
 7. ~~**Security**: HTTP-only cookies, CSRF protection, rate limiting on auth endpoints~~
 
 **Files created in Phase 2:**
+
 - `src/server/auth/jwt.ts` - JWT utilities
 - `src/server/auth/password.ts` - bcrypt password hashing
 - `src/server/auth/middleware.ts` - requireAuth middleware
@@ -307,6 +336,7 @@ business-finance/
 - `src/client/pages/ManagePasskeys.tsx` - Passkey management
 
 ### Phase 3: Core Data Models [COMPLETE]
+
 1. ~~Create all Drizzle schemas (already done in Phase 1)~~
 2. ~~Setup database migrations~~
 3. ~~Implement CRUD API routes for:~~
@@ -317,11 +347,13 @@ business-finance/
 5. ~~**Security**: Input validation with Zod, user_id filtering on all queries~~
 
 **Files created in Phase 3:**
+
 - `src/server/routes/invoices.ts` - Invoice CRUD API routes
 - `src/server/routes/expenses.ts` - Expense CRUD API routes
 - `src/server/routes/settings.ts` - Settings and tax bracket API routes
 
 **API Endpoints added:**
+
 - `GET/POST /api/invoices` - List/create invoices
 - `GET/PUT/DELETE /api/invoices/:id` - Get/update/delete invoice
 - `GET /api/invoices/summary/monthly` - Monthly invoice summary
@@ -334,17 +366,20 @@ business-finance/
 - `POST /api/settings/calculate-tax` - Calculate estimated income tax
 
 ### Phase 4: Invoice Management [COMPLETE]
+
 1. ~~Invoice list page with filters (by month and client)~~
 2. ~~Add/edit invoice form (modal with full CRUD)~~
 3. ~~Monthly summary calculations (CA HT, TVA, Urssaf, Impôts estimés, Restant)~~
 4. ~~Invoice number auto-generation (FAC-YYYYMM-XXX format)~~
 
 **Files created in Phase 4:**
+
 - `src/client/hooks/useInvoices.ts` - Invoice CRUD hooks with TanStack Query
 - `src/client/hooks/useSettings.ts` - Settings hooks for Urssaf/tax rates
 - `src/client/pages/Invoices.tsx` - Full invoice management UI
 
 **Features implemented:**
+
 - Invoice list with month and client filtering
 - Create/Edit/Delete invoices via modal form
 - Monthly summary with CA HT, CA TTC, TVA collected, Urssaf, estimated taxes, remaining amount
@@ -353,16 +388,19 @@ business-finance/
 - Payment status tracking (paid/pending)
 
 ### Phase 5: Expense Management [COMPLETE]
+
 1. ~~Unified expense interface~~
 2. ~~Recurring expense support~~
 3. ~~Tax recovery tracking~~
 4. ~~Category management~~
 
 **Files created in Phase 5:**
+
 - `src/client/hooks/useExpenses.ts` - Expense CRUD hooks with TanStack Query
 - `src/client/pages/Expenses.tsx` - Full expense management UI
 
 **Features implemented:**
+
 - Expense list with month, category, and recurring filters
 - Create/Edit/Delete expenses via modal form
 - Monthly summary with Total HT, TVA paid, TVA recoverable, Total TTC
@@ -373,12 +411,14 @@ business-finance/
 - 5 expense categories: Fixed monthly, One-time, Recurring, Professional, Other
 
 ### Phase 6: Tax & Contributions [COMPLETE]
+
 1. ~~TVA calculation and tracking~~
 2. ~~Urssaf quarterly management~~
 3. ~~Payment status tracking~~
 4. ~~Auto-calculations based on settings~~
 
 **Files created in Phase 6:**
+
 - `src/server/routes/tva.ts` - TVA payment CRUD and summary API routes
 - `src/server/routes/urssaf.ts` - Urssaf payment CRUD and summary API routes
 - `src/client/hooks/useTva.ts` - TVA CRUD hooks with TanStack Query
@@ -387,6 +427,7 @@ business-finance/
 - `src/client/pages/Urssaf.tsx` - Full Urssaf management UI
 
 **API Endpoints added:**
+
 - `GET/POST /api/tva/payments` - List/create TVA payments
 - `GET/PUT/DELETE /api/tva/payments/:id` - Get/update/delete TVA payment
 - `GET /api/tva/summary` - TVA summary for a period (collected, recoverable, net, paid)
@@ -397,6 +438,7 @@ business-finance/
 - `POST /api/urssaf/calculate` - Calculate Urssaf amount for given revenue
 
 **Features implemented:**
+
 - TVA page with annual summary (collected, recoverable, net, balance)
 - Monthly TVA breakdown table showing collected/recoverable/net per month
 - TVA payment list with CRUD operations via modal form
@@ -407,27 +449,32 @@ business-finance/
 - Year selector for viewing historical data
 
 ### Phase 7: Financial Overview [COMPLETE]
+
 1. ~~Dashboard with key metrics~~
 2. ~~Business account overview~~
 3. ~~Available funds calculation~~
 4. ~~Pending obligations display~~
 
 **Files created in Phase 7:**
+
 - `src/server/routes/dashboard.ts` - Dashboard summary API endpoint
 - `src/server/routes/account.ts` - Business account balance and summary API endpoints
 - `src/client/hooks/useDashboard.ts` - Dashboard data hook with TanStack Query
 - `src/client/hooks/useAccount.ts` - Account balance and summary hooks with TanStack Query
 
 **Database changes:**
+
 - Added `account_balances` table for storing user's business account balance
 
 **API Endpoints added:**
+
 - `GET /api/dashboard/summary` - Monthly summary with revenue, TVA, Urssaf, expenses, and upcoming payments
 - `GET /api/account/balance` - Get current account balance
 - `PUT /api/account/balance` - Update account balance
 - `GET /api/account/summary` - Account summary with all pending obligations and available funds
 
 **Features implemented:**
+
 - Dashboard with month/year selector for historical data
 - Monthly summary cards showing CA HT/TTC, TVA net, Urssaf estimate, net remaining
 - Account overview section with current balance, obligations, salary reserve, available funds
@@ -439,28 +486,33 @@ business-finance/
 - Color-coded indicators for positive/negative available funds
 
 ### Phase 8: Income Tax [COMPLETE]
+
 1. ~~French tax bracket integration (official 2024/2025 rates)~~
 2. ~~Custom bracket override~~
 3. ~~Tax estimation calculator~~
 4. ~~Annual tax tracking~~
 
 **Files created in Phase 8:**
+
 - `src/server/routes/income-tax.ts` - Income tax payment CRUD and summary API routes
 - `src/client/hooks/useIncomeTax.ts` - Income tax CRUD hooks with TanStack Query
 - `src/client/pages/IncomeTax.tsx` - Full income tax management UI (updated from stub)
 
 **Types added to shared/types.ts:**
+
 - `CreateIncomeTaxPaymentInput` - Input type for creating income tax payments
 - `UpdateIncomeTaxPaymentInput` - Input type for updating income tax payments
 - `IncomeTaxSummary` - Annual income tax summary with bracket breakdown
 - `TaxBracketBreakdown` - Individual bracket calculation details
 
 **API Endpoints added:**
+
 - `GET/POST /api/income-tax/payments` - List/create income tax payments
 - `GET/PUT/DELETE /api/income-tax/payments/:id` - Get/update/delete income tax payment
 - `GET /api/income-tax/summary?year=YYYY` - Annual income tax summary with progressive calculation
 
 **Features implemented:**
+
 - Annual income tax summary with CA, taxable income, estimated tax, remaining
 - Progressive tax calculation using French tax brackets (2024 defaults)
 - Breakdown table showing tax per bracket with rates
@@ -472,14 +524,17 @@ business-finance/
 - Year selector for viewing historical data
 
 ### Phase 9: Calculator Tool [COMPLETE]
+
 1. ~~Quick prestation calculator~~
 2. ~~HT/TTC conversion~~
 3. ~~Net amount after deductions~~
 
 **Files created/modified in Phase 9:**
+
 - `src/client/pages/Calculator.tsx` - Full calculator UI implementation
 
 **Features implemented:**
+
 - Quick prestation calculator for client quotes
 - HT/TTC input mode toggle with automatic conversion
 - TVA rate selection (0%, 5.5%, 10%, 20%)
@@ -491,6 +546,7 @@ business-finance/
 - Real-time calculations as user types
 
 ### Phase 10: Polish & Deployment [COMPLETE]
+
 1. ~~French translations (UI labels)~~ - Already implemented throughout
 2. ~~Error handling and validation~~ - Zod validation on all API endpoints
 3. ~~Docker production build~~ - Multi-stage Dockerfile with non-root user
@@ -498,6 +554,7 @@ business-finance/
 5. ~~**Security**: SSL/TLS setup~~ - Traefik with Let's Encrypt auto-renewal
 
 **Files created in Phase 10:**
+
 - `Dockerfile` - Multi-stage production build with non-root user
 - `docker-compose.yml` - Development/self-hosting with app and database services
 - `docker-compose.prod.yml` - Production with Traefik reverse proxy and automatic SSL
@@ -506,6 +563,7 @@ business-finance/
 - `src/server/index.ts` - Updated with static file serving for production
 
 **Features implemented:**
+
 - Multi-stage Docker build for minimal production image (~180MB)
 - Non-root user in container for security
 - Health checks on all services
@@ -516,6 +574,7 @@ business-finance/
 - SPA fallback routing for client-side routing
 
 **Deployment commands:**
+
 ```bash
 # Development/local deployment
 docker compose up -d
@@ -532,6 +591,7 @@ docker compose logs -f app
 ## Key Calculations
 
 ### Monthly Summary (from Chiffre d'affaire)
+
 ```
 Revenue = sum(invoice.amount_ht) for month
 Tax Total = sum(invoice.amount_ttc - invoice.amount_ht) for month
@@ -541,6 +601,7 @@ Remaining = Revenue - Urssaf - Impots
 ```
 
 ### TVA Owed
+
 ```
 TVA Collected = sum(invoice taxes) for period
 TVA Recoverable = sum(expense.tax_amount * expense.tax_recovery_rate) for period
@@ -548,11 +609,13 @@ Net TVA = TVA Collected - TVA Recoverable
 ```
 
 ### Business Account Available
+
 ```
 Available = Current Balance - Unpaid Urssaf - Unpaid TVA - Next Month Salary
 ```
 
 ### Income Tax Estimation
+
 ```
 Taxable Income = Annual Revenue * (1 - revenue_deduction_rate)
 Tax = apply progressive brackets to Taxable Income
@@ -561,13 +624,14 @@ Tax = apply progressive brackets to Taxable Income
 ---
 
 ## French Tax Brackets (2024 - to be updated yearly)
-| Bracket | Income Range | Rate |
-|---------|--------------|------|
-| 1 | 0 - 11,294 EUR | 0% |
-| 2 | 11,295 - 28,797 EUR | 11% |
-| 3 | 28,798 - 82,341 EUR | 30% |
-| 4 | 82,342 - 177,106 EUR | 41% |
-| 5 | > 177,106 EUR | 45% |
+
+| Bracket | Income Range         | Rate |
+| ------- | -------------------- | ---- |
+| 1       | 0 - 11,294 EUR       | 0%   |
+| 2       | 11,295 - 28,797 EUR  | 11%  |
+| 3       | 28,798 - 82,341 EUR  | 30%  |
+| 4       | 82,342 - 177,106 EUR | 41%  |
+| 5       | > 177,106 EUR        | 45%  |
 
 *App will include these as defaults with ability to override*
 
@@ -576,6 +640,7 @@ Tax = apply progressive brackets to Taxable Income
 ## Files to Create (Initial)
 
 ### Backend (src/server/)
+
 - `src/server/index.ts` - Fastify server setup with security middleware
 - `src/server/db/schema.ts` - Drizzle schema definitions
 - `src/server/db/index.ts` - Database connection
@@ -591,6 +656,7 @@ Tax = apply progressive brackets to Taxable Income
 - `src/server/middleware/security.ts` - Rate limiting, validation
 
 ### Frontend (src/client/)
+
 - `src/client/App.tsx` - Main app with routing
 - `src/client/main.tsx` - Entry point with TanStack Query provider
 - `src/client/pages/Dashboard.tsx`
@@ -611,10 +677,12 @@ Tax = apply progressive brackets to Taxable Income
 - `src/client/hooks/useAuth.ts` - Auth hook with TanStack Query
 
 ### Shared (src/shared/)
+
 - `src/shared/types.ts` - Shared TypeScript types
 - `src/shared/validation.ts` - Shared Zod schemas
 
 ### Root
+
 - `docker-compose.yml` - PostgreSQL + app services
 - `docker-compose.prod.yml` - Production configuration with SSL
 - `Dockerfile` - Production build (non-root user)
@@ -655,14 +723,14 @@ WEBAUTHN_ORIGIN=https://your-domain.com
 
 ## Deployment Checklist
 
-- [x] All environment variables configured (see `.env.example`)
+- [X] All environment variables configured (see `.env.example`)
 - [ ] Database migrations run (`npm run db:migrate`)
-- [x] SSL/TLS certificates configured (Traefik + Let's Encrypt auto-renewal)
-- [x] CORS origin set to production domain (via `DOMAIN` env var)
-- [x] WebAuthn RP ID matches production domain (via `DOMAIN` env var)
-- [x] Rate limiting enabled (configured in server)
+- [X] SSL/TLS certificates configured (Traefik + Let's Encrypt auto-renewal)
+- [X] CORS origin set to production domain (via `DOMAIN` env var)
+- [X] WebAuthn RP ID matches production domain (via `DOMAIN` env var)
+- [X] Rate limiting enabled (configured in server)
 - [ ] Database backups configured (implement backup strategy)
-- [x] Monitoring/logging setup (Fastify logger + health checks)
-- [x] Security headers verified (Helmet.js + Traefik HSTS)
+- [X] Monitoring/logging setup (Fastify logger + health checks)
+- [X] Security headers verified (Helmet.js + Traefik HSTS)
 - [ ] Default tax brackets seeded in database
 - [ ] Test passkey registration and authentication
