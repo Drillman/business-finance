@@ -139,9 +139,10 @@ function PeriodSelectShell({
 interface YearSelectProps {
   value: number
   onChange: (year: number) => void
+  years?: number[]
 }
 
-export function YearSelect({ value, onChange }: YearSelectProps) {
+export function YearSelect({ value, onChange, years }: YearSelectProps) {
   const [isOpen, setIsOpen] = useState(false)
   const rootRef = useRef<HTMLDivElement | null>(null)
 
@@ -166,16 +167,21 @@ export function YearSelect({ value, onChange }: YearSelectProps) {
     }
   }, [])
 
-  const currentIndex = YEARS.indexOf(value as (typeof YEARS)[number])
+  const availableYears = useMemo(() => {
+    const sourceYears = years && years.length > 0 ? years : [...YEARS]
+    return [...new Set(sourceYears)].sort((a, b) => a - b)
+  }, [years])
+
+  const currentIndex = availableYears.indexOf(value)
   const canPrev = currentIndex > 0
-  const canNext = currentIndex < YEARS.length - 1
-  const options = YEARS.map((year) => ({ value: String(year), label: String(year) }))
+  const canNext = currentIndex >= 0 && currentIndex < availableYears.length - 1
+  const options = availableYears.map((year) => ({ value: String(year), label: String(year) }))
 
   return (
     <div ref={rootRef}>
       <PeriodSelectShell
-        onPrev={() => canPrev && onChange(YEARS[currentIndex - 1])}
-        onNext={() => canNext && onChange(YEARS[currentIndex + 1])}
+        onPrev={() => canPrev && onChange(availableYears[currentIndex - 1])}
+        onNext={() => canNext && onChange(availableYears[currentIndex + 1])}
         canPrev={canPrev}
         canNext={canNext}
         prevTitle="Annee precedente"

@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
 import { Save, Loader2, CheckCircle, XCircle, Plus, Trash2, RotateCcw } from 'lucide-react'
 import { AppButton } from '../components/ui/AppButton'
+import { YearSelect } from '../components/YearSelect'
 
 interface UserSettings {
   id: string
@@ -49,6 +50,8 @@ interface EditableBracket {
   maxIncome: string
   rate: string
 }
+
+const SETTINGS_YEARS = [2024, 2025, 2026]
 
 export default function Settings() {
   const queryClient = useQueryClient()
@@ -326,18 +329,10 @@ export default function Settings() {
             <div className="flex items-center justify-between gap-3">
               <h2 className="font-['Space_Grotesk'] text-sm font-semibold text-(--text-primary)">Taux annuels</h2>
               <div className="flex items-center gap-2">
-                <select
-                  className="h-7 rounded-lg border border-(--border-default) bg-(--card-bg) px-3 font-['Space_Grotesk'] text-xs font-medium text-(--text-primary)"
-                  value={ratesYear}
-                  onChange={(e) => setRatesYear(parseInt(e.target.value))}
-                >
-                  <option value={2024}>2024</option>
-                  <option value={2025}>2025</option>
-                  <option value={2026}>2026</option>
-                </select>
                 {yearlyRatesData?.isCustom && (
                   <span className="inline-flex h-6 items-center rounded-full bg-[#FEF3C7] px-2 text-[10px] font-semibold text-[#92400E]">Personnalisé</span>
                 )}
+                <YearSelect value={ratesYear} onChange={setRatesYear} years={SETTINGS_YEARS} />
               </div>
             </div>
 
@@ -422,15 +417,7 @@ export default function Settings() {
           </div>
 
           <div className="flex items-center gap-2">
-            <select
-              className="h-8 rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary)"
-              value={selectedYear}
-              onChange={(e) => setSelectedYear(parseInt(e.target.value))}
-            >
-              <option value={2024}>2024</option>
-              <option value={2025}>2025</option>
-              <option value={2026}>2026</option>
-            </select>
+            <YearSelect value={selectedYear} onChange={setSelectedYear} years={SETTINGS_YEARS} />
 
             <AppButton startIcon={<Plus className="h-4 w-4" />} onClick={addBracket}>
               Ajouter
