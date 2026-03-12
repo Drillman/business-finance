@@ -1,0 +1,19 @@
+<svg width="40" height="40" viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="logoTitle">
+  <title id="logoTitle">Finances Logo</title>
+  <defs>
+    <linearGradient id="logoGradient" x1="6" y1="6" x2="34" y2="34" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4F46E5" />
+      <stop offset="0.5" stop-color="#2563EB" />
+      <stop offset="1" stop-color="#1E40AF" />
+    </linearGradient>
+  </defs>
+  <rect x="0" y="0" width="40" height="40" rx="10" fill="url(#logoGradient)" />
+
+  <rect x="9" y="7" width="4" height="26" rx="1.5" fill="#FFFFFF" />
+  <rect x="9" y="7" width="12" height="4" rx="1.5" fill="#FFFFFF" />
+  <rect x="9" y="18" width="16" height="4" rx="1.5" fill="#FFFFFF" />
+  <rect x="9" y="29" width="16" height="4" rx="1.5" fill="#FFFFFF" />
+  <rect x="17" y="7" width="4" height="15" rx="2" fill="#FFFFFF" />
+  <rect x="21" y="18" width="4" height="15" rx="2" fill="#FFFFFF" />
+  <rect x="29" y="11" width="3" height="22" rx="1.5" fill="#FFFFFF" fill-opacity="0.35" />
+</svg>

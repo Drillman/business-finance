@@ -11,11 +11,15 @@ import {
 } from '../hooks/useInvoices'
 import { useSettings } from '../hooks/useSettings'
 import type { Invoice, CreateInvoiceInput } from '@shared/types'
-import { Pencil, Trash2, CreditCard, Ban, RotateCcw } from 'lucide-react'
-import { ConfirmDialog } from '../components/ConfirmDialog'
+import { Pencil, Trash2, CreditCard, Ban, RotateCcw, Plus, X, Sparkles } from 'lucide-react'
+import { ActionModal } from '../components/ui/ActionModal'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { ComboSelect } from '../components/ComboSelect'
-import { YearSelect } from '../components/YearSelect'
+import { YearSelect } from '../components/PeriodSelect'
+import { AppButton } from '../components/ui/AppButton'
+import { KpiCard } from '../components/ui/KpiCard'
+import { FinanceTable, type FinanceTableColumn } from '../components/ui/FinanceTable'
+import { Select } from '../components/ui/Select'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -33,9 +37,23 @@ function formatCurrency(amount: string | number): string {
   }).format(num)
 }
 
+function normalizeTaxRateForSelect(taxRate: string): string {
+  const parsedRate = Number.parseFloat(taxRate)
+  return Number.isNaN(parsedRate) ? taxRate : parsedRate.toString()
+}
+
 const monthNames = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+]
+
+const invoiceColumns: FinanceTableColumn[] = [
+  { key: 'invoice-number', label: 'N° Facture', className: 'w-[112px]' },
+  { key: 'client', label: 'Client', className: 'w-[200px]' },
+  { key: 'invoice-date', label: 'Date facture', className: 'w-[106px]' },
+  { key: 'payment-date', label: 'Paiement', className: 'w-[116px]' },
+  { key: 'amount-ht', label: 'Montant', className: 'w-[168px] text-right' },
+  { key: 'actions', label: 'Actions', className: 'w-[96px] text-right' },
 ]
 
 interface InvoiceFormData {
@@ -60,9 +78,21 @@ const defaultFormData: InvoiceFormData = {
   note: '',
 }
 
+const modalFieldLabelClass = 'mb-1.5 block text-[11px] font-semibold uppercase tracking-[0.06em] text-(--text-tertiary)'
+const modalInputClass =
+  'h-10 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
+const modalTextareaClass =
+  'w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 py-2 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
+
+const taxRateOptions = [
+  { value: '0', label: '0% (Exonere)' },
+  { value: '5.5', label: '5.5%' },
+  { value: '10', label: '10%' },
+  { value: '20', label: '20% (Taux normal)' },
+]
+
 export default function Invoices() {
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear())
-  const [clientFilter, setClientFilter] = useState('')
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingInvoice, setEditingInvoice] = useState<Invoice | null>(null)
   const [formData, setFormData] = useState<InvoiceFormData>(defaultFormData)
@@ -70,13 +100,13 @@ export default function Invoices() {
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
   const [paymentInvoice, setPaymentInvoice] = useState<Invoice | null>(null)
   const [paymentDate, setPaymentDate] = useState('')
+  const [hoveredVatInvoiceId, setHoveredVatInvoiceId] = useState<string | null>(null)
   const [error, setError] = useState('')
 
   const { showSuccess, showError } = useSnackbar()
 
   const { data: invoicesData, isLoading: isLoadingInvoices } = useInvoices({
     year: selectedYear,
-    client: clientFilter || undefined,
   })
 
   const { data: summary, isLoading: isLoadingSummary } = useInvoiceYearlySummary(selectedYear)
@@ -98,7 +128,6 @@ export default function Invoices() {
 
     const urssafAmount = totalHt * (urssafRate / 100)
     const estimatedTax = totalHt * (estimatedTaxRate / 100)
-    const remaining = totalHt - urssafAmount - estimatedTax
 
     return {
       totalHt,
@@ -106,10 +135,29 @@ export default function Invoices() {
       taxTotal: parseFloat(summary.taxTotal),
       urssafAmount,
       estimatedTax,
-      remaining,
       count: summary.count,
     }
   }, [summary, settings])
+
+  const invoiceMetrics = useMemo(() => {
+    const allInvoices = invoicesData?.data ?? []
+    const activeInvoices = allInvoices.filter((invoice) => !invoice.isCanceled)
+    const paidInvoices = activeInvoices.filter((invoice) => Boolean(invoice.paymentDate))
+    const unpaidInvoices = activeInvoices.filter((invoice) => !invoice.paymentDate)
+
+    const totalTtc = activeInvoices.reduce((acc, invoice) => acc + parseFloat(invoice.amountTtc), 0)
+    const paidAmountTtc = paidInvoices.reduce((acc, invoice) => acc + parseFloat(invoice.amountTtc), 0)
+    const pendingAmountTtc = unpaidInvoices.reduce((acc, invoice) => acc + parseFloat(invoice.amountTtc), 0)
+
+    return {
+      paidCount: paidInvoices.length,
+      pendingCount: unpaidInvoices.length,
+      totalTtc,
+      paidAmountTtc,
+      pendingAmountTtc,
+      canceledCount: allInvoices.filter((invoice) => invoice.isCanceled).length,
+    }
+  }, [invoicesData])
 
   // Group invoices by month (prioritize payment date, fall back to invoice date)
   const invoicesByMonth = useMemo(() => {
@@ -150,7 +198,7 @@ export default function Invoices() {
       invoiceDate: invoice.invoiceDate,
       paymentDate: invoice.paymentDate || '',
       amountHt: invoice.amountHt,
-      taxRate: invoice.taxRate,
+      taxRate: normalizeTaxRateForSelect(invoice.taxRate),
       invoiceNumber: invoice.invoiceNumber || '',
       note: invoice.note || '',
     })
@@ -252,92 +300,49 @@ export default function Invoices() {
     return ht * (1 + rate / 100)
   }, [formData.amountHt, formData.taxRate])
 
+  const deleteInvoice = useMemo(() => {
+    if (!deleteConfirmId) return null
+    return invoicesData?.data.find((invoice) => invoice.id === deleteConfirmId) ?? null
+  }, [deleteConfirmId, invoicesData])
+
+  const deleteInvoiceNumber = deleteInvoice?.invoiceNumber || '-'
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Factures</h1>
-        <button className="btn btn-primary" onClick={openCreateModal}>
-          Ajouter une facture
-        </button>
-      </div>
-
-      {/* Yearly Summary */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
-        <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">CA HT {selectedYear}</div>
-          <div className="stat-value text-lg">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.totalHt || 0)
-            )}
-          </div>
-          <div className="stat-desc">{calculatedSummary?.count || 0} facture(s)</div>
+    <div className="space-y-7">
+      <div className="flex items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
+            Factures
+          </h1>
         </div>
-        <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">TVA collectée</div>
-          <div className="stat-value text-lg text-base-content/70">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.taxTotal || 0)
-            )}
-          </div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">Urssaf</div>
-          <div className="stat-value text-lg text-base-content/70">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.urssafAmount || 0)
-            )}
-          </div>
-          <div className="stat-desc">{settings ? parseFloat(settings.urssafRate) : 0}%</div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">Impôts (estimé)</div>
-          <div className="stat-value text-lg text-base-content/70">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.estimatedTax || 0)
-            )}
-          </div>
-          <div className="stat-desc">{settings ? parseFloat(settings.estimatedTaxRate) : 0}%</div>
-        </div>
-        <div className="stat bg-base-100 rounded-box shadow">
-          <div className="stat-title">Restant</div>
-          <div className="stat-value text-lg">
-            {isLoadingSummary ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              formatCurrency(calculatedSummary?.remaining || 0)
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Filters */}
-      <div className="flex flex-wrap gap-4 mb-6">
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Année</span>
-          </label>
+        <div className="ml-auto flex shrink-0 items-center gap-3 self-start">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
+          <AppButton startIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
+            Ajouter une facture
+          </AppButton>
         </div>
-        <div className="form-control">
-          <label className="label">
-            <span className="label-text">Client</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Filtrer par client..."
-            className="input input-bordered"
-            value={clientFilter}
-            onChange={(e) => setClientFilter(e.target.value)}
-          />
-        </div>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 md:grid-cols-3 xl:grid-cols-3">
+        <KpiCard
+          title={`CA HT ${selectedYear}`}
+          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(calculatedSummary?.totalHt || 0)}
+          description={`${calculatedSummary?.count || 0} facture(s) - ${formatCurrency(invoiceMetrics.paidAmountTtc || 0)} ttc`}
+          accentColor="#6366F1"
+        />
+        <KpiCard
+          title="TVA collectée"
+          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(calculatedSummary?.taxTotal || 0)}
+          description={isLoadingSummary ? 'Chargement...' : `Encaissée: ${formatCurrency(invoiceMetrics.paidAmountTtc)}`}
+          accentColor="#3B82F6"
+        />
+        <KpiCard
+          title="À encaisser"
+          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(invoiceMetrics.pendingAmountTtc)}
+          description={`${invoiceMetrics.pendingCount} facture(s) en attente`}
+          accentColor="#FBBF24"
+          valueClassName={invoiceMetrics.pendingAmountTtc > 0 ? 'text-[#B45309]' : ''}
+        />
       </div>
 
       {/* Invoice Timeline */}
@@ -346,9 +351,12 @@ export default function Invoices() {
           <span className="loading loading-spinner loading-lg"></span>
         </div>
       ) : invoicesByMonth.size === 0 ? (
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <p className="text-base-content/60">Aucune facture pour {selectedYear}.</p>
+        <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <p className="text-sm text-(--text-secondary)">Aucune facture pour {selectedYear}.</p>
+          <div className="mt-4">
+            <AppButton startIcon={<Plus className="h-4 w-4" />} onClick={openCreateModal}>
+              Créer la première facture
+            </AppButton>
           </div>
         </div>
       ) : (
@@ -357,134 +365,168 @@ export default function Invoices() {
             const activeInvoices = monthInvoices.filter(inv => !inv.isCanceled)
             const monthTotal = activeInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountHt), 0)
             const monthTotalTtc = activeInvoices.reduce((acc, inv) => acc + parseFloat(inv.amountTtc), 0)
+            const monthPaid = activeInvoices.filter(inv => inv.paymentDate).length
 
             return (
-              <div key={month} className="card bg-base-100 shadow">
-                <div className="card-body">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="card-title">
+              <section key={month} className="space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+                  <div>
+                    <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
                       {monthNames[month]} {selectedYear}
                     </h2>
-                    <div className="text-right">
-                      <div className="font-bold">{formatCurrency(monthTotal)} HT</div>
-                      <div className="text-sm text-base-content/60">{formatCurrency(monthTotalTtc)} TTC</div>
-                    </div>
+                    <p className="text-xs text-(--text-secondary)">
+                      {monthInvoices.length} facture(s), {monthPaid} payée(s)
+                    </p>
                   </div>
-
-                  <div className="overflow-x-auto">
-                    <table className="table table-fixed">
-                      <thead>
-                        <tr>
-                          <th className="w-32">N° Facture</th>
-                          <th className="w-48">Client</th>
-                          <th className="w-28">Date facture</th>
-                          <th className="w-32">Date paiement</th>
-                          <th className="w-28 text-right">Montant HT</th>
-                          <th className="w-16 text-right">TVA</th>
-                          <th className="w-28 text-right">Montant TTC</th>
-                          <th className="w-20">Actions</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {monthInvoices.map((invoice) => (
-                          <tr key={invoice.id} className={`hover ${invoice.isCanceled ? 'opacity-50' : ''}`}>
-                            <td className="font-mono text-sm">
-                              <span className={invoice.isCanceled ? 'line-through' : ''}>
-                                {invoice.invoiceNumber || '-'}
-                              </span>
-                              {invoice.isCanceled && (
-                                <span className="badge badge-sm badge-error ml-2">Annulée</span>
-                              )}
-                            </td>
-                            <td>
-                              <div className={`font-medium ${invoice.isCanceled ? 'line-through' : ''}`}>
-                                {invoice.client}
-                              </div>
-                              {invoice.description && (
-                                <div className={`text-sm text-base-content/60 truncate max-w-xs ${invoice.isCanceled ? 'line-through' : ''}`}>
-                                  {invoice.description}
-                                </div>
-                              )}
-                            </td>
-                            <td className={invoice.isCanceled ? 'line-through' : ''}>
-                              {formatDate(invoice.invoiceDate)}
-                            </td>
-                            <td>
-                              {invoice.isCanceled ? (
-                                <span className="text-base-content/40">-</span>
-                              ) : invoice.paymentDate ? (
-                                <span className="badge badge-sm badge-success">
-                                  {formatDate(invoice.paymentDate)}
-                                </span>
-                              ) : (
-                                <button
-                                  onClick={() => openPaymentModal(invoice)}
-                                  className="btn btn-xs btn-warning gap-1"
-                                  title="Enregistrer le paiement"
-                                  disabled={updateMutation.isPending}
-                                >
-                                  <CreditCard className="h-3 w-3" />
-                                  En attente
-                                </button>
-                              )}
-                            </td>
-                            <td className={`text-right font-mono ${invoice.isCanceled ? 'line-through' : ''}`}>
-                              {formatCurrency(invoice.amountHt)}
-                            </td>
-                            <td className={`text-right font-mono text-base-content/60 ${invoice.isCanceled ? 'line-through' : ''}`}>
-                              {parseFloat(invoice.taxRate)}%
-                            </td>
-                            <td className={`text-right font-mono font-medium ${invoice.isCanceled ? 'line-through' : ''}`}>
-                              {formatCurrency(invoice.amountTtc)}
-                            </td>
-                            <td>
-                              <div className="flex gap-1">
-                                {invoice.isCanceled ? (
-                                  <button
-                                    className="btn btn-sm btn-ghost btn-square text-success"
-                                    onClick={() => handleToggleCanceled(invoice)}
-                                    title="Restaurer la facture"
-                                    disabled={updateMutation.isPending}
-                                  >
-                                    <RotateCcw className="h-4 w-4" />
-                                  </button>
-                                ) : (
-                                  <>
-                                    <button
-                                      className="btn btn-sm btn-ghost btn-square"
-                                      onClick={() => openEditModal(invoice)}
-                                      title="Modifier"
-                                    >
-                                      <Pencil className="h-4 w-4" />
-                                    </button>
-                                    {!invoice.paymentDate && (
-                                      <button
-                                        className="btn btn-sm btn-ghost btn-square text-warning"
-                                        onClick={() => handleToggleCanceled(invoice)}
-                                        title="Annuler la facture"
-                                        disabled={updateMutation.isPending}
-                                      >
-                                        <Ban className="h-4 w-4" />
-                                      </button>
-                                    )}
-                                  </>
-                                )}
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square text-error"
-                                  onClick={() => setDeleteConfirmId(invoice.id)}
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                  <div className="text-right">
+                    <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                      {formatCurrency(monthTotal)} HT
+                    </div>
+                    <div className="text-xs text-(--text-secondary)">{formatCurrency(monthTotalTtc)} TTC</div>
                   </div>
                 </div>
-              </div>
+
+                <FinanceTable
+                  columns={invoiceColumns}
+                  minWidthClassName=""
+                >
+                  {monthInvoices.map((invoice, index) => (
+                    <tr
+                      key={invoice.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                        invoice.isCanceled ? 'opacity-55' : '',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 font-mono text-[11px] text-(--text-primary) md:px-4 md:text-xs">
+                        <span className={invoice.isCanceled ? 'line-through' : ''}>{invoice.invoiceNumber || '-'}</span>
+                        {invoice.isCanceled && (
+                          <span className="ml-2 inline-flex rounded-full bg-[#FEE2E2] px-2 py-0.5 text-[10px] font-semibold text-[#B91C1C]">
+                            Annulée
+                          </span>
+                        )}
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <p className={['truncate text-sm font-medium text-(--text-primary)', invoice.isCanceled ? 'line-through' : ''].join(' ')}>
+                          {invoice.client}
+                        </p>
+                        {invoice.description && (
+                          <p className={[
+                            'max-w-72.5 truncate text-xs text-(--text-secondary)',
+                            invoice.isCanceled ? 'line-through' : '',
+                          ].join(' ')}>
+                            {invoice.description}
+                          </p>
+                        )}
+                      </td>
+                      <td className={['px-3 text-xs text-(--text-primary) md:px-4 md:text-sm', invoice.isCanceled ? 'line-through' : ''].join(' ')}>
+                        {formatDate(invoice.invoiceDate)}
+                      </td>
+                      <td className="px-3 md:px-4">
+                        {invoice.isCanceled ? (
+                          <span className="text-xs text-(--text-secondary) md:text-sm">-</span>
+                        ) : invoice.paymentDate ? (
+                          <span className="inline-flex rounded-full bg-[#DCFCE7] px-2 py-1 text-[11px] font-semibold text-[#15803D] md:text-xs">
+                            {formatDate(invoice.paymentDate)}
+                          </span>
+                        ) : (
+                          <AppButton
+                            size="sm"
+                            variant="outline"
+                            onClick={() => openPaymentModal(invoice)}
+                            disabled={updateMutation.isPending}
+                            className="h-7 border-[#F59E0B]/35 bg-[#FFFBEB] px-2 text-[11px] text-[#92400E] hover:bg-[#FEF3C7] md:px-2.5 md:text-xs"
+                            startIcon={<CreditCard className="h-3.5 w-3.5" />}
+                          >
+                            Attente
+                          </AppButton>
+                        )}
+                      </td>
+                      <td className="px-3 text-right md:px-4">
+                        <div className="flex flex-col items-end leading-tight">
+                          <div className="relative inline-flex flex-col items-end">
+                            <button
+                              type="button"
+                              className={[
+                                'cursor-help bg-transparent p-0 text-right text-sm text-(--text-primary) md:text-sm',
+                                invoice.isCanceled ? 'line-through' : '',
+                              ].join(' ')}
+                              onMouseEnter={() => setHoveredVatInvoiceId(invoice.id)}
+                              onMouseLeave={() => setHoveredVatInvoiceId((current) => (current === invoice.id ? null : current))}
+                              onFocus={() => setHoveredVatInvoiceId(invoice.id)}
+                              onBlur={() => setHoveredVatInvoiceId((current) => (current === invoice.id ? null : current))}
+                            >
+                              {formatCurrency(invoice.amountHt)} HT
+                            </button>
+                            {hoveredVatInvoiceId === invoice.id && (
+                              <span className="pointer-events-none absolute right-0 top-0 z-20 -translate-y-[120%] whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white shadow-lg">
+                                TVA ({parseFloat(invoice.taxRate)}%): {formatCurrency(parseFloat(invoice.amountTtc) - parseFloat(invoice.amountHt))}
+                              </span>
+                            )}
+                          </div>
+                          <span
+                            className={[
+                              'font-mono text-[11px] text-(--text-secondary)',
+                              invoice.isCanceled ? 'line-through' : '',
+                            ].join(' ')}
+                          >
+                            {formatCurrency(invoice.amountTtc)} TTC
+                          </span>
+                        </div>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <div className="flex justify-end gap-1">
+                          {invoice.isCanceled ? (
+                            <AppButton
+                              size="icon-sm"
+                              variant="ghost"
+                              onClick={() => handleToggleCanceled(invoice)}
+                              title="Restaurer la facture"
+                              disabled={updateMutation.isPending}
+                              className="text-[#059669] hover:bg-[#ECFDF5]"
+                            >
+                              <RotateCcw className="h-4 w-4" />
+                            </AppButton>
+                          ) : (
+                            <>
+                              <AppButton
+                                size="icon-sm"
+                                variant="ghost"
+                                onClick={() => openEditModal(invoice)}
+                                title="Modifier"
+                              >
+                                <Pencil className="h-4 w-4" />
+                              </AppButton>
+                              {!invoice.paymentDate && (
+                                <AppButton
+                                  size="icon-sm"
+                                  variant="ghost"
+                                  onClick={() => handleToggleCanceled(invoice)}
+                                  title="Annuler la facture"
+                                  disabled={updateMutation.isPending}
+                                  className="text-[#B45309] hover:bg-[#FFFBEB]"
+                                >
+                                  <Ban className="h-4 w-4" />
+                                </AppButton>
+                              )}
+                            </>
+                          )}
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmId(invoice.id)}
+                            title="Supprimer"
+                            className="text-(--color-error) hover:bg-[#FEE2E2]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AppButton>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </FinanceTable>
+              </section>
             )
           })}
         </div>
@@ -493,223 +535,230 @@ export default function Invoices() {
       {/* Create/Edit Modal */}
       {isModalOpen && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">
-              {editingInvoice ? 'Modifier la facture' : 'Nouvelle facture'}
-            </h3>
-
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
+          <div className="modal-box my-6 w-[calc(100%-1.5rem)] max-w-xl overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)] sm:w-[calc(100%-2rem)]">
+            <header className="px-6 pb-3 pt-5">
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <h3 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                    {editingInvoice ? 'Modifier la facture' : 'Nouvelle facture'}
+                  </h3>
+                  <p className="mt-1 text-xs text-(--text-secondary)">
+                    Renseignez les informations de facturation et de paiement client.
+                  </p>
+                </div>
+                <AppButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={closeModal}
+                  title="Fermer"
+                  className="text-(--text-secondary)"
+                >
+                  <X className="h-4 w-4" />
+                </AppButton>
               </div>
-            )}
+            </header>
 
-            <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Client *</span>
-                  </label>
-                  <ComboSelect
-                    value={formData.client}
-                    options={clientsData?.clients || []}
-                    onChange={(value) => updateFormField('client', value)}
-                    placeholder="Sélectionner un client..."
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">N° Facture</span>
-                  </label>
-                  <div className="join w-full">
-                    <input
-                      type="text"
-                      className="input input-bordered join-item flex-1"
-                      value={formData.invoiceNumber}
-                      onChange={(e) => updateFormField('invoiceNumber', e.target.value)}
-                      placeholder="FAC-YYYYMM-XXX"
-                    />
-                    <button
-                      type="button"
-                      className="btn join-item"
-                      onClick={async () => {
-                        const { data } = await refetchNextNumber()
-                        if (data?.invoiceNumber) {
-                          updateFormField('invoiceNumber', data.invoiceNumber)
-                        }
-                      }}
-                      title="Générer automatiquement"
-                    >
-                      Auto
-                    </button>
-                  </div>
-                </div>
-
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Description</span>
-                  </label>
-                  <ComboSelect
-                    value={formData.description}
-                    options={descriptionsData?.descriptions || []}
-                    onChange={(value) => updateFormField('description', value)}
-                    placeholder="Sélectionner une description..."
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Date de facturation *</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    value={formData.invoiceDate}
-                    onChange={(e) => updateFormField('invoiceDate', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Date de paiement</span>
-                  </label>
-                  <input
-                    type="date"
-                    className="input input-bordered w-full"
-                    value={formData.paymentDate}
-                    onChange={(e) => updateFormField('paymentDate', e.target.value)}
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Montant HT (€) *</span>
-                  </label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0"
-                    className="input input-bordered w-full"
-                    value={formData.amountHt}
-                    onChange={(e) => updateFormField('amountHt', e.target.value)}
-                    required
-                  />
-                </div>
-
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux TVA (%) *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.taxRate}
-                    onChange={(e) => updateFormField('taxRate', e.target.value)}
-                  >
-                    <option value="0">0% (Exonéré)</option>
-                    <option value="5.5">5.5%</option>
-                    <option value="10">10%</option>
-                    <option value="20">20% (Taux normal)</option>
-                  </select>
-                </div>
-
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Note</span>
-                  </label>
-                  <textarea
-                    className="textarea textarea-bordered w-full"
-                    value={formData.note}
-                    onChange={(e) => updateFormField('note', e.target.value)}
-                    placeholder="Notes supplémentaires..."
-                    rows={2}
-                  />
-                </div>
-              </div>
-
-              {/* Calculated TTC */}
-              {formData.amountHt && (
-                <div className="mt-4 p-4 bg-base-200 rounded-lg">
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Montant TTC calculé :</span>
-                    <span className="text-xl font-bold">{formatCurrency(calculatedTtc)}</span>
-                  </div>
+            <div className="px-6 pb-6 pt-2">
+              {error && (
+                <div className="mb-4 rounded-lg border border-[#FECACA] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                  {error}
                 </div>
               )}
 
-              <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
-                  Annuler
-                </button>
-                <button
-                  type="submit"
-                  className="btn btn-primary"
-                  disabled={createMutation.isPending || updateMutation.isPending}
-                >
-                  {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : editingInvoice ? (
-                    'Enregistrer'
-                  ) : (
-                    'Créer'
-                  )}
-                </button>
-              </div>
-            </form>
+              <form onSubmit={handleSubmit}>
+                <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Client *</label>
+                    <ComboSelect
+                      value={formData.client}
+                      options={clientsData?.clients || []}
+                      onChange={(value) => updateFormField('client', value)}
+                      placeholder="Sélectionner un client..."
+                      required
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>N° Facture</label>
+                    <div className="grid grid-cols-[1fr_auto] gap-2">
+                      <input
+                        type="text"
+                        className={[modalInputClass, 'min-w-0 flex-1'].join(' ')}
+                        value={formData.invoiceNumber}
+                        onChange={(e) => updateFormField('invoiceNumber', e.target.value)}
+                        placeholder="FAC-YYYYMM-XXX"
+                      />
+                      <AppButton
+                        type="button"
+                        size="icon-sm"
+                        className="h-10 w-10"
+                        onClick={async () => {
+                          const { data } = await refetchNextNumber()
+                          if (data?.invoiceNumber) {
+                            updateFormField('invoiceNumber', data.invoiceNumber)
+                          }
+                        }}
+                        title="Générer automatiquement"
+                      >
+                        <Sparkles className="h-4 w-4" />
+                      </AppButton>
+                    </div>
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Description</label>
+                    <ComboSelect
+                      value={formData.description}
+                      options={descriptionsData?.descriptions || []}
+                      onChange={(value) => updateFormField('description', value)}
+                      placeholder="Sélectionner une description..."
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Date de facturation *</label>
+                    <input
+                      type="date"
+                      className={modalInputClass}
+                      value={formData.invoiceDate}
+                      onChange={(e) => updateFormField('invoiceDate', e.target.value)}
+                      required
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Date de paiement</label>
+                    <input
+                      type="date"
+                      className={modalInputClass}
+                      value={formData.paymentDate}
+                      onChange={(e) => updateFormField('paymentDate', e.target.value)}
+                    />
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Montant HT *</label>
+                    <div className="relative">
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        className={[modalInputClass, 'pr-9'].join(' ')}
+                        value={formData.amountHt}
+                        onChange={(e) => updateFormField('amountHt', e.target.value)}
+                        required
+                      />
+                      <span className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-sm text-(--text-secondary)">
+                        €
+                      </span>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={modalFieldLabelClass}>Taux TVA (%) *</label>
+                    <Select
+                      className="h-10"
+                      value={formData.taxRate}
+                      onChange={(e) => updateFormField('taxRate', e.target.value)}
+                      options={taxRateOptions}
+                    />
+                  </div>
+
+                  <div className="md:col-span-2">
+                    <label className={modalFieldLabelClass}>Note</label>
+                    <textarea
+                      className={[modalTextareaClass, 'h-10 resize-none overflow-hidden'].join(' ')}
+                      value={formData.note}
+                      onChange={(e) => updateFormField('note', e.target.value)}
+                      placeholder="Notes supplémentaires..."
+                      rows={1}
+                    />
+                  </div>
+                </div>
+
+                <div className="mt-4 rounded-lg border border-(--border-default) bg-(--color-base-200)/70 px-4 py-3">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-medium text-(--text-secondary)">Montant TTC calculé :</span>
+                    <span className="font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
+                      {formatCurrency(calculatedTtc)}
+                    </span>
+                  </div>
+                </div>
+
+                <div className="mt-6 flex justify-end gap-2">
+                  <AppButton type="button" variant="outline" onClick={closeModal}>
+                    Annuler
+                  </AppButton>
+                  <AppButton type="submit" disabled={createMutation.isPending || updateMutation.isPending}>
+                    {createMutation.isPending || updateMutation.isPending ? (
+                      <span className="loading loading-spinner loading-sm" />
+                    ) : editingInvoice ? (
+                      'Enregistrer'
+                    ) : (
+                      'Créer'
+                    )}
+                  </AppButton>
+                </div>
+              </form>
+            </div>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
+          <div className="modal-backdrop bg-[#0F172A]/50 backdrop-blur-[1px]" onClick={closeModal}></div>
         </div>
       )}
 
       {/* Payment Modal */}
       {isPaymentModalOpen && paymentInvoice && (
         <div className="modal modal-open">
-          <div className="modal-box max-w-sm">
-            <h3 className="font-bold text-lg mb-4">Enregistrer le paiement</h3>
-            <p className="text-base-content/70 mb-4">
+          <div className="modal-box my-6 w-[calc(100%-1.5rem)] max-w-105 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-0 shadow-[0_12px_34px_rgba(17,24,39,0.16)] sm:w-[calc(100%-2rem)]">
+            <header className="px-5 pb-2 pt-4">
+              <div className="flex items-start justify-between gap-3">
+                <h3 className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">Enregistrer le paiement</h3>
+                <AppButton
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  onClick={closePaymentModal}
+                  title="Fermer"
+                  className="text-(--text-secondary)"
+                >
+                  <X className="h-4 w-4" />
+                </AppButton>
+              </div>
+            </header>
+
+            <div className="px-5 pb-5 pt-2">
+              <p className="mb-4 text-sm text-(--text-secondary)">
               Facture <span className="font-mono">{paymentInvoice.invoiceNumber || '-'}</span> pour{' '}
               <span className="font-medium">{paymentInvoice.client}</span>
-            </p>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Date de paiement</span>
-              </label>
+              </p>
+              <label className={modalFieldLabelClass}>Date de paiement</label>
               <input
                 type="date"
-                className="input input-bordered w-full"
+                className={modalInputClass}
                 value={paymentDate}
                 onChange={(e) => setPaymentDate(e.target.value)}
               />
-            </div>
-            <div className="modal-action">
-              <button type="button" className="btn" onClick={closePaymentModal}>
-                Annuler
-              </button>
-              <button
-                type="button"
-                className="btn btn-success"
-                onClick={handleConfirmPayment}
-                disabled={updateMutation.isPending}
-              >
-                {updateMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  'Confirmer'
-                )}
-              </button>
+
+              <div className="mt-5 flex justify-end gap-2">
+                <AppButton type="button" variant="outline" onClick={closePaymentModal}>
+                  Annuler
+                </AppButton>
+                <AppButton type="button" onClick={handleConfirmPayment} disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? <span className="loading loading-spinner loading-sm" /> : 'Confirmer'}
+                </AppButton>
+              </div>
             </div>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closePaymentModal}></div>
+          <div className="modal-backdrop bg-[#18223a]/40 backdrop-blur-[1px]" onClick={closePaymentModal}></div>
         </div>
       )}
 
       {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
+      <ActionModal
         isOpen={deleteConfirmId !== null}
-        title="Supprimer la facture"
-        message="Êtes-vous sûr de vouloir supprimer cette facture ? Cette action est irréversible."
+        title="Supprimer la facture ?"
+        message={`Cette action est irréversible. La facture ${deleteInvoiceNumber} et toutes les données associées seront définitivement supprimées.`}
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
         variant="danger"

@@ -106,3 +106,40 @@ WEBAUTHN_ORIGIN=http://localhost:5173
 - French UI labels (e.g., "Connexion", "Déconnexion", "Tableau de bord")
 - Financial amounts use `decimal(12,2)` in database
 - All dates stored as `date` type, timestamps as `timestamp`
+
+## Design (Pencil)
+
+The design mockup lives in `design.pen`. Always open it via `mcp__pencil__open_document` before making changes.
+
+### Component reuse
+
+- **Always** scan existing components before creating anything new. Use `batch_get` to search for matching component names or patterns.
+- If a standard UI component (button, input, select, table, badge, modal, etc.) does not exist yet, create it in a dedicated components section of the canvas with **all its states**: default, hover, focused, disabled, loading, error (and empty/filled for inputs).
+- Never inline a one-off version of a component directly inside a page frame — always use or create a proper reusable component.
+
+### Visual consistency
+
+- Use design variables (`get_variables` / `set_variables`) for all colors, spacing, typography, and border-radius values. Never hardcode raw values in nodes.
+- Stick to the established type scale and spacing scale. Do not introduce new sizes without updating the variables.
+- All pages must share the same sidebar, top bar, and layout structure. When updating the global layout, propagate changes to every page.
+
+### Page design workflow
+
+1. Call `get_editor_state` to understand the current canvas state.
+2. Call `batch_get` to list existing components and identify reusable elements.
+3. Call `snapshot_layout` to understand spatial structure before inserting nodes.
+4. Call `get_screenshot` periodically to visually validate the result.
+5. Keep each page frame self-contained: no floating nodes outside frames.
+
+### Naming conventions
+
+- Frames: `Page/[PageName]` (e.g., `Page/Dashboard`, `Page/Invoices`)
+- Components: `Component/[Name]/[State]` (e.g., `Component/Button/Primary`, `Component/Button/Disabled`)
+- Icons: `Icon/[name]`
+- Use English names for all nodes, even though the UI copy is in French.
+
+### Content & data
+
+- Use realistic placeholder data (French amounts, French dates, realistic company names) to make mockups reviewable.
+- Financial amounts must always display a currency symbol (€) and two decimal places.
+- Empty states must be designed for every list or table.

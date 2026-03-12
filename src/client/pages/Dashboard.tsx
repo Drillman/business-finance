@@ -2,7 +2,10 @@ import { useState } from 'react'
 import { useYearlyDashboard } from '../hooks/useDashboard'
 import { useAccountSummary } from '../hooks/useAccount'
 import { Link } from 'react-router-dom'
-import { YearSelect } from '../components/YearSelect'
+import { YearSelect } from '../components/PeriodSelect'
+import { ArrowUpRight, Landmark, Receipt, Wallet } from 'lucide-react'
+import { KpiCard } from '../components/ui/KpiCard'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -15,6 +18,16 @@ function formatCurrency(amount: string | number): string {
 const MONTHS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
+]
+
+const monthlyColumns: DataTableColumn[] = [
+  { key: 'month', label: 'Mois' },
+  { key: 'revenue', label: 'CA HT', className: 'text-right' },
+  { key: 'expenses', label: 'Dépenses', className: 'text-right' },
+  { key: 'urssaf', label: 'Urssaf', className: 'text-right' },
+  { key: 'income-tax', label: 'Impôts', className: 'text-right' },
+  { key: 'tva', label: 'TVA', className: 'text-right' },
+  { key: 'remaining', label: 'Restant', className: 'text-right' },
 ]
 
 export default function Dashboard() {
@@ -43,9 +56,16 @@ export default function Dashboard() {
 
   return (
     <div>
-      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-        <h1 className="text-2xl font-bold">Tableau de bord</h1>
-        <YearSelect value={selectedYear} onChange={setSelectedYear} size="sm" />
+      <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold tracking-tight text-[#18181B]">Tableau de bord</h1>
+          <p className="mt-1 text-sm text-[#71717A]">
+            Vue d&apos;ensemble de votre activite financiere
+          </p>
+        </div>
+        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
+          <YearSelect value={selectedYear} onChange={setSelectedYear} />
+        </div>
       </div>
 
       {isLoading ? (
@@ -56,141 +76,145 @@ export default function Dashboard() {
         <>
           {/* Yearly KPIs */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Bilan {selectedYear}</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Chiffre d'affaires</div>
-                <div className="stat-value text-xl text-primary">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
-                </div>
-              </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Urssaf</div>
-                <div className="stat-value text-xl text-accent">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
-                </div>
-                <div className="stat-desc">
-                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} |
-                  Est.: {yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}
-                </div>
-              </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Impôts sur le revenu</div>
-                <div className="stat-value text-xl text-warning">
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
-                </div>
-                <div className="stat-desc">
-                  Payé: {yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}
-                </div>
-              </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Restant net</div>
-                <div className={`stat-value text-xl ${yearlyData && parseFloat(yearlyData.kpis.totalRemaining) >= 0 ? 'text-success' : 'text-error'}`}>
-                  {yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
-                </div>
-                <div className="stat-desc">Après charges et impôts</div>
-              </div>
+            <h2 className="mb-4 text-lg font-semibold">Bilan {selectedYear}</h2>
+            <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
+              <KpiCard
+                title="Chiffre d'affaires"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalRevenue) : '0 €'}
+                description="Total encaisse sur l'annee"
+                accentColor="#818CF8"
+                valueColor="#818CF8"
+              />
+              <KpiCard
+                title="Urssaf"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
+                description={`Payé: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} | Est.: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}`}
+                accentColor="#FBBF24"
+                valueColor="#FBBF24"
+              />
+              <KpiCard
+                title="Impôts sur le revenu"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxEstimated) : '0 €'}
+                description={`Payé: ${yearlyData ? formatCurrency(yearlyData.kpis.totalIncomeTaxPaid) : '0 €'}`}
+                accentColor="#A78BFA"
+                valueColor="#A78BFA"
+              />
+              <KpiCard
+                title="Restant net"
+                value={yearlyData ? formatCurrency(yearlyData.kpis.totalRemaining) : '0 €'}
+                description="Après charges et impôts"
+                accentColor="#34D399"
+                valueColor={yearlyData && parseFloat(yearlyData.kpis.totalRemaining) < 0 ? 'var(--color-error)' : '#34D399'}
+              />
             </div>
           </div>
 
           {/* Monthly Breakdown Table */}
           <div className="mb-8">
-            <h2 className="text-lg font-semibold mb-4">Détail mensuel</h2>
-            <div className="overflow-x-auto">
-              <table className="table table-sm bg-base-100 rounded-box shadow">
-                <thead>
-                  <tr>
-                    <th>Mois</th>
-                    <th className="text-right">CA HT</th>
-                    <th className="text-right">Urssaf</th>
-                    <th className="text-right">Impôts</th>
-                    <th className="text-right">TVA</th>
-                    <th className="text-right">Restant</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedMonths.map((month) => {
-                    const isCurrentMonth = month.month === yearlyData?.currentMonth
-                    return (
-                      <tr key={month.month} className={isCurrentMonth ? 'bg-base-200' : ''}>
-                        <td className={isCurrentMonth ? 'font-semibold' : ''}>
-                          {MONTHS[month.month - 1]}
-                          {isCurrentMonth && <span className="badge badge-sm badge-primary ml-2">En cours</span>}
-                        </td>
-                        <td className="text-right">{formatCurrency(month.revenue)}</td>
-                        <td className="text-right">
-                          <span className={month.urssafIsPaid ? 'text-success' : 'text-base-content/70'}>
-                            {formatCurrency(month.urssaf)}
-                          </span>
-                          {month.urssafIsPaid && <span className="text-success ml-1">✓</span>}
-                        </td>
-                        <td className="text-right text-base-content/70">
-                          {formatCurrency(month.incomeTax)}
-                        </td>
-                        <td className="text-right">
-                          <span className={month.tvaIsPaid ? 'text-success' : 'text-base-content/70'}>
-                            {formatCurrency(month.tva)}
-                          </span>
-                          {month.tvaIsPaid && <span className="text-success ml-1">✓</span>}
-                        </td>
-                        <td className={`text-right font-medium ${parseFloat(month.remaining) >= 0 ? 'text-success' : 'text-error'}`}>
-                          {formatCurrency(month.remaining)}
-                        </td>
-                      </tr>
-                    )
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2">
-                    <td className="font-semibold">Moyenne</td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td></td>
-                    <td className={`text-right font-semibold ${averageRemaining >= 0 ? 'text-success' : 'text-error'}`}>
-                      {formatCurrency(averageRemaining)}
+            <h2 className="mb-4 text-lg font-semibold">Détail mensuel</h2>
+            <DataTable
+              columns={monthlyColumns}
+              minWidthClassName="min-w-[920px]"
+              footer={
+                <tr className="h-11 border-t border-(--border-default) bg-(--card-bg)">
+                  <td className="px-4 text-sm font-semibold text-(--text-primary)">Moyenne</td>
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className="px-4" />
+                  <td className={`px-4 text-right text-sm font-semibold ${averageRemaining >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                    {formatCurrency(averageRemaining)}
+                  </td>
+                </tr>
+              }
+            >
+              {sortedMonths.map((month, index) => {
+                const isCurrentMonth = month.month === yearlyData?.currentMonth
+                return (
+                  <tr
+                    key={month.month}
+                    className={[
+                      'h-12 border-b border-(--border-default)',
+                      index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      isCurrentMonth ? 'bg-[#EEF2FF]' : '',
+                    ].join(' ').trim()}
+                  >
+                    <td className="px-4 text-sm text-(--text-primary)">
+                      <span className={isCurrentMonth ? 'font-semibold' : ''}>{MONTHS[month.month - 1]}</span>
+                      {isCurrentMonth && <span className="ml-2 inline-flex rounded-full bg-[#6366F1] px-2 py-0.5 text-[10px] font-semibold text-white">En cours</span>}
+                    </td>
+                    <td className="px-4 text-right text-sm">{formatCurrency(month.revenue)}</td>
+                    <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.expensesHt)}</td>
+                    <td className="px-4 text-right text-sm">
+                      <span className={month.urssafIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
+                        {formatCurrency(month.urssaf)}
+                      </span>
+                      {month.urssafIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
+                    </td>
+                    <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.incomeTax)}</td>
+                    <td className="px-4 text-right text-sm">
+                      <span className={month.tvaIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
+                        {formatCurrency(month.tva)}
+                      </span>
+                      {month.tvaIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
+                    </td>
+                    <td className={`px-4 text-right text-sm font-medium ${parseFloat(month.remaining) >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                      {formatCurrency(month.remaining)}
                     </td>
                   </tr>
-                </tfoot>
-              </table>
-            </div>
+                )
+              })}
+            </DataTable>
           </div>
 
           {/* Account Overview */}
           <div className="mb-8">
             <div className="flex justify-between items-center mb-4">
               <h2 className="text-lg font-semibold">Compte entreprise</h2>
-              <Link to="/account" className="btn btn-sm btn-ghost">
-                Voir détails →
+              <Link to="/account" className="btn btn-sm btn-ghost gap-2">
+                Voir détails <ArrowUpRight className="h-4 w-4" />
               </Link>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Solde actuel</div>
-                <div className="stat-value text-lg">
+              <div className="rounded-[10px] border border-[#E2E5F0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#A1A1AA]">Solde actuel</p>
+                  <Wallet className="h-4 w-4 text-[#2563EB]" />
+                </div>
+                <div className="font-['Space_Grotesk'] text-2xl font-semibold tracking-tight text-[#18181B]">
                   {accountSummary ? formatCurrency(accountSummary.currentBalance) : '0 €'}
                 </div>
               </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Obligations en attente</div>
-                <div className="stat-value text-lg text-warning">
+              <div className="rounded-[10px] border border-[#E2E5F0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#A1A1AA]">Obligations</p>
+                  <Landmark className="h-4 w-4 text-[#F59E0B]" />
+                </div>
+                <div className="font-['Space_Grotesk'] text-2xl font-semibold tracking-tight text-[#F59E0B]">
                   {accountSummary ? formatCurrency(accountSummary.totalObligations) : '0 €'}
                 </div>
-                <div className="stat-desc">TVA + Urssaf + Impôts</div>
+                <p className="mt-2 text-xs text-[#71717A]">TVA + Urssaf + Impôts</p>
               </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Salaire réservé</div>
-                <div className="stat-value text-lg text-info">
+              <div className="rounded-[10px] border border-[#E2E5F0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#A1A1AA]">Salaire réservé</p>
+                  <Receipt className="h-4 w-4 text-[#3B82F6]" />
+                </div>
+                <div className="font-['Space_Grotesk'] text-2xl font-semibold tracking-tight text-[#3B82F6]">
                   {accountSummary ? formatCurrency(accountSummary.nextMonthSalary) : '0 €'}
                 </div>
-                <div className="stat-desc">Prochain mois</div>
+                <p className="mt-2 text-xs text-[#71717A]">Prochain mois</p>
               </div>
-              <div className="stat bg-base-100 rounded-box shadow">
-                <div className="stat-title">Fonds disponibles</div>
-                <div className={`stat-value text-lg ${accountSummary && parseFloat(accountSummary.availableFunds) >= 0 ? 'text-success' : 'text-error'}`}>
+              <div className="rounded-[10px] border border-[#E2E5F0] bg-white p-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <div className="mb-3 flex items-center justify-between">
+                  <p className="text-xs font-semibold uppercase tracking-[0.06em] text-[#A1A1AA]">Fonds disponibles</p>
+                  <ArrowUpRight className={`h-4 w-4 ${accountSummary && parseFloat(accountSummary.availableFunds) >= 0 ? 'text-[#16A34A]' : 'text-[#DC2626]'}`} />
+                </div>
+                <div className={`font-['Space_Grotesk'] text-2xl font-semibold tracking-tight ${accountSummary && parseFloat(accountSummary.availableFunds) >= 0 ? 'text-success' : 'text-error'}`}>
                   {accountSummary ? formatCurrency(accountSummary.availableFunds) : '0 €'}
                 </div>
-                <div className="stat-desc">Après déductions</div>
+                <p className="mt-2 text-xs text-[#71717A]">Après déductions</p>
               </div>
             </div>
           </div>
@@ -198,18 +222,30 @@ export default function Dashboard() {
           {/* Quick Links */}
           <div>
             <h2 className="text-lg font-semibold mb-4">Accès rapide</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <Link to="/invoices" className="btn btn-outline">
-                Factures
+            <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+              <Link to="/invoices" className="group rounded-[10px] border border-[#E2E5F0] bg-white px-4 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-colors hover:bg-[#EEF2FF]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Factures</span>
+                  <ArrowUpRight className="h-4 w-4 text-[#71717A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
               </Link>
-              <Link to="/expenses" className="btn btn-outline">
-                Dépenses
+              <Link to="/expenses" className="group rounded-[10px] border border-[#E2E5F0] bg-white px-4 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-colors hover:bg-[#EEF2FF]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Dépenses</span>
+                  <ArrowUpRight className="h-4 w-4 text-[#71717A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
               </Link>
-              <Link to="/tva" className="btn btn-outline">
-                TVA
+              <Link to="/tva" className="group rounded-[10px] border border-[#E2E5F0] bg-white px-4 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-colors hover:bg-[#EEF2FF]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">TVA</span>
+                  <ArrowUpRight className="h-4 w-4 text-[#71717A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
               </Link>
-              <Link to="/urssaf" className="btn btn-outline">
-                Urssaf
+              <Link to="/urssaf" className="group rounded-[10px] border border-[#E2E5F0] bg-white px-4 py-4 shadow-[0_1px_4px_rgba(0,0,0,0.06)] transition-colors hover:bg-[#EEF2FF]">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-medium">Urssaf</span>
+                  <ArrowUpRight className="h-4 w-4 text-[#71717A] transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+                </div>
               </Link>
             </div>
           </div>

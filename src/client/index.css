@@ -1,38 +1,184 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Space+Grotesk:wght@500;600;700&display=swap");
 @import "tailwindcss";
 @plugin "daisyui";
 @plugin "daisyui/theme" {
-  name: "pastel";
+  name: "finances";
   default: false;
   prefersdark: false;
   color-scheme: "light";
-  --color-base-100: oklch(100% 0 0);
-  --color-base-200: oklch(98.462% 0.001 247.838);
-  --color-base-300: oklch(92.462% 0.001 247.838);
-  --color-base-content: oklch(20% 0 0);
-  --color-primary: oklch(62% 0.214 259.815);
-  --color-primary-content: oklch(97% 0.014 254.604);
-  --color-secondary: oklch(89% 0.196 126.665);
-  --color-secondary-content: oklch(45% 0.124 130.933);
-  --color-accent: oklch(84% 0.143 164.978);
-  --color-accent-content: oklch(44% 0.119 151.328);
-  --color-neutral: oklch(55% 0.046 257.417);
-  --color-neutral-content: oklch(92% 0.013 255.508);
-  --color-info: oklch(74% 0.16 232.661);
-  --color-info-content: oklch(97% 0.013 236.62);
-  --color-success: oklch(79% 0.209 151.711);
-  --color-success-content: oklch(98% 0.031 120.757);
-  --color-warning: oklch(83% 0.128 66.29);
-  --color-warning-content: oklch(98% 0.016 73.684);
-  --color-error: oklch(70% 0.191 22.216);
-  --color-error-content: oklch(97% 0.013 17.38);
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F5F7FB;
+  --color-base-300: #EEF0F6;
+  --color-base-content: #18181B;
+  --color-primary: #2563EB;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #6366F1;
+  --color-secondary-content: #FFFFFF;
+  --color-accent: #A78BFA;
+  --color-accent-content: #1E1B4B;
+  --color-neutral: #1F2937;
+  --color-neutral-content: #F9FAFB;
+  --color-info: #3B82F6;
+  --color-info-content: #FFFFFF;
+  --color-success: #16A34A;
+  --color-success-content: #FFFFFF;
+  --color-warning: #F59E0B;
+  --color-warning-content: #1F2937;
+  --color-error: #DC2626;
+  --color-error-content: #FFFFFF;
   --radius-selector: 0.5rem;
   --radius-field: 0.5rem;
-  --radius-box: 0.5rem;
+  --radius-box: 0.625rem;
   --size-selector: 0.25rem;
   --size-field: 0.25rem;
-  --border: 2px;
+  --border: 1px;
   --depth: 0;
   --noise: 0;
+}
+
+:root {
+  --page-bg: #F2F3F7;
+  --card-bg: #FFFFFF;
+  --border-default: #E2E5F0;
+  --bg-hover: #F4F4F5;
+  --bg-active: #E4E4E7;
+  --text-primary: #18181B;
+  --text-secondary: #71717A;
+  --text-tertiary: #A1A1AA;
+}
+
+@layer base {
+  html {
+    font-size: 16px;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Inter", "Segoe UI", sans-serif;
+    color: var(--text-primary);
+    background-color: var(--page-bg);
+    line-height: 1.4;
+  }
+
+  button,
+  input,
+  select,
+  textarea {
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+
+  .font-mono {
+    font-family: "Inter", "Segoe UI", sans-serif !important;
+  }
+
+  table,
+  table thead,
+  table tbody,
+  table tfoot,
+  table th,
+  table td,
+  table caption {
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+
+  table tr {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+  }
+
+  h1,
+  h2,
+  h3,
+  .card-title {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    letter-spacing: -0.01em;
+  }
+
+  h1 {
+    font-size: 2rem;
+    line-height: 1.2;
+    font-weight: 700;
+  }
+
+  h2 {
+    font-size: 1.5rem;
+    line-height: 1.25;
+    font-weight: 600;
+  }
+}
+
+@layer components {
+  .card,
+  .stat,
+  .table,
+  .modal-box {
+    border: 1px solid var(--border-default);
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+    background: var(--card-bg);
+  }
+
+  .card {
+    border-radius: 10px;
+  }
+
+  .stat {
+    border-radius: 10px;
+    padding: 20px 24px;
+    border-left: 3px solid var(--color-primary);
+    gap: 4px;
+  }
+
+  .stat-title {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--text-tertiary);
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+  }
+
+  .stat-value {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+    font-size: 1.75rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+
+  .stat-desc {
+    font-size: 12px;
+    color: var(--text-secondary);
+  }
+
+  .btn {
+    min-height: 38px;
+    height: 38px;
+    padding-inline: 18px;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    text-transform: none;
+  }
+
+  .btn-primary {
+    background-color: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-content);
+  }
+
+  .btn-outline {
+    border-width: 1.5px;
+    border-color: var(--border-default);
+  }
+
+  .input,
+  .select,
+  .textarea {
+    border-color: var(--border-default);
+    background-color: var(--card-bg);
+    font-size: 14px;
+  }
+
+  .table thead tr {
+    background-color: var(--color-base-200);
+  }
 }
 
 /* Remove dashed right border from stat components */

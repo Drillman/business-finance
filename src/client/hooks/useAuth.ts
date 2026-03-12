@@ -1,6 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
-import type { User, LoginInput, RegisterInput, AuthResponse, Passkey } from '@shared/types'
+import type {
+  User,
+  LoginInput,
+  RegisterInput,
+  AuthResponse,
+  Passkey,
+  AuthSetupStatus,
+} from '@shared/types'
 
 export function useUser() {
   return useQuery({
@@ -20,6 +27,15 @@ export function useLogin() {
     onSuccess: (data) => {
       queryClient.setQueryData(['user'], data.user)
     },
+  })
+}
+
+export function useAuthSetupStatus() {
+  return useQuery({
+    queryKey: ['auth', 'setup-status'],
+    queryFn: () => api.get<AuthSetupStatus>('/auth/setup-status'),
+    staleTime: 1000 * 60,
+    retry: false,
   })
 }
 

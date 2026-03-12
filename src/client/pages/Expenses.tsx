@@ -7,9 +7,17 @@ import {
   useRecurringExpenses,
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
-import { Pencil, Trash2, ChevronLeft, ChevronRight } from 'lucide-react'
+import { ArrowUpDown, Check, ChevronDown, ChevronUp, Pencil, Plus, Repeat2, Trash2, Wallet, X } from 'lucide-react'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
+import { MonthSelect } from '../components/PeriodSelect'
+import { AppButton } from '../components/ui/AppButton'
+import { Checkbox } from '../components/ui/Checkbox'
+import { KpiCard } from '../components/ui/KpiCard'
+import { Radio } from '../components/ui/Radio'
+import { Select } from '../components/ui/Select'
+import { Switch } from '../components/ui/Switch'
+import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -51,6 +59,76 @@ const recurrenceLabels: Record<RecurrencePeriod, string> = {
   monthly: 'Mensuelle',
   quarterly: 'Trimestrielle',
   yearly: 'Annuelle',
+}
+
+const categoryOptions = Object.entries(categoryLabels).map(([value, label]) => ({
+  value,
+  label,
+}))
+
+const recurrenceOptions = Object.entries(recurrenceLabels).map(([value, label]) => ({
+  value,
+  label,
+}))
+
+const taxRateOptions = [
+  { value: '0', label: '0% (Exonere)' },
+  { value: '5.5', label: '5.5%' },
+  { value: '10', label: '10%' },
+  { value: '20', label: '20%' },
+]
+
+const taxRecoveryRateOptions = [
+  { value: '100', label: '100% (Recuperation totale)' },
+  { value: '80', label: '80% (Recuperation partielle)' },
+  { value: '0', label: '0% (Non recuperable)' },
+]
+
+const fixedExpenseColumns: DataTableColumn[] = [
+  { key: 'description', label: 'Description', className: 'w-[320px]' },
+  { key: 'payment-day', label: 'Jour', className: 'w-[92px] text-center' },
+  { key: 'amount-ht', label: 'Montant HT', className: 'w-[170px] text-right' },
+  { key: 'amount-ttc', label: 'Montant TTC', className: 'w-[170px] text-right' },
+]
+
+const variableExpenseColumns: DataTableColumn[] = [
+  { key: 'description', label: 'Description', className: 'w-[150px]' },
+  { key: 'date', label: 'Date', className: 'w-[100px]' },
+  { key: 'amount-ht', label: 'Montant HT', className: 'w-[110px] text-right' },
+  { key: 'tax', label: 'TVA', className: 'w-[80px] text-right' },
+  { key: 'recoverable', label: 'Recuperable', className: 'w-[100px] text-right' },
+  { key: 'actions', label: 'Actions', className: 'w-[80px] text-right' },
+]
+
+type FixedExpenseStatus = 'termine' | 'en-cours' | 'a-venir'
+type FixedSortKey = 'description' | 'amountTtc' | 'paymentDay' | 'status' | 'recurrence'
+type SortDirection = 'asc' | 'desc'
+
+const fixedStatusOrder: Record<FixedExpenseStatus, number> = {
+  'a-venir': 0,
+  'en-cours': 1,
+  termine: 2,
+}
+
+function getFixedExpenseStatus(expense: Expense, currentMonth: string): FixedExpenseStatus {
+  const startMonth = expense.startMonth?.slice(0, 7) ?? ''
+  const endMonth = expense.endMonth?.slice(0, 7) ?? ''
+
+  if (startMonth && startMonth > currentMonth) {
+    return 'a-venir'
+  }
+
+  if (endMonth && endMonth < currentMonth) {
+    return 'termine'
+  }
+
+  return 'en-cours'
+}
+
+function getFixedExpenseStatusTooltip(expense: Expense): string {
+  const startLabel = expense.startMonth ? formatMonth(expense.startMonth) : 'Non defini'
+  const endLabel = expense.endMonth ? formatMonth(expense.endMonth) : 'En cours'
+  return `Debut: ${startLabel} | Fin: ${endLabel}`
 }
 
 interface ExpenseFormData {
@@ -99,6 +177,10 @@ export default function Expenses() {
   const [formData, setFormData] = useState<ExpenseFormData>(defaultFormData)
   const [deleteConfirmId, setDeleteConfirmId] = useState<string | null>(null)
   const [error, setError] = useState('')
+  const [fixedSort, setFixedSort] = useState<{ key: FixedSortKey; direction: SortDirection }>({
+    key: 'status',
+    direction: 'asc',
+  })
 
   const { showSuccess, showError } = useSnackbar()
 
@@ -117,6 +199,12 @@ export default function Expenses() {
   const createMutation = useCreateExpense()
   const updateMutation = useUpdateExpense()
   const deleteMutation = useDeleteExpense()
+  const currentMonthKey = getCurrentMonth()
+
+  const nonFixedExpenses = useMemo(
+    () => expensesData?.data.filter((expense) => expense.category !== 'fixed') ?? [],
+    [expensesData],
+  )
 
   // Calculate variable expenses summary for the selected month (excluding fixed category)
   const variableExpensesSummary = useMemo(() => {
@@ -170,7 +258,7 @@ export default function Expenses() {
 
   // Combined summary for KPIs (fixed + variable expenses)
   const combinedSummary = useMemo(() => {
-    const variableCount = expensesData?.data.filter(e => e.category !== 'fixed').length || 0
+    const variableCount = nonFixedExpenses.length
     return {
       totalHt: variableExpensesSummary.totalHt + fixedExpensesSummary.totalHt,
       totalTax: variableExpensesSummary.totalTax + fixedExpensesSummary.totalTax,
@@ -178,7 +266,7 @@ export default function Expenses() {
       totalRecoverable: variableExpensesSummary.totalRecoverable + fixedExpensesSummary.totalRecoverable,
       count: variableCount + fixedExpensesSummary.count,
     }
-  }, [variableExpensesSummary, fixedExpensesSummary, expensesData])
+  }, [variableExpensesSummary, fixedExpensesSummary, nonFixedExpenses])
 
   // Calculate all fixed expenses summary
   const allFixedSummary = useMemo(() => {
@@ -214,6 +302,152 @@ export default function Expenses() {
       yearlyTotal,
     }
   }, [allFixedData])
+
+  const sortedFixedExpenses = useMemo(() => {
+    if (!allFixedData?.data) return []
+
+    const sorted = [...allFixedData.data]
+    const directionFactor = fixedSort.direction === 'asc' ? 1 : -1
+
+    sorted.sort((a, b) => {
+      if (fixedSort.key === 'status') {
+        const statusA = getFixedExpenseStatus(a, currentMonthKey)
+        const statusB = getFixedExpenseStatus(b, currentMonthKey)
+        const rankDiff = fixedStatusOrder[statusA] - fixedStatusOrder[statusB]
+        if (rankDiff !== 0) return rankDiff * directionFactor
+
+        const startA = a.startMonth?.slice(0, 7) ?? ''
+        const startB = b.startMonth?.slice(0, 7) ?? ''
+        return startA.localeCompare(startB, 'fr') * directionFactor
+      }
+
+      if (fixedSort.key === 'description') {
+        return a.description.localeCompare(b.description, 'fr') * directionFactor
+      }
+
+      if (fixedSort.key === 'amountTtc') {
+        const amountA = parseFloat(a.amountHt) + parseFloat(a.taxAmount)
+        const amountB = parseFloat(b.amountHt) + parseFloat(b.taxAmount)
+        return (amountA - amountB) * directionFactor
+      }
+
+      if (fixedSort.key === 'paymentDay') {
+        const dayA = a.paymentDay ?? 0
+        const dayB = b.paymentDay ?? 0
+        return (dayA - dayB) * directionFactor
+      }
+
+      const recA = a.recurrencePeriod ?? ''
+      const recB = b.recurrencePeriod ?? ''
+      return recA.localeCompare(recB, 'fr') * directionFactor
+    })
+
+    return sorted
+  }, [allFixedData, fixedSort, currentMonthKey])
+
+  const toggleFixedSort = (key: FixedSortKey) => {
+    setFixedSort((prev) => {
+      if (prev.key === key) {
+        return {
+          key,
+          direction: prev.direction === 'asc' ? 'desc' : 'asc',
+        }
+      }
+
+      return {
+        key,
+        direction: 'asc',
+      }
+    })
+  }
+
+  const renderSortIcon = (key: FixedSortKey) => {
+    if (fixedSort.key !== key) {
+      return <ArrowUpDown className="h-3.5 w-3.5 text-(--text-tertiary)" />
+    }
+
+    return fixedSort.direction === 'asc'
+      ? <ChevronUp className="h-3.5 w-3.5 text-(--text-secondary)" />
+      : <ChevronDown className="h-3.5 w-3.5 text-(--text-secondary)" />
+  }
+
+  const fixedLibraryColumns: DataTableColumn[] = [
+    {
+      key: 'description',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('description')}
+        >
+          Description
+          {renderSortIcon('description')}
+        </button>
+      ),
+      className: 'w-55',
+    },
+    {
+      key: 'amount-ttc',
+      label: (
+        <button
+          type="button"
+          className="ml-auto inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('amountTtc')}
+        >
+          Montant TTC
+          {renderSortIcon('amountTtc')}
+        </button>
+      ),
+      className: 'w-30 text-right',
+    },
+    {
+      key: 'payment-day',
+      label: (
+        <button
+          type="button"
+          className="mx-auto inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('paymentDay')}
+        >
+          Jour
+          {renderSortIcon('paymentDay')}
+        </button>
+      ),
+      className: 'w-18 text-center',
+    },
+    {
+      key: 'status',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('status')}
+        >
+          Statut
+          {renderSortIcon('status')}
+        </button>
+      ),
+      className: 'w-48',
+    },
+    {
+      key: 'recurrence',
+      label: (
+        <button
+          type="button"
+          className="inline-flex items-center gap-1"
+          onClick={() => toggleFixedSort('recurrence')}
+        >
+          Periodicite
+          {renderSortIcon('recurrence')}
+        </button>
+      ),
+      className: 'w-30',
+    },
+    {
+      key: 'actions',
+      label: 'Actions',
+      className: 'w-24 text-right',
+    },
+  ]
 
   const openCreateModal = (isFixed: boolean = false) => {
     setEditingExpense(null)
@@ -345,19 +579,6 @@ export default function Expenses() {
     return calculatedValues.tax * (rate / 100)
   }, [calculatedValues.tax, formData.taxRecoveryRate])
 
-  const monthOptions = useMemo(() => {
-    const options: { value: string; label: string }[] = []
-    for (const year of [2026, 2025, 2024]) {
-      for (let month = 12; month >= 1; month--) {
-        const date = new Date(year, month - 1, 1)
-        const value = `${year}-${month.toString().padStart(2, '0')}`
-        const label = date.toLocaleDateString('fr-FR', { year: 'numeric', month: 'long' })
-        options.push({ value, label })
-      }
-    }
-    return options
-  }, [])
-
   const monthSelectOptions = useMemo(() => {
     const options: { value: string; label: string }[] = []
     for (const year of [2024, 2025, 2026, 2027]) {
@@ -371,30 +592,75 @@ export default function Expenses() {
     return options
   }, [])
 
+  const endMonthOptions = useMemo(
+    () => [{ value: '', label: 'En cours (pas de fin)' }, ...monthSelectOptions],
+    [monthSelectOptions],
+  )
+
+  const paymentDayOptions = useMemo(
+    () => Array.from({ length: 31 }, (_, i) => ({ value: String(i + 1), label: String(i + 1) })),
+    [],
+  )
+
+  const modalTitle = editingExpense
+    ? (formData.isRecurring ? 'Modifier la charge fixe' : 'Modifier la depense')
+    : (formData.isRecurring ? 'Nouvelle charge fixe' : 'Nouvelle depense')
+
+  const modalSubtitle = formData.isRecurring
+    ? 'Remplissez les informations de la charge fixe'
+    : 'Remplissez les informations de la depense'
+
+  const submitLabel = editingExpense
+    ? 'Enregistrer les modifications'
+    : (formData.isRecurring ? 'Ajouter la charge fixe' : 'Ajouter la depense')
+
   return (
-    <div>
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Dépenses</h1>
-        <button
-          className="btn btn-primary"
-          onClick={() => openCreateModal(activeTab === 'fixed')}
-        >
-          {activeTab === 'fixed' ? 'Ajouter une charge fixe' : 'Ajouter une dépense'}
-        </button>
+    <div className="space-y-7">
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div className="min-w-0">
+          <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
+            Dépenses
+          </h1>
+        </div>
+
+        <div className="ml-auto flex shrink-0 flex-wrap items-center gap-3 self-start">
+          {activeTab === 'monthly' ? (
+            <MonthSelect
+              value={selectedMonth}
+              onChange={setSelectedMonth}
+              years={[2027, 2026, 2025, 2024]}
+            />
+          ) : null}
+          <AppButton
+            startIcon={<Plus className="h-4 w-4" />}
+            onClick={() => openCreateModal(activeTab === 'fixed')}
+          >
+            {activeTab === 'fixed' ? 'Ajouter une charge fixe' : 'Ajouter une dépense'}
+          </AppButton>
+        </div>
       </div>
 
-      {/* Tabs */}
-      <div role="tablist" className="tabs tabs-boxed mb-6">
+      <div className="inline-flex h-10 items-center gap-1 rounded-lg border border-(--border-default) bg-(--color-base-200) p-1">
         <button
-          role="tab"
-          className={`tab ${activeTab === 'monthly' ? 'tab-active' : ''}`}
+          type="button"
+          className={[
+            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
+            activeTab === 'monthly'
+              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+              : 'text-(--text-secondary) hover:text-(--text-primary)',
+          ].join(' ')}
           onClick={() => setActiveTab('monthly')}
         >
           Par mois
         </button>
         <button
-          role="tab"
-          className={`tab ${activeTab === 'fixed' ? 'tab-active' : ''}`}
+          type="button"
+          className={[
+            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
+            activeTab === 'fixed'
+              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
+              : 'text-(--text-secondary) hover:text-(--text-primary)',
+          ].join(' ')}
           onClick={() => setActiveTab('fixed')}
         >
           Charges fixes ({allFixedSummary?.count || 0})
@@ -403,703 +669,594 @@ export default function Expenses() {
 
       {activeTab === 'monthly' && (
         <>
-          {/* Month Selector */}
-          <div className="form-control mb-6">
-            <label className="label">
-              <span className="label-text">Mois</span>
-            </label>
-            <div className="flex items-center gap-2">
-              <button
-                className="btn btn-square btn-sm"
-                onClick={() => {
-                  const [year, month] = selectedMonth.split('-').map(Number)
-                  const prevDate = new Date(year, month - 2, 1)
-                  setSelectedMonth(`${prevDate.getFullYear()}-${(prevDate.getMonth() + 1).toString().padStart(2, '0')}`)
-                }}
-                title="Mois précédent"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </button>
-              <select
-                className="select select-bordered"
-                value={selectedMonth}
-                onChange={(e) => setSelectedMonth(e.target.value)}
-              >
-                {monthOptions.map((option) => (
-                  <option key={option.value} value={option.value}>
-                    {option.label}
-                  </option>
-                ))}
-              </select>
-              <button
-                className="btn btn-square btn-sm"
-                onClick={() => {
-                  const [year, month] = selectedMonth.split('-').map(Number)
-                  const nextDate = new Date(year, month, 1)
-                  setSelectedMonth(`${nextDate.getFullYear()}-${(nextDate.getMonth() + 1).toString().padStart(2, '0')}`)
-                }}
-                title="Mois suivant"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
-          
-          {/* Monthly Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Total HT</div>
-              <div className="stat-value text-lg">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalHt)
-                )}
-              </div>
-              <div className="stat-desc">{combinedSummary.count} dépense(s)</div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">TVA récupérable</div>
-              <div className="stat-value text-lg text-success">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalRecoverable)
-                )}
-              </div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Total TTC</div>
-              <div className="stat-value text-lg">
-                {isLoadingExpenses || isLoadingActiveFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(combinedSummary.totalTtc)
-                )}
-              </div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
+            <KpiCard
+              title="Total TTC du mois"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalTtc)}
+              description={`${combinedSummary.count} depense(s)`}
+              accentColor="#818CF8"
+            />
+            <KpiCard
+              title="TVA recuperable"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
+              description="Deduction possible"
+              accentColor="#34D399"
+              valueColor="#34D399"
+            />
+            <KpiCard
+              title="Charges fixes actives"
+              value={isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : fixedExpensesSummary.count}
+              description={isLoadingActiveFixed ? 'Chargement...' : `${formatCurrency(fixedExpensesSummary.totalTtc)} TTC`}
+              accentColor="#A78BFA"
+            />
+            <KpiCard
+              title="Dépenses ponctuelles"
+              value={isLoadingExpenses ? <span className="loading loading-spinner loading-sm" /> : nonFixedExpenses.length}
+              description={isLoadingExpenses ? 'Chargement...' : `${formatCurrency(variableExpensesSummary.totalTtc)} TTC`}
+              accentColor="#FBBF24"
+              valueClassName="text-[#B45309]"
+            />
           </div>
 
-          {/* Fixed Expenses Summary Card */}
-          <div className="card bg-base-100 shadow mb-6">
-            <div className="card-body">
-              <h2 className="card-title text-base">Charges fixes du mois</h2>
-              {isLoadingActiveFixed ? (
-                <div className="flex justify-center py-4">
-                  <span className="loading loading-spinner loading-sm"></span>
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Charges fixes du mois
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  {formatMonth(`${selectedMonth}-01`)} - {fixedExpensesSummary.count} charge(s) active(s)
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                  {formatCurrency(fixedExpensesSummary.totalTtc)} TTC
                 </div>
-              ) : fixedExpensesSummary.count === 0 ? (
-                <p className="text-base-content/60">Aucune charge fixe active pour ce mois.</p>
-              ) : (
-                <>
-                  <div className="flex justify-between items-center mb-4">
-                    <span className="text-base-content/70">{fixedExpensesSummary.count} charge(s) fixe(s)</span>
-                    <div className="text-right">
-                      <span className="text-xl font-bold">{formatCurrency(fixedExpensesSummary.totalTtc)} TTC</span> / <span className="text-sm text-base-content/70">{formatCurrency(fixedExpensesSummary.totalHt)} HT</span>
-                    </div>
-                  </div>
-                  <div className="overflow-x-auto">
-                    <table className="table table-sm">
-                      <thead>
-                        <tr>
-                          <th>Description</th>
-                          <th>Jour</th>
-                          <th className="text-right">Montant HT</th>
-                          <th className="text-right">Montant TTC</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {activeFixedData?.data.map((expense) => {
-                          const ht = parseFloat(expense.amountHt)
-                          const ttc = ht + parseFloat(expense.taxAmount)
-                          return (
-                            <tr key={expense.id}>
-                              <td>{expense.description}</td>
-                              <td>{expense.paymentDay}</td>
-                              <td className="text-right font-mono">{formatCurrency(ht)}</td>
-                              <td className="text-right font-mono">{formatCurrency(ttc)}</td>
-                            </tr>
-                          )
-                        })}
-                      </tbody>
-                    </table>
-                  </div>
-                </>
-              )}
+                <div className="text-xs text-(--text-secondary)">{formatCurrency(fixedExpensesSummary.totalHt)} HT</div>
+              </div>
             </div>
-          </div>
 
+            {isLoadingActiveFixed ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : fixedExpensesSummary.count === 0 ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <p className="text-sm text-(--text-secondary)">Aucune charge fixe active pour cette période.</p>
+              </div>
+            ) : (
+              <DataTable columns={fixedExpenseColumns} minWidthClassName="min-w-[780px]">
+                {activeFixedData?.data.map((expense, index) => {
+                  const ht = parseFloat(expense.amountHt)
+                  const ttc = ht + parseFloat(expense.taxAmount)
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 text-sm font-medium text-(--text-primary) md:px-4">{expense.description}</td>
+                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ht)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
+                    </tr>
+                  )
+                })}
+              </DataTable>
+            )}
+          </section>
 
-          {/* Non-recurring Expense List */}
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              <h2 className="card-title text-base">Dépenses ponctuelles</h2>
-              {isLoadingExpenses ? (
-                <div className="flex justify-center py-8">
-                  <span className="loading loading-spinner loading-lg"></span>
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Dépenses ponctuelles
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  {nonFixedExpenses.length} dépense(s) sur la période sélectionnée
+                </p>
+              </div>
+              <div className="text-right">
+                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                  {formatCurrency(variableExpensesSummary.totalTtc)} TTC
                 </div>
-              ) : !expensesData?.data.filter(e => e.category !== 'fixed').length ? (
-                <p className="text-base-content/60">Aucune dépense ponctuelle pour cette période.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Description</th>
-                        <th>Date</th>
-                        <th className="text-right">Montant HT</th>
-                        <th className="text-right">TVA</th>
-                        <th className="text-right">Récupérable</th>
-                        <th className="text-right">TTC</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {expensesData.data.filter(e => e.category !== 'fixed').map((expense) => {
-                        const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
-                        return (
-                          <tr key={expense.id} className="hover">
-                            <td>
-                              <div className="font-medium">{expense.description}</div>
-                              {expense.note && (
-                                <div className="text-sm text-base-content/60 truncate max-w-xs">
-                                  {expense.note}
-                                </div>
-                              )}
-                            </td>
-                            <td>{formatDate(expense.date)}</td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(expense.amountHt)}
-                            </td>
-                            <td className="text-right font-mono text-base-content/60">
-                              {formatCurrency(expense.taxAmount)}
-                            </td>
-                            <td className="text-right font-mono">
-                              <span className="text-success">{formatCurrency(taxRecovery)}</span>
-                              <span className="text-xs text-base-content/50 ml-1">
-                                ({parseFloat(expense.taxRecoveryRate)}%)
-                              </span>
-                            </td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount))}
-                            </td>
-                            <td>
-                              <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square"
-                                  onClick={() => openEditModal(expense)}
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square text-error"
-                                  onClick={() => setDeleteConfirmId(expense.id)}
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                    <tfoot>
-                      <tr className="font-bold border-t-2">
-                        <td colSpan={2}>Total</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalHt)}</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalTax)}</td>
-                        <td className="text-right font-mono text-success">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
-                        <td className="text-right font-mono">{formatCurrency(variableExpensesSummary.totalTtc)}</td>
-                        <td></td>
-                      </tr>
-                    </tfoot>
-                  </table>
+                <div className="text-xs text-(--text-secondary)">
+                  {formatCurrency(variableExpensesSummary.totalRecoverable)} récupérable
                 </div>
-              )}
+              </div>
             </div>
-          </div>
+
+            {isLoadingExpenses ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : !nonFixedExpenses.length ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
+              </div>
+            ) : (
+              <DataTable columns={variableExpenseColumns} minWidthClassName="min-w-[980px]">
+                {nonFixedExpenses.map((expense, index) => {
+                  const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 md:px-4">
+                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
+                        {expense.note && (
+                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">
+                            {expense.note}
+                          </div>
+                        )}
+                      </td>
+                      <td className="px-3 text-sm text-(--text-primary) md:px-4">{formatDate(expense.date)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(expense.amountHt)}</td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-secondary) md:px-4">{formatCurrency(expense.taxAmount)}</td>
+                      <td className="px-3 text-right font-mono text-sm md:px-4">
+                        <span className="text-[#15803D]">{formatCurrency(taxRecovery)}</span>
+                        <span className="ml-1 text-[11px] text-(--text-tertiary)">({parseFloat(expense.taxRecoveryRate)}%)</span>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <div className="flex justify-end gap-1">
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => openEditModal(expense)}
+                            title="Modifier"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </AppButton>
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmId(expense.id)}
+                            title="Supprimer"
+                            className="text-(--color-error) hover:bg-[#FEE2E2]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AppButton>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+                <tr className="h-12 border-t-2 border-(--border-default) bg-(--card-bg) font-semibold">
+                  <td colSpan={2} className="px-3 text-sm text-(--text-primary) md:px-4">Total</td>
+                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalHt)}</td>
+                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTax)}</td>
+                  <td className="px-3 text-right font-mono text-sm text-[#15803D] md:px-4">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
+                  <td className="px-3 md:px-4" />
+                </tr>
+              </DataTable>
+            )}
+          </section>
         </>
       )}
 
       {activeTab === 'fixed' && (
         <>
-          {/* Fixed Expenses Summary */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Charges fixes</div>
-              <div className="stat-value text-lg">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  allFixedSummary?.count || 0
-                )}
-              </div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Coût mensuel estimé</div>
-              <div className="stat-value text-lg text-base-content/70">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(allFixedSummary?.monthlyTotal || 0)
-                )}
-              </div>
-              <div className="stat-desc">TTC</div>
-            </div>
-            <div className="stat bg-base-100 rounded-box shadow">
-              <div className="stat-title">Coût annuel estimé</div>
-              <div className="stat-value text-lg text-base-content/70">
-                {isLoadingAllFixed ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  formatCurrency(allFixedSummary?.yearlyTotal || 0)
-                )}
-              </div>
-              <div className="stat-desc">TTC</div>
-            </div>
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+            <KpiCard
+              title="Charges fixes"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : allFixedSummary?.count || 0}
+              description="Actives dans votre plan de charges"
+              accentColor="#A78BFA"
+            />
+            <KpiCard
+              title="Coût mensuel estime"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.monthlyTotal || 0)}
+              description="Projection TTC"
+              accentColor="#3B82F6"
+            />
+            <KpiCard
+              title="Coût annuel estime"
+              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.yearlyTotal || 0)}
+              description="Projection TTC"
+              accentColor="#F59E0B"
+              valueClassName="text-[#B45309]"
+            />
           </div>
 
-          {/* Fixed Expenses List */}
-          <div className="card bg-base-100 shadow">
-            <div className="card-body">
-              {isLoadingAllFixed ? (
-                <div className="flex justify-center py-8">
-                  <span className="loading loading-spinner loading-lg"></span>
-                </div>
-              ) : !allFixedData?.data.length ? (
-                <p className="text-base-content/60">Aucune charge fixe enregistrée.</p>
-              ) : (
-                <div className="overflow-x-auto">
-                  <table className="table">
-                    <thead>
-                      <tr>
-                        <th>Description</th>
-                        <th className="text-right">Montant TTC</th>
-                        <th>Jour</th>
-                        <th>Début</th>
-                        <th>Fin</th>
-                        <th>Périodicité</th>
-                        <th>Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {allFixedData.data.map((expense) => {
-                        const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
-                        return (
-                          <tr key={expense.id} className="hover">
-                            <td>
-                              <div className="font-medium">{expense.description}</div>
-                              {expense.note && (
-                                <div className="text-sm text-base-content/60 truncate max-w-xs">
-                                  {expense.note}
-                                </div>
-                              )}
-                            </td>
-                            <td className="text-right font-mono">
-                              {formatCurrency(ttc)}
-                            </td>
-                            <td>{expense.paymentDay}</td>
-                            <td>{expense.startMonth ? formatMonth(expense.startMonth) : '-'}</td>
-                            <td>
-                              {expense.endMonth ? (
-                                formatMonth(expense.endMonth)
-                              ) : (
-                                <span className="badge badge-success badge-sm">En cours</span>
-                              )}
-                            </td>
-                            <td>
-                              <span className="badge badge-accent badge-sm">
-                                {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
-                              </span>
-                            </td>
-                            <td>
-                              <div className="flex gap-1">
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square"
-                                  onClick={() => openEditModal(expense)}
-                                  title="Modifier"
-                                >
-                                  <Pencil className="h-4 w-4" />
-                                </button>
-                                <button
-                                  className="btn btn-sm btn-ghost btn-square text-error"
-                                  onClick={() => setDeleteConfirmId(expense.id)}
-                                  title="Supprimer"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </div>
-                            </td>
-                          </tr>
-                        )
-                      })}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+          <section className="space-y-3">
+            <div className="flex flex-wrap items-center justify-between gap-3 px-1">
+              <div>
+                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                  Bibliothèque des charges fixes
+                </h2>
+                <p className="text-xs text-(--text-secondary)">
+                  Visualisez et modifiez toutes les charges récurrentes
+                </p>
+              </div>
+              <div className="inline-flex items-center gap-2 rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#4338CA]">
+                <Repeat2 className="h-3.5 w-3.5" />
+                {allFixedSummary?.count || 0} actif(s)
+              </div>
             </div>
-          </div>
+
+            {isLoadingAllFixed ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <span className="loading loading-spinner loading-lg" />
+              </div>
+            ) : !allFixedData?.data.length ? (
+              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+                <Wallet className="mx-auto h-8 w-8 text-(--text-tertiary)" />
+                <p className="mt-3 text-sm text-(--text-secondary)">Aucune charge fixe enregistrée.</p>
+              </div>
+            ) : (
+              <DataTable columns={fixedLibraryColumns} minWidthClassName="">
+                {sortedFixedExpenses.map((expense, index) => {
+                  const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
+                  const status = getFixedExpenseStatus(expense, currentMonthKey)
+                  const statusTooltip = getFixedExpenseStatusTooltip(expense)
+                  const statusLabel = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
+                  const statusClassName =
+                    status === 'termine'
+                      ? 'bg-[#F3F4F6] text-[#6B7280]'
+                      : status === 'a-venir'
+                        ? 'bg-[#FEF3C7] text-[#92400E]'
+                        : 'bg-[#DCFCE7] text-[#15803D]'
+
+                  return (
+                    <tr
+                      key={expense.id}
+                      className={[
+                        'h-12 border-b border-(--border-default) align-middle',
+                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
+                      ].join(' ')}
+                    >
+                      <td className="px-3 md:px-4">
+                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
+                        {expense.note && (
+                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
+                        )}
+                      </td>
+                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
+                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
+                      <td className="px-3 text-sm md:px-4">
+                        <span className="group relative inline-flex">
+                          <span className={`inline-flex w-fit cursor-help rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName}`}>
+                            {statusLabel}
+                          </span>
+                          <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100">
+                            {statusTooltip}
+                          </span>
+                        </span>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <span className="inline-flex rounded-full bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4338CA]">
+                          {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
+                        </span>
+                      </td>
+                      <td className="px-3 md:px-4">
+                        <div className="flex justify-end gap-1">
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => openEditModal(expense)}
+                            title="Modifier"
+                          >
+                            <Pencil className="h-4 w-4" />
+                          </AppButton>
+                          <AppButton
+                            size="icon-sm"
+                            variant="ghost"
+                            onClick={() => setDeleteConfirmId(expense.id)}
+                            title="Supprimer"
+                            className="text-(--color-error) hover:bg-[#FEE2E2]"
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </AppButton>
+                        </div>
+                      </td>
+                    </tr>
+                  )
+                })}
+              </DataTable>
+            )}
+          </section>
         </>
       )}
 
       {/* Create/Edit Modal */}
       {isModalOpen && (
-        <div className="modal modal-open">
-          <div className="modal-box max-w-2xl">
-            <h3 className="font-bold text-lg mb-4">
-              {editingExpense
-                ? (formData.isRecurring ? 'Modifier la charge fixe' : 'Modifier la dépense')
-                : (formData.isRecurring ? 'Nouvelle charge fixe' : 'Nouvelle dépense')}
-            </h3>
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <button
+            type="button"
+            className="absolute inset-0 bg-black/45"
+            onClick={closeModal}
+            aria-label="Fermer"
+          />
 
-            {error && (
-              <div className="alert alert-error mb-4">
-                <span>{error}</span>
+          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-(--border-default) bg-(--card-bg) shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
+            <div className="flex items-center justify-between px-7 pt-6 pb-0">
+              <div>
+                <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold tracking-[-0.02em] text-(--text-primary)">
+                  {modalTitle}
+                </h3>
+                <p className="mt-1 text-[13px] text-(--text-secondary)">{modalSubtitle}</p>
               </div>
-            )}
+
+              <button
+                type="button"
+                onClick={closeModal}
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
+                aria-label="Fermer"
+              >
+                <X className="h-4.5 w-4.5" />
+              </button>
+            </div>
 
             <form onSubmit={handleSubmit}>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Description *</span>
-                  </label>
+              <div className="max-h-[65vh] space-y-4.5 overflow-y-auto px-7 py-5">
+                {error && (
+                  <div className="rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                    {error}
+                  </div>
+                )}
+
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Description *</label>
                   <input
                     type="text"
-                    className="input input-bordered w-full"
+                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.description}
                     onChange={(e) => updateFormField('description', e.target.value)}
-                    placeholder="Description de la dépense..."
+                    placeholder="Description de la depense..."
                     required
                   />
                 </div>
 
-                {/* Toggle for expense type - only show when creating */}
                 {!editingExpense && (
-                  <div className="form-control md:col-span-2">
-                    <label className="label cursor-pointer justify-start gap-3">
+                  <Switch
+                    checked={formData.isRecurring}
+                    onChange={(e) => {
+                      updateFormField('isRecurring', e.target.checked)
+                      updateFormField('category', e.target.checked ? 'fixed' : 'one-time')
+                    }}
+                    label="Charge fixe (recurrente)"
+                  />
+                )}
+
+                {!formData.isRecurring ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Date *</label>
                       <input
-                        type="checkbox"
-                        className="toggle toggle-primary"
-                        checked={formData.isRecurring}
-                        onChange={(e) => {
-                          updateFormField('isRecurring', e.target.checked)
-                          updateFormField('category', e.target.checked ? 'fixed' : 'one-time')
-                        }}
+                        type="date"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        value={formData.date}
+                        onChange={(e) => updateFormField('date', e.target.value)}
+                        required
                       />
-                      <span className="label-text">Charge fixe (récurrente)</span>
-                    </label>
-                  </div>
-                )}
+                    </div>
 
-                {/* Date field for non-recurring */}
-                {!formData.isRecurring && (
-                  <div className="form-control">
-                    <label className="label">
-                      <span className="label-text">Date *</span>
-                    </label>
-                    <input
-                      type="date"
-                      className="input input-bordered w-full"
-                      value={formData.date}
-                      onChange={(e) => updateFormField('date', e.target.value)}
-                      required
-                    />
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
+                      <Select
+                        value={formData.category}
+                        onChange={(e) => updateFormField('category', e.target.value)}
+                        options={categoryOptions}
+                      />
+                    </div>
                   </div>
-                )}
-
-                {/* Fields for recurring expenses */}
-                {formData.isRecurring && (
+                ) : (
                   <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Mois de début *</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.startMonth}
-                        onChange={(e) => updateFormField('startMonth', e.target.value)}
-                        required
-                      >
-                        {monthSelectOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de debut *</label>
+                        <Select
+                          value={formData.startMonth}
+                          onChange={(e) => updateFormField('startMonth', e.target.value)}
+                          options={monthSelectOptions}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de fin</label>
+                        <Select
+                          value={formData.endMonth}
+                          onChange={(e) => updateFormField('endMonth', e.target.value)}
+                          options={endMonthOptions}
+                        />
+                      </div>
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Mois de fin (optionnel)</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.endMonth}
-                        onChange={(e) => updateFormField('endMonth', e.target.value)}
-                      >
-                        <option value="">En cours (pas de fin)</option>
-                        {monthSelectOptions.map((option) => (
-                          <option key={option.value} value={option.value}>
-                            {option.label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Jour de paiement *</label>
+                        <Select
+                          value={formData.paymentDay}
+                          onChange={(e) => updateFormField('paymentDay', e.target.value)}
+                          options={paymentDayOptions}
+                          required
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <label className="block text-[13px] font-medium text-(--text-primary)">Periodicite *</label>
+                        <Select
+                          value={formData.recurrencePeriod}
+                          onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
+                          options={recurrenceOptions}
+                          required
+                        />
+                      </div>
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Jour de paiement *</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.paymentDay}
-                        onChange={(e) => updateFormField('paymentDay', e.target.value)}
-                        required
-                      >
-                        {Array.from({ length: 31 }, (_, i) => i + 1).map((day) => (
-                          <option key={day} value={day}>
-                            {day}
-                          </option>
-                        ))}
-                      </select>
-                    </div>
-
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Périodicité *</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
-                        value={formData.recurrencePeriod}
-                        onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
-                        required
-                      >
-                        {Object.entries(recurrenceLabels).map(([value, label]) => (
-                          <option key={value} value={value}>
-                            {label}
-                          </option>
-                        ))}
-                      </select>
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
+                      <Select
+                        value={formData.category}
+                        onChange={(e) => updateFormField('category', e.target.value)}
+                        options={categoryOptions}
+                      />
                     </div>
                   </>
                 )}
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Catégorie *</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
-                    value={formData.category}
-                    onChange={(e) => updateFormField('category', e.target.value)}
-                  >
-                    {Object.entries(categoryLabels).map(([value, label]) => (
-                      <option key={value} value={value}>
-                        {label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Intra-EU checkbox - only for non-recurring expenses */}
                 {!formData.isRecurring && (
-                  <div className="form-control md:col-span-2">
-                    <label className="label cursor-pointer justify-start gap-3">
-                      <input
-                        type="checkbox"
-                        className="checkbox checkbox-primary"
-                        checked={formData.isIntraEu}
-                        onChange={(e) => {
-                          updateFormField('isIntraEu', e.target.checked)
-                          // When intra-EU is checked, set tax amount to 0 (auto-liquidation)
-                          if (e.target.checked) {
-                            updateFormField('taxAmount', '0')
-                            updateFormField('taxRate', '0')
-                          }
-                        }}
-                      />
-                      <div>
-                        <span className="label-text font-medium">Achat intracommunautaire (intra-UE)</span>
-                        <span className="label-text-alt block text-xs text-base-content/60">
-                          Auto-liquidation TVA - La TVA sera declaree mais non payee au fournisseur
-                        </span>
-                      </div>
-                    </label>
-                  </div>
+                  <Checkbox
+                    checked={formData.isIntraEu}
+                    onChange={(e) => {
+                      updateFormField('isIntraEu', e.target.checked)
+                      if (e.target.checked) {
+                        updateFormField('taxAmount', '0')
+                        updateFormField('taxRate', '0')
+                      }
+                    }}
+                    label="Achat intracommunautaire (intra-UE)"
+                    description="Auto-liquidation TVA"
+                    alignTop
+                  />
                 )}
 
-                {/* Amount input mode toggle */}
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Mode de saisie du montant</span>
-                  </label>
-                  <div className="flex gap-2">
-                    <label className="label cursor-pointer gap-2">
-                      <input
-                        type="radio"
-                        name="inputMode"
-                        className="radio radio-primary"
-                        checked={formData.inputMode === 'ttc'}
-                        onChange={() => updateFormField('inputMode', 'ttc')}
-                      />
-                      <span className="label-text">TTC (toutes taxes comprises)</span>
-                    </label>
-                    <label className="label cursor-pointer gap-2">
-                      <input
-                        type="radio"
-                        name="inputMode"
-                        className="radio radio-primary"
-                        checked={formData.inputMode === 'ht'}
-                        onChange={() => updateFormField('inputMode', 'ht')}
-                      />
-                      <span className="label-text">HT (hors taxes)</span>
-                    </label>
+                <div className="space-y-2">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Mode de saisie</label>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <Radio
+                      name="inputMode"
+                      checked={formData.inputMode === 'ttc'}
+                      onChange={() => updateFormField('inputMode', 'ttc')}
+                      label="TTC (toutes taxes)"
+                    />
+                    <Radio
+                      name="inputMode"
+                      checked={formData.inputMode === 'ht'}
+                      onChange={() => updateFormField('inputMode', 'ht')}
+                      label="HT (hors taxes)"
+                    />
                   </div>
                 </div>
 
                 {formData.inputMode === 'ttc' ? (
-                  <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant TTC (€) *</span>
-                      </label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_160px]">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TTC (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.amountTtc}
                         onChange={(e) => updateFormField('amountTtc', e.target.value)}
                         required
                       />
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Taux TVA (%)</span>
-                      </label>
-                      <select
-                        className="select select-bordered w-full"
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Taux TVA</label>
+                      <Select
                         value={formData.taxRate}
                         onChange={(e) => updateFormField('taxRate', e.target.value)}
-                      >
-                        <option value="0">0% (Exonéré)</option>
-                        <option value="5.5">5.5%</option>
-                        <option value="10">10%</option>
-                        <option value="20">20% (Taux normal)</option>
-                      </select>
+                        options={taxRateOptions}
+                      />
                     </div>
-                  </>
+                  </div>
                 ) : (
-                  <>
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant HT (€) *</span>
-                      </label>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant HT (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.amountHt}
                         onChange={(e) => updateFormField('amountHt', e.target.value)}
                         required
                       />
                     </div>
 
-                    <div className="form-control">
-                      <label className="label">
-                        <span className="label-text">Montant TVA (€)</span>
-                      </label>
+                    <div className="space-y-1.5">
+                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TVA (EUR)</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="input input-bordered w-full"
+                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
                         value={formData.taxAmount}
                         onChange={(e) => updateFormField('taxAmount', e.target.value)}
                       />
                     </div>
-                  </>
+                  </div>
                 )}
 
-                <div className="form-control">
-                  <label className="label">
-                    <span className="label-text">Taux de récupération TVA (%)</span>
-                  </label>
-                  <select
-                    className="select select-bordered w-full"
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">Taux de recuperation TVA</label>
+                  <Select
                     value={formData.taxRecoveryRate}
                     onChange={(e) => updateFormField('taxRecoveryRate', e.target.value)}
-                  >
-                    <option value="100">100% (Récupération totale)</option>
-                    <option value="80">80% (Récupération partielle)</option>
-                    <option value="0">0% (Non récupérable)</option>
-                  </select>
+                    options={taxRecoveryRateOptions}
+                  />
                 </div>
 
-                <div className="form-control md:col-span-2">
-                  <label className="label">
-                    <span className="label-text">Note</span>
+                <div className="space-y-1.5">
+                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                    Note <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
                   </label>
                   <textarea
-                    className="textarea textarea-bordered w-full"
+                    className="min-h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
-                    placeholder="Notes supplémentaires..."
+                    placeholder="Notes supplementaires..."
                     rows={2}
                   />
                 </div>
+
+                {(formData.inputMode === 'ttc' ? formData.amountTtc : formData.amountHt) && (
+                  <div className="space-y-2 rounded-lg bg-[#EEF2FF] px-4 py-3.5">
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">Montant HT :</span>
+                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.ht)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">TVA :</span>
+                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.tax)}</span>
+                    </div>
+                    <div className="flex items-center justify-between text-[13px]">
+                      <span className="text-(--text-secondary)">Total TTC :</span>
+                      <span className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">{formatCurrency(calculatedValues.ttc)}</span>
+                    </div>
+                    {calculatedValues.tax > 0 && (
+                      <>
+                        <div className="h-px w-full bg-(--border-default)" />
+                        <div className="flex items-center justify-between text-[13px]">
+                          <span className="text-(--text-secondary)">TVA recuperable :</span>
+                          <span className="font-['Space_Grotesk'] text-base font-semibold text-(--color-success)">{formatCurrency(calculatedRecovery)}</span>
+                        </div>
+                      </>
+                    )}
+                  </div>
+                )}
               </div>
 
-              {/* Calculated totals */}
-              {(formData.inputMode === 'ttc' ? formData.amountTtc : formData.amountHt) && (
-                <div className="mt-4 p-4 bg-base-200 rounded-lg space-y-2">
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Montant HT :</span>
-                    <span className="font-medium">{formatCurrency(calculatedValues.ht)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">TVA :</span>
-                    <span className="font-medium">{formatCurrency(calculatedValues.tax)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-base-content/70">Total TTC :</span>
-                    <span className="text-lg font-bold">{formatCurrency(calculatedValues.ttc)}</span>
-                  </div>
-                  {calculatedValues.tax > 0 && (
-                    <div className="flex justify-between items-center border-t border-base-300 pt-2 mt-2">
-                      <span className="text-base-content/70">TVA récupérable :</span>
-                      <span className="text-lg font-bold text-success">{formatCurrency(calculatedRecovery)}</span>
-                    </div>
-                  )}
-                </div>
-              )}
-
-              <div className="modal-action">
-                <button type="button" className="btn" onClick={closeModal}>
+              <div className="h-px w-full bg-(--border-default)" />
+              <div className="flex items-center justify-end gap-3 px-7 pt-4 pb-6">
+                <AppButton type="button" variant="outline" onClick={closeModal}>
                   Annuler
-                </button>
-                <button
+                </AppButton>
+                <AppButton
                   type="submit"
-                  className="btn btn-primary"
+                  startIcon={createMutation.isPending || updateMutation.isPending ? null : <Check className="h-4 w-4" />}
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm"></span>
-                  ) : editingExpense ? (
-                    'Enregistrer'
+                    <span className="loading loading-spinner loading-sm" />
                   ) : (
-                    'Créer'
+                    submitLabel
                   )}
-                </button>
+                </AppButton>
               </div>
             </form>
           </div>
-          <div className="modal-backdrop bg-black/50" onClick={closeModal}></div>
         </div>
       )}
 
