@@ -23,6 +23,7 @@ const MONTHS = [
 const monthlyColumns: DataTableColumn[] = [
   { key: 'month', label: 'Mois' },
   { key: 'revenue', label: 'CA HT', className: 'text-right' },
+  { key: 'expenses', label: 'Dépenses', className: 'text-right' },
   { key: 'urssaf', label: 'Urssaf', className: 'text-right' },
   { key: 'income-tax', label: 'Impôts', className: 'text-right' },
   { key: 'tva', label: 'TVA', className: 'text-right' },
@@ -121,6 +122,7 @@ export default function Dashboard() {
                   <td className="px-4" />
                   <td className="px-4" />
                   <td className="px-4" />
+                  <td className="px-4" />
                   <td className={`px-4 text-right text-sm font-semibold ${averageRemaining >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
                     {formatCurrency(averageRemaining)}
                   </td>
@@ -143,6 +145,7 @@ export default function Dashboard() {
                       {isCurrentMonth && <span className="ml-2 inline-flex rounded-full bg-[#6366F1] px-2 py-0.5 text-[10px] font-semibold text-white">En cours</span>}
                     </td>
                     <td className="px-4 text-right text-sm">{formatCurrency(month.revenue)}</td>
+                    <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.expensesHt)}</td>
                     <td className="px-4 text-right text-sm">
                       <span className={month.urssafIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
                         {formatCurrency(month.urssaf)}
