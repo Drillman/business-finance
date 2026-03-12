@@ -1,15 +1,15 @@
-import { useState } from 'react'
-import { Plus, Trash2, X } from 'lucide-react'
+import { useState, type FormEvent } from 'react'
+import { Plus, Trash2 } from 'lucide-react'
 import { useInvoiceClients, useInvoiceDescriptions } from '../hooks/useInvoices'
 import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { api } from '../api/client'
+import { AppButton } from '../components/ui/AppButton'
 
-interface InvoiceSettingsData {
-  clients: string[]
-  descriptions: string[]
-}
+const sectionTitleClass = "font-['Space_Grotesk'] text-[22px] font-semibold leading-tight tracking-[-0.015em] text-(--text-primary)"
+const inputClass =
+  'h-10 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--color-primary)'
 
 export default function InvoiceSettings() {
   const queryClient = useQueryClient()
@@ -73,14 +73,14 @@ export default function InvoiceSettings() {
     },
   })
 
-  const handleAddClient = (e: React.FormEvent) => {
+  const handleAddClient = (e: FormEvent) => {
     e.preventDefault()
     if (newClient.trim()) {
       addClientMutation.mutate(newClient.trim())
     }
   }
 
-  const handleAddDescription = (e: React.FormEvent) => {
+  const handleAddDescription = (e: FormEvent) => {
     e.preventDefault()
     if (newDescription.trim()) {
       addDescriptionMutation.mutate(newDescription.trim())
@@ -97,130 +97,146 @@ export default function InvoiceSettings() {
   }
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold mb-6">Paramètres des factures</h1>
+    <div className="space-y-7">
+      <div className="space-y-2">
+        <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
+          Paramètres des factures
+        </h1>
+        <p className="text-sm text-(--text-secondary)">
+          Gérez les valeurs suggérées pour accélérer la création de vos factures.
+        </p>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Clients List */}
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title">Clients</h2>
-            <p className="text-base-content/60 text-sm mb-4">
+      <div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div className="space-y-1">
+            <h2 className={sectionTitleClass}>Clients</h2>
+            <p className="text-sm text-(--text-secondary)">
               Liste des clients pour l'autocomplétion lors de la création de factures.
             </p>
+          </div>
 
-            <form onSubmit={handleAddClient} className="flex gap-2 mb-4">
+          <form onSubmit={handleAddClient} className="mt-5 flex items-end gap-2">
+            <div className="flex-1 space-y-1.5">
+              <label htmlFor="new-client" className="text-xs font-medium text-(--text-secondary)">
+                Nouveau client
+              </label>
               <input
+                id="new-client"
                 type="text"
-                className="input input-bordered flex-1"
-                placeholder="Nouveau client..."
+                className={inputClass}
+                placeholder="Ex: SARL Martin Conseil"
                 value={newClient}
                 onChange={(e) => setNewClient(e.target.value)}
               />
-              <button
-                type="submit"
-                className="btn btn-primary btn-square"
-                disabled={!newClient.trim() || addClientMutation.isPending}
-              >
-                {addClientMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  <Plus className="h-5 w-5" />
-                )}
-              </button>
-            </form>
+            </div>
+            <AppButton
+              type="submit"
+              disabled={!newClient.trim() || addClientMutation.isPending}
+              startIcon={addClientMutation.isPending ? undefined : <Plus className="h-4 w-4" />}
+            >
+              {addClientMutation.isPending ? <span className="loading loading-spinner loading-sm" /> : 'Ajouter'}
+            </AppButton>
+          </form>
 
-            {isLoadingClients ? (
-              <div className="flex justify-center py-4">
-                <span className="loading loading-spinner loading-md"></span>
-              </div>
-            ) : clients.length === 0 ? (
-              <p className="text-base-content/50 text-center py-4">Aucun client enregistré</p>
-            ) : (
-              <ul className="space-y-2">
-                {clients.map((client) => (
-                  <li
-                    key={client}
-                    className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+          {isLoadingClients ? (
+            <div className="flex justify-center py-10">
+              <span className="loading loading-spinner loading-md" />
+            </div>
+          ) : clients.length === 0 ? (
+            <p className="py-10 text-center text-sm text-(--text-tertiary)">Aucun client enregistré</p>
+          ) : (
+            <ul className="mt-5 space-y-2">
+              {clients.map((client) => (
+                <li
+                  key={client}
+                  className="flex items-center justify-between rounded-lg border border-(--border-default) bg-[#F8FAFC] px-3 py-2.5"
+                >
+                  <span className="min-w-0 truncate text-sm text-(--text-primary)">{client}</span>
+                  <AppButton
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setDeleteConfirm({ type: 'client', value: client })}
+                    title="Supprimer ce client"
+                    className="h-8 w-8 text-[#DC2626] hover:bg-[#FEE2E2] hover:text-[#B91C1C]"
                   >
-                    <span>{client}</span>
-                    <button
-                      className="btn btn-ghost btn-sm btn-square text-error"
-                      onClick={() => setDeleteConfirm({ type: 'client', value: client })}
-                      title="Supprimer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+                    <Trash2 className="h-4 w-4" />
+                  </AppButton>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
 
-        {/* Descriptions List */}
-        <div className="card bg-base-100 shadow">
-          <div className="card-body">
-            <h2 className="card-title">Descriptions</h2>
-            <p className="text-base-content/60 text-sm mb-4">
+        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+          <div className="space-y-1">
+            <h2 className={sectionTitleClass}>Descriptions</h2>
+            <p className="text-sm text-(--text-secondary)">
               Liste des descriptions prédéfinies pour les factures.
             </p>
+          </div>
 
-            <form onSubmit={handleAddDescription} className="flex gap-2 mb-4">
+          <form onSubmit={handleAddDescription} className="mt-5 flex items-end gap-2">
+            <div className="flex-1 space-y-1.5">
+              <label htmlFor="new-description" className="text-xs font-medium text-(--text-secondary)">
+                Nouvelle description
+              </label>
               <input
+                id="new-description"
                 type="text"
-                className="input input-bordered flex-1"
-                placeholder="Nouvelle description..."
+                className={inputClass}
+                placeholder="Ex: Développement et maintenance"
                 value={newDescription}
                 onChange={(e) => setNewDescription(e.target.value)}
               />
-              <button
-                type="submit"
-                className="btn btn-primary btn-square"
-                disabled={!newDescription.trim() || addDescriptionMutation.isPending}
-              >
-                {addDescriptionMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  <Plus className="h-5 w-5" />
-                )}
-              </button>
-            </form>
+            </div>
+            <AppButton
+              type="submit"
+              disabled={!newDescription.trim() || addDescriptionMutation.isPending}
+              startIcon={addDescriptionMutation.isPending ? undefined : <Plus className="h-4 w-4" />}
+            >
+              {addDescriptionMutation.isPending ? <span className="loading loading-spinner loading-sm" /> : 'Ajouter'}
+            </AppButton>
+          </form>
 
-            {isLoadingDescriptions ? (
-              <div className="flex justify-center py-4">
-                <span className="loading loading-spinner loading-md"></span>
-              </div>
-            ) : descriptions.length === 0 ? (
-              <p className="text-base-content/50 text-center py-4">Aucune description enregistrée</p>
-            ) : (
-              <ul className="space-y-2">
-                {descriptions.map((description) => (
-                  <li
-                    key={description}
-                    className="flex items-center justify-between p-3 bg-base-200 rounded-lg"
+          {isLoadingDescriptions ? (
+            <div className="flex justify-center py-10">
+              <span className="loading loading-spinner loading-md" />
+            </div>
+          ) : descriptions.length === 0 ? (
+            <p className="py-10 text-center text-sm text-(--text-tertiary)">Aucune description enregistrée</p>
+          ) : (
+            <ul className="mt-5 space-y-2">
+              {descriptions.map((description) => (
+                <li
+                  key={description}
+                  className="flex items-center justify-between rounded-lg border border-(--border-default) bg-[#F8FAFC] px-3 py-2.5"
+                >
+                  <span className="min-w-0 flex-1 truncate pr-2 text-sm text-(--text-primary)">{description}</span>
+                  <AppButton
+                    variant="ghost"
+                    size="icon-sm"
+                    onClick={() => setDeleteConfirm({ type: 'description', value: description })}
+                    title="Supprimer cette description"
+                    className="h-8 w-8 text-[#DC2626] hover:bg-[#FEE2E2] hover:text-[#B91C1C]"
                   >
-                    <span className="truncate flex-1 mr-2">{description}</span>
-                    <button
-                      className="btn btn-ghost btn-sm btn-square text-error flex-shrink-0"
-                      onClick={() => setDeleteConfirm({ type: 'description', value: description })}
-                      title="Supprimer"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
+                    <Trash2 className="h-4 w-4" />
+                  </AppButton>
+                </li>
+              ))}
+            </ul>
+          )}
+        </section>
       </div>
 
-      {/* Delete Confirmation Dialog */}
       <ConfirmDialog
         isOpen={deleteConfirm !== null}
         title={deleteConfirm?.type === 'client' ? 'Supprimer le client' : 'Supprimer la description'}
-        message={`Êtes-vous sûr de vouloir supprimer "${deleteConfirm?.value}" ? Cette action est irréversible.`}
+        message={
+          deleteConfirm
+            ? `Êtes-vous sûr de vouloir supprimer "${deleteConfirm.value}" ? Cette action est irréversible.`
+            : ''
+        }
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
         variant="danger"

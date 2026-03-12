@@ -99,7 +99,7 @@ export default function Sidebar() {
               to={item.to}
               label={item.label}
               icon={item.icon}
-              end={item.to === '/'}
+              end={item.to === '/' || item.to === '/invoices'}
             />
           ))}
         </nav>
