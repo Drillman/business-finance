@@ -246,7 +246,7 @@ export default function Urssaf() {
           <DataTable
             columns={quarterlyColumns}
             minWidthClassName=""
-            tableClassName="mx-auto w-full max-w-245"
+            tableClassName="mx-auto w-full"
             footer={(
               <tr className="h-11 border-t border-(--border-default) bg-(--card-bg)">
                 <td className="px-4 text-sm font-semibold text-(--text-primary)">

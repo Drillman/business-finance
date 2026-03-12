@@ -449,7 +449,7 @@ export default function Invoices() {
                             <button
                               type="button"
                               className={[
-                                "cursor-help bg-transparent p-0 text-right text-sm font-['Space_Grotesk'] text-(--text-primary) md:text-sm",
+                                'cursor-help bg-transparent p-0 text-right text-sm text-(--text-primary) md:text-sm',
                                 invoice.isCanceled ? 'line-through' : '',
                               ].join(' ')}
                               onMouseEnter={() => setHoveredVatInvoiceId(invoice.id)}

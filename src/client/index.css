@@ -67,6 +67,24 @@
     font-family: "Inter", "Segoe UI", sans-serif;
   }
 
+  .font-mono {
+    font-family: "Inter", "Segoe UI", sans-serif !important;
+  }
+
+  table,
+  table thead,
+  table tbody,
+  table tfoot,
+  table th,
+  table td,
+  table caption {
+    font-family: "Inter", "Segoe UI", sans-serif;
+  }
+
+  table tr {
+    font-family: "Space Grotesk", "Inter", sans-serif;
+  }
+
   h1,
   h2,
   h3,
