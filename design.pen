@@ -1,5 +1,5 @@
 {
-  "version": "2.8",
+  "version": "2.10",
   "children": [
     {
       "type": "rectangle",
@@ -85,33 +85,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -121,21 +97,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -148,13 +112,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -195,7 +159,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -1246,33 +1210,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -1282,21 +1222,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -1309,13 +1237,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -1356,7 +1284,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -2452,33 +2380,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -2488,21 +2392,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -2515,13 +2407,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -2562,7 +2454,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -3500,33 +3392,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -3536,21 +3404,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -3563,13 +3419,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -3610,7 +3466,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -4627,33 +4483,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -4663,21 +4495,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -4690,13 +4510,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -4737,7 +4557,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -6152,33 +5972,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -6188,21 +5984,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -6215,13 +5999,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -6262,7 +6046,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -7386,33 +7170,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -7422,21 +7182,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -7449,13 +7197,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -7496,7 +7244,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -9401,33 +9149,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -9437,21 +9161,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -9464,13 +9176,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -9511,7 +9223,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -12538,6 +12250,8 @@
                 {
                   "type": "text",
                   "id": "YjrBi",
+                  "x": 0,
+                  "y": 0,
                   "name": "heading",
                   "enabled": false,
                   "fill": "$text-primary",
@@ -14117,33 +13831,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -14153,21 +13843,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -14180,13 +13858,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -14227,7 +13905,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -15743,52 +15421,12 @@
               }
             },
             {
-              "id": "mCkIC",
-              "type": "ref",
-              "ref": "9IhPV",
-              "width": "fill_container",
-              "name": "nav4",
-              "y": 126,
-              "descendants": {
-                "drFLX": {
-                  "iconFontName": "receipt",
-                  "x": 12,
-                  "y": 10
-                },
-                "xbj5h": {
-                  "content": "TVA",
-                  "x": 42,
-                  "y": 11.5
-                }
-              }
-            },
-            {
-              "id": "jhldh",
-              "type": "ref",
-              "ref": "9IhPV",
-              "width": "fill_container",
-              "name": "nav5",
-              "y": 168,
-              "descendants": {
-                "drFLX": {
-                  "iconFontName": "landmark",
-                  "x": 12,
-                  "y": 10
-                },
-                "xbj5h": {
-                  "content": "Urssaf",
-                  "x": 42,
-                  "y": 11.5
-                }
-              }
-            },
-            {
               "id": "fEG97",
               "type": "ref",
               "ref": "9IhPV",
               "width": "fill_container",
               "name": "nav6",
-              "y": 210,
+              "y": 126,
               "descendants": {
                 "drFLX": {
                   "iconFontName": "building-2",
@@ -15803,32 +15441,12 @@
               }
             },
             {
-              "id": "g6ViT",
-              "type": "ref",
-              "ref": "9IhPV",
-              "width": "fill_container",
-              "name": "nav7",
-              "y": 252,
-              "descendants": {
-                "drFLX": {
-                  "iconFontName": "clipboard-list",
-                  "x": 12,
-                  "y": 10
-                },
-                "xbj5h": {
-                  "content": "Impôts",
-                  "x": 42,
-                  "y": 11.5
-                }
-              }
-            },
-            {
               "id": "kJn5Y",
               "type": "ref",
               "ref": "9IhPV",
               "width": "fill_container",
               "name": "nav8",
-              "y": 294,
+              "y": 168,
               "descendants": {
                 "drFLX": {
                   "iconFontName": "calculator",
@@ -15848,6 +15466,84 @@
           "type": "frame",
           "id": "ATxJO",
           "name": "divider",
+          "width": "fill_container",
+          "height": 1,
+          "fill": "#FFFFFF20"
+        },
+        {
+          "type": "frame",
+          "id": "j52Yr",
+          "name": "TaxGroup",
+          "width": "fill_container",
+          "layout": "vertical",
+          "gap": 2,
+          "children": [
+            {
+              "id": "jhldh",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav5",
+              "y": 0,
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "landmark",
+                  "x": 12,
+                  "y": 10
+                },
+                "xbj5h": {
+                  "content": "Urssaf",
+                  "x": 42,
+                  "y": 11.5
+                }
+              }
+            },
+            {
+              "id": "mCkIC",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav4",
+              "y": 42,
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "receipt",
+                  "x": 12,
+                  "y": 10
+                },
+                "xbj5h": {
+                  "content": "TVA",
+                  "x": 42,
+                  "y": 11.5
+                }
+              }
+            },
+            {
+              "id": "g6ViT",
+              "type": "ref",
+              "ref": "9IhPV",
+              "width": "fill_container",
+              "name": "nav7",
+              "y": 84,
+              "descendants": {
+                "drFLX": {
+                  "iconFontName": "clipboard-list",
+                  "x": 12,
+                  "y": 10
+                },
+                "xbj5h": {
+                  "content": "Impôts",
+                  "x": 42,
+                  "y": 11.5
+                }
+              }
+            }
+          ]
+        },
+        {
+          "type": "frame",
+          "id": "Msvte",
+          "name": "divider2",
           "width": "fill_container",
           "height": 1,
           "fill": "#FFFFFF20"
@@ -20232,33 +19928,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -20268,22 +19940,10 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "fill": "#FFFFFF20",
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "fill": "$sidebar-accent",
@@ -20299,13 +19959,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "width": "fill_container",
               "height": "fit_content",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -20346,7 +20006,7 @@
               "width": "fill_container",
               "height": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "width": "fill_container",
@@ -21446,33 +21106,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -21482,21 +21118,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -21509,13 +21133,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "height": "fit_content",
               "width": "fill_container",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -21555,7 +21179,7 @@
               "height": "fill_container",
               "width": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "height": "fit_content",
@@ -22394,33 +22018,9 @@
               "x": 42,
               "y": 11.5
             },
-            "mCkIC": {
-              "width": "fill_container",
-              "y": 126
-            },
-            "mCkIC/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "mCkIC/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
-            "jhldh": {
-              "width": "fill_container",
-              "y": 168
-            },
-            "jhldh/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "jhldh/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "fEG97": {
               "width": "fill_container",
-              "y": 210
+              "y": 126
             },
             "fEG97/drFLX": {
               "x": 12,
@@ -22430,21 +22030,9 @@
               "x": 42,
               "y": 11.5
             },
-            "g6ViT": {
-              "width": "fill_container",
-              "y": 252
-            },
-            "g6ViT/drFLX": {
-              "x": 12,
-              "y": 10
-            },
-            "g6ViT/xbj5h": {
-              "x": 42,
-              "y": 11.5
-            },
             "kJn5Y": {
               "width": "fill_container",
-              "y": 294
+              "y": 168
             },
             "kJn5Y/drFLX": {
               "x": 12,
@@ -22457,13 +22045,13 @@
             "ATxJO": {
               "width": "fill_container",
               "x": 20,
-              "y": 422
+              "y": 296
             },
             "jUFO7": {
               "height": "fit_content",
               "width": "fill_container",
               "x": 20,
-              "y": 431
+              "y": 446
             },
             "FuAuh": {
               "width": "fill_container"
@@ -22504,7 +22092,7 @@
               "height": "fill_container",
               "width": "fill_container",
               "x": 20,
-              "y": 563
+              "y": 578
             },
             "bBO2P": {
               "height": "fit_content",

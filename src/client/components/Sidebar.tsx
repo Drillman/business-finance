@@ -28,11 +28,14 @@ const navItems: NavItem[] = [
   { to: '/', label: 'Tableau de bord', icon: LayoutDashboard },
   { to: '/invoices', label: 'Factures', icon: FileText },
   { to: '/expenses', label: 'Dépenses', icon: Wallet },
-  { to: '/tva', label: 'TVA', icon: Receipt },
-  { to: '/urssaf', label: 'Urssaf', icon: Landmark },
   { to: '/account', label: 'Compte entreprise', icon: Building2 },
-  { to: '/income-tax', label: 'Impôts', icon: ClipboardList },
   { to: '/calculator', label: 'Calculateur', icon: Calculator },
+]
+
+const taxItems: NavItem[] = [
+  { to: '/urssaf', label: 'Urssaf', icon: Landmark },
+  { to: '/tva', label: 'TVA', icon: Receipt },
+  { to: '/income-tax', label: 'Impôts', icon: ClipboardList },
 ]
 
 const settingsItems: NavItem[] = [
@@ -121,6 +124,20 @@ export default function Sidebar() {
               label={item.label}
               icon={item.icon}
               end={item.to === '/' || item.to === '/invoices'}
+              collapsed={collapsed}
+            />
+          ))}
+        </nav>
+
+        <div className="my-2 h-px w-full bg-white/20" />
+
+        <nav className="space-y-0.5">
+          {taxItems.map((item) => (
+            <SidebarLink
+              key={item.to}
+              to={item.to}
+              label={item.label}
+              icon={item.icon}
               collapsed={collapsed}
             />
           ))}
