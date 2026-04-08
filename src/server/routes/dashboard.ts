@@ -2,13 +2,38 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { eq, and, gte, lte, sql } from 'drizzle-orm'
 import { db } from '../db'
-import { invoices, expenses, taxPayments, urssafPayments, incomeTaxPayments, settings } from '../db/schema'
+import { invoices, expenses, taxPayments, urssafPayments, incomeTaxPayments, settings, yearlyRates } from '../db/schema'
 import { requireAuth } from '../auth/middleware'
 
 const querySchema = z.object({
   year: z.coerce.number().min(2000).max(2100),
   month: z.coerce.number().min(1).max(12),
 })
+
+async function getRatesForYear(userId: string, year: number) {
+  const customRates = await db.query.yearlyRates.findFirst({
+    where: and(
+      eq(yearlyRates.userId, userId),
+      eq(yearlyRates.year, year)
+    ),
+  })
+
+  if (customRates) {
+    return {
+      urssafRate: parseFloat(customRates.urssafRate),
+      taxRate: parseFloat(customRates.estimatedTaxRate),
+    }
+  }
+
+  const userSettings = await db.query.settings.findFirst({
+    where: eq(settings.userId, userId),
+  })
+
+  return {
+    urssafRate: userSettings ? parseFloat(userSettings.urssafRate) : 22,
+    taxRate: userSettings ? parseFloat(userSettings.estimatedTaxRate) : 11,
+  }
+}
 
 export async function dashboardRoutes(fastify: FastifyInstance) {
   // Get dashboard summary for a specific month
@@ -31,13 +56,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
       const lastDay = new Date(year, month, 0).getDate()
       const endDate = `${year}-${month.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`
 
-      // Get user settings
-      const userSettings = await db.query.settings.findFirst({
-        where: eq(settings.userId, userId),
-      })
-
-      const urssafRate = userSettings ? parseFloat(userSettings.urssafRate) : 22
-      const taxRate = userSettings ? parseFloat(userSettings.estimatedTaxRate) : 11
+      const { urssafRate, taxRate } = await getRatesForYear(userId, year)
 
       // Get invoice totals for the month (based on payment date)
       const invoiceResult = await db
@@ -256,13 +275,7 @@ export async function dashboardRoutes(fastify: FastifyInstance) {
       const currentMonth = now.getMonth() + 1
       const maxMonth = year === currentYear ? currentMonth : 12
 
-      // Get user settings
-      const userSettings = await db.query.settings.findFirst({
-        where: eq(settings.userId, userId),
-      })
-
-      const urssafRate = userSettings ? parseFloat(userSettings.urssafRate) : 22
-      const taxRate = userSettings ? parseFloat(userSettings.estimatedTaxRate) : 11
+      const { urssafRate, taxRate } = await getRatesForYear(userId, year)
 
       // Get all recurring expenses for the year
       const yearStart = `${year}-01-01`

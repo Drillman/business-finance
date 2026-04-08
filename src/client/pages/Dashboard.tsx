@@ -15,6 +15,16 @@ function formatCurrency(amount: string | number): string {
   }).format(num)
 }
 
+function formatRoundedCurrency(amount: string | number): string {
+  const num = typeof amount === 'string' ? parseFloat(amount) : amount
+  return new Intl.NumberFormat('fr-FR', {
+    style: 'currency',
+    currency: 'EUR',
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0,
+  }).format(Math.round(num))
+}
+
 const MONTHS = [
   'Janvier', 'Février', 'Mars', 'Avril', 'Mai', 'Juin',
   'Juillet', 'Août', 'Septembre', 'Octobre', 'Novembre', 'Décembre'
@@ -87,8 +97,8 @@ export default function Dashboard() {
               />
               <KpiCard
                 title="Urssaf"
-                value={yearlyData ? formatCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
-                description={`Payé: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} | Est.: ${yearlyData ? formatCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}`}
+                value={yearlyData ? formatRoundedCurrency(yearlyData.kpis.totalUrssaf) : '0 €'}
+                description={`Payé: ${yearlyData ? formatRoundedCurrency(yearlyData.kpis.totalUrssafPaid) : '0 €'} | Est.: ${yearlyData ? formatRoundedCurrency(yearlyData.kpis.totalUrssafEstimated) : '0 €'}`}
                 accentColor="#FBBF24"
                 valueColor="#FBBF24"
               />
@@ -148,14 +158,14 @@ export default function Dashboard() {
                     <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.expensesHt)}</td>
                     <td className="px-4 text-right text-sm">
                       <span className={month.urssafIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
-                        {formatCurrency(month.urssaf)}
+                        {formatRoundedCurrency(month.urssaf)}
                       </span>
                       {month.urssafIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
                     </td>
                     <td className="px-4 text-right text-sm text-(--text-secondary)">{formatCurrency(month.incomeTax)}</td>
                     <td className="px-4 text-right text-sm">
                       <span className={month.tvaIsPaid ? 'text-(--color-success)' : 'text-(--text-secondary)'}>
-                        {formatCurrency(month.tva)}
+                        {formatRoundedCurrency(month.tva)}
                       </span>
                       {month.tvaIsPaid && <span className="ml-1 text-(--color-success)">✓</span>}
                     </td>
