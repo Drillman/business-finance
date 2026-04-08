@@ -275,7 +275,7 @@ export default function TVA() {
                 </td>
                 <td className="px-4 text-right font-mono text-sm font-semibold">
                   <span className={parseFloat(summary?.netTva || '0') > 0 ? 'text-(--color-warning)' : 'text-(--color-success)'}>
-                    {formatCurrency(summary?.netTva || '0')}
+                    {formatCurrency(Math.round(parseFloat(summary?.netTva || '0')))}
                   </span>
                 </td>
                 <td className="px-4" />
@@ -354,7 +354,7 @@ export default function TVA() {
                   <td className="px-4 text-right font-mono text-sm">
                     {hasData ? (
                       <span className={net > 0 ? 'text-(--color-warning)' : 'text-(--color-success)'}>
-                        {formatCurrency(net)}
+                        {formatCurrency(Math.round(net))}
                       </span>
                     ) : (
                       '-'
