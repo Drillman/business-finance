@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { NavLink } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext'
 import {
@@ -13,6 +13,9 @@ import {
   Calculator,
   Settings,
   KeyRound,
+  CircleUserRound,
+  ChevronUp,
+  LogOut,
   ChevronsLeft,
   ChevronsRight,
   type LucideIcon,
@@ -66,6 +69,13 @@ interface SidebarLinkProps {
   collapsed: boolean
 }
 
+interface UserMenuLinkProps {
+  to: string
+  label: string
+  icon: LucideIcon
+  onSelect: () => void
+}
+
 function SidebarLink({ to, label, icon: Icon, end = false, collapsed }: SidebarLinkProps) {
   return (
     <NavLink
@@ -88,9 +98,60 @@ function SidebarLink({ to, label, icon: Icon, end = false, collapsed }: SidebarL
   )
 }
 
+function UserMenuLink({ to, label, icon: Icon, onSelect }: UserMenuLinkProps) {
+  return (
+    <NavLink
+      to={to}
+      end={to === '/settings'}
+      onClick={onSelect}
+      className={({ isActive }) =>
+        [
+          'flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13px] transition-colors',
+          isActive ? 'bg-[#EEF2FF] text-[#1E3A8A]' : 'text-[#0F172A] hover:bg-[#F8FAFC]',
+        ].join(' ')
+      }
+    >
+      <Icon className="h-4.5 w-4.5 shrink-0" />
+      <span className="truncate font-medium">{label}</span>
+    </NavLink>
+  )
+}
+
 export default function Sidebar() {
   const { user, logout, isLoggingOut } = useAuth()
   const [collapsed, setCollapsed] = useState(false)
+  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
+  const userMenuRef = useRef<HTMLDivElement | null>(null)
+
+  useEffect(() => {
+    const onPointerDown = (event: PointerEvent) => {
+      if (!isUserMenuOpen || !userMenuRef.current) {
+        return
+      }
+
+      if (!userMenuRef.current.contains(event.target as Node)) {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
+        setIsUserMenuOpen(false)
+      }
+    }
+
+    document.addEventListener('pointerdown', onPointerDown)
+    document.addEventListener('keydown', onKeyDown)
+
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown)
+      document.removeEventListener('keydown', onKeyDown)
+    }
+  }, [isUserMenuOpen])
+
+  useEffect(() => {
+    setIsUserMenuOpen(false)
+  }, [collapsed])
 
   return (
     <aside
@@ -142,39 +203,73 @@ export default function Sidebar() {
             />
           ))}
         </nav>
-
-        <div className="my-2 h-px w-full bg-white/20" />
-
-        <nav className="space-y-0.5">
-          {settingsItems.map((item) => (
-            <SidebarLink
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              icon={item.icon}
-              collapsed={collapsed}
-            />
-          ))}
-        </nav>
       </div>
 
-      {/* Footer */}
-      {!collapsed && (
-        <div className="space-y-2.5">
-          <p className="truncate px-1 text-xs font-normal text-[#CBD5E1]">{user?.email}</p>
-          <button
-            onClick={logout}
-            disabled={isLoggingOut}
-            className="flex h-9 w-full items-center justify-center rounded-lg border-[1.5px] border-white/25 bg-white/10 px-3 text-[13px] font-medium text-white/80 transition-colors hover:bg-white/20 hover:text-white disabled:cursor-not-allowed disabled:opacity-60"
+      <div ref={userMenuRef} className="relative">
+        <button
+          onClick={() => setIsUserMenuOpen((open) => !open)}
+          title={collapsed ? user?.email ?? 'Compte utilisateur' : undefined}
+          aria-label="Compte utilisateur"
+          aria-haspopup="menu"
+          aria-expanded={isUserMenuOpen}
+          className={[
+            'flex w-full items-center rounded-lg border border-white/20 bg-white/10 text-white transition-colors hover:bg-white/20',
+            collapsed ? 'h-10 justify-center' : 'h-11 gap-2.5 px-3',
+          ].join(' ')}
+        >
+          <CircleUserRound className="h-5.5 w-5.5 shrink-0" />
+          {!collapsed && (
+            <>
+              <span className="truncate text-[13px] font-medium text-white">{user?.email ?? 'Compte utilisateur'}</span>
+              <ChevronUp
+                className={[
+                  'ml-auto h-4 w-4 shrink-0 text-white/70 transition-transform',
+                  isUserMenuOpen ? '' : 'rotate-180',
+                ].join(' ')}
+              />
+            </>
+          )}
+        </button>
+
+        {isUserMenuOpen && (
+          <div
+            className={[
+              'absolute z-30 w-55 rounded-xl border border-[#E2E8F0] bg-white p-1.5 shadow-[0_-4px_16px_rgba(0,0,0,0.09)]',
+                collapsed ? 'bottom-0 left-full ml-3' : 'bottom-full left-0 mb-3',
+            ].join(' ')}
           >
-            {isLoggingOut ? (
-              <span className="loading loading-spinner loading-sm text-white/80" />
-            ) : (
-              'Déconnexion'
-            )}
-          </button>
-        </div>
-      )}
+            {settingsItems.map((item) => (
+              <UserMenuLink
+                key={item.to}
+                to={item.to}
+                label={item.label}
+                icon={item.icon}
+                onSelect={() => setIsUserMenuOpen(false)}
+              />
+            ))}
+
+            <div className="my-1 h-px w-full bg-[#E2E8F0]" />
+
+            <button
+              onClick={async () => {
+                setIsUserMenuOpen(false)
+                await logout()
+              }}
+              disabled={isLoggingOut}
+              className="flex h-9 w-full items-center gap-2.5 rounded-lg px-2.5 text-[13px] font-medium text-[#DC2626] transition-colors hover:bg-[#FEF2F2] disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isLoggingOut ? (
+                <span className="loading loading-spinner loading-sm text-[#DC2626]" />
+              ) : (
+                <>
+                  <LogOut className="h-4.5 w-4.5 shrink-0" />
+                  Déconnexion
+                </>
+              )}
+            </button>
+          </div>
+        )}
+      </div>
 
       {/* Fold button */}
       <button
