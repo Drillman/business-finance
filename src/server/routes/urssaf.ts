@@ -2,7 +2,7 @@ import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
 import { eq, and, desc, sql } from 'drizzle-orm'
 import { db } from '../db'
-import { urssafPayments, invoices, settings } from '../db/schema'
+import { urssafPayments, invoices, settings, yearlyRates } from '../db/schema'
 import { requireAuth } from '../auth/middleware'
 
 const createUrssafPaymentSchema = z.object({
@@ -35,6 +35,25 @@ function getTrimesterDates(year: number, trimester: number) {
     startDate: `${year}-${startMonth.toString().padStart(2, '0')}-01`,
     endDate: `${year}-${endMonth.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`,
   }
+}
+
+async function getUrssafRateForYear(userId: string, year: number) {
+  const customRates = await db.query.yearlyRates.findFirst({
+    where: and(
+      eq(yearlyRates.userId, userId),
+      eq(yearlyRates.year, year)
+    ),
+  })
+
+  if (customRates) {
+    return parseFloat(customRates.urssafRate)
+  }
+
+  const userSettings = await db.query.settings.findFirst({
+    where: eq(settings.userId, userId),
+  })
+
+  return userSettings ? parseFloat(userSettings.urssafRate) : 22
 }
 
 export async function urssafRoutes(fastify: FastifyInstance) {
@@ -260,11 +279,8 @@ export async function urssafRoutes(fastify: FastifyInstance) {
       const { year } = parseResult.data
       const userId = request.authUser.userId
 
-      // Get user's Urssaf rate
-      const userSettings = await db.query.settings.findFirst({
-        where: eq(settings.userId, userId),
-      })
-      const urssafRate = userSettings ? parseFloat(userSettings.urssafRate) : 22
+      // Use yearly custom rate when configured, fallback to global settings.
+      const urssafRate = await getUrssafRateForYear(userId, year)
 
       // Get all payments for the year
       const payments = await db
