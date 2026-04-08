@@ -177,6 +177,21 @@ export default function TVA() {
     setFormData((prev) => ({ ...prev, [field]: value }))
   }
 
+  const now = new Date()
+  const currentMonth = now.getMonth() + 1
+  const isCurrentYearSelected = selectedYear === now.getFullYear()
+  const currentMonthData = isCurrentYearSelected
+    ? monthlyData?.months.find((m) => m.month === currentMonth)
+    : null
+
+  const totalPendingAmount = parseFloat(summary?.totalPending || '0')
+  const currentMonthNetTva = parseFloat(currentMonthData?.netTva || '0')
+  const currentMonthDeclaredAmount = currentMonthData
+    ? parseFloat(currentMonthData.paidAmount) + parseFloat(currentMonthData.pendingAmount)
+    : 0
+  const undeclaredCurrentMonthAmount = Math.max(0, currentMonthNetTva - currentMonthDeclaredAmount)
+  const remainingToDeclareAndPay = totalPendingAmount + undeclaredCurrentMonthAmount
+
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   return (
@@ -227,9 +242,12 @@ export default function TVA() {
           valueClassName="text-lg"
         />
         <KpiCard
-          title="Solde restant"
-          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.balance || '0')}
-          description={isLoadingSummary ? '' : `Payé: ${formatCurrency(summary?.totalPaid || '0')}`}
+          title="À déclarer et payer"
+          value={
+            isLoadingSummary || isLoadingMonthly
+              ? <span className="loading loading-spinner loading-sm"></span>
+              : formatCurrency(remainingToDeclareAndPay)
+          }
           accentColor="var(--kpi-indigo, #A78BFA)"
           valueClassName="text-lg"
         />
