@@ -284,6 +284,65 @@ export async function accountRoutes(fastify: FastifyInstance) {
         return parseFloat(invoiceResult[0].totalHt) * (rate / 100)
       }
 
+      // Helper: total TTC expenses (non-recurring + applicable recurring) for a given month
+      const calculateExpensesTtcForMonth = async (month: number, year: number) => {
+        const startDate = `${year}-${month.toString().padStart(2, '0')}-01`
+        const lastDay = new Date(year, month, 0).getDate()
+        const endDate = `${year}-${month.toString().padStart(2, '0')}-${lastDay.toString().padStart(2, '0')}`
+
+        const nonRecurringResult = await db
+          .select({
+            totalTtc: sql<string>`COALESCE(SUM(${expenses.amountHt}::numeric + ${expenses.taxAmount}::numeric), 0)`,
+          })
+          .from(expenses)
+          .where(
+            and(
+              eq(expenses.userId, userId),
+              eq(expenses.isRecurring, false),
+              gte(expenses.date, startDate),
+              lte(expenses.date, endDate)
+            )
+          )
+
+        const monthRecurringExpenses = await db
+          .select({
+            amountHt: expenses.amountHt,
+            taxAmount: expenses.taxAmount,
+            startMonth: expenses.startMonth,
+            recurrencePeriod: expenses.recurrencePeriod,
+          })
+          .from(expenses)
+          .where(
+            and(
+              eq(expenses.userId, userId),
+              eq(expenses.isRecurring, true),
+              lte(expenses.startMonth, startDate),
+              sql`(${expenses.endMonth} IS NULL OR ${expenses.endMonth} >= ${startDate})`
+            )
+          )
+
+        let recurringTtc = 0
+        for (const expense of monthRecurringExpenses) {
+          const expenseStartMonth = new Date(expense.startMonth!).getMonth()
+          const currentMonthIndex = month - 1
+
+          let shouldInclude = false
+          if (expense.recurrencePeriod === 'monthly') {
+            shouldInclude = true
+          } else if (expense.recurrencePeriod === 'quarterly') {
+            shouldInclude = (currentMonthIndex - expenseStartMonth + 12) % 3 === 0
+          } else if (expense.recurrencePeriod === 'yearly') {
+            shouldInclude = currentMonthIndex === expenseStartMonth
+          }
+
+          if (shouldInclude) {
+            recurringTtc += parseFloat(expense.amountHt || '0') + parseFloat(expense.taxAmount || '0')
+          }
+        }
+
+        return parseFloat(nonRecurringResult[0].totalTtc) + recurringTtc
+      }
+
       // Calculate estimated TVA for undeclared months (previous year + current year)
       let estimatedTva = 0
 
@@ -331,8 +390,26 @@ export async function accountRoutes(fastify: FastifyInstance) {
         estimatedUrssaf += await calculateUrssafForTrimester(trimester, currentYear, currentYearUrssafRate, maxMonth)
       }
 
+      // Typical-month TTC expenses: median over the last completed months of the current year.
+      // Median (rather than mean) so a single exceptional month (e.g. an annual payment)
+      // does not inflate the obligation. We look back up to 6 months for a more reliable median.
+      const completedMonthsThisYear = currentMonth - 1
+      const monthsToSample = Math.min(6, completedMonthsThisYear)
+      let typicalMonthlyExpenses = 0
+      if (monthsToSample > 0) {
+        const samples: number[] = []
+        for (let i = 1; i <= monthsToSample; i++) {
+          samples.push(await calculateExpensesTtcForMonth(currentMonth - i, currentYear))
+        }
+        samples.sort((a, b) => a - b)
+        const mid = Math.floor(samples.length / 2)
+        typicalMonthlyExpenses = samples.length % 2 === 0
+          ? (samples[mid - 1] + samples[mid]) / 2
+          : samples[mid]
+      }
+
       // Income tax is handled on the user's personal account — not a business obligation
-      const totalObligations = pendingTva + estimatedTva + pendingUrssaf + estimatedUrssaf
+      const totalObligations = pendingTva + estimatedTva + pendingUrssaf + estimatedUrssaf + typicalMonthlyExpenses
       const availableFunds = currentBalance - totalObligations - monthlySalary
 
       return {
@@ -341,6 +418,8 @@ export async function accountRoutes(fastify: FastifyInstance) {
         estimatedTva: estimatedTva.toFixed(2),
         pendingUrssaf: pendingUrssaf.toFixed(2),
         estimatedUrssaf: estimatedUrssaf.toFixed(2),
+        typicalMonthlyExpenses: typicalMonthlyExpenses.toFixed(2),
+        typicalMonthlyExpensesMonths: monthsToSample,
         totalObligations: totalObligations.toFixed(2),
         nextMonthSalary: monthlySalary.toFixed(2),
         availableFunds: availableFunds.toFixed(2),

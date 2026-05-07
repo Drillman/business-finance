@@ -270,6 +270,8 @@ export interface AccountSummary {
   estimatedTva: string
   pendingUrssaf: string
   estimatedUrssaf: string
+  typicalMonthlyExpenses: string
+  typicalMonthlyExpensesMonths: number
   totalObligations: string
   nextMonthSalary: string
   availableFunds: string

@@ -49,6 +49,10 @@ export default function BusinessAccount() {
   const isAvailablePositive = availableFundsValue >= 0
   const totalTva = summary ? parseFloat(summary.pendingTva) + parseFloat(summary.estimatedTva) : 0
   const totalUrssaf = summary ? parseFloat(summary.pendingUrssaf) + parseFloat(summary.estimatedUrssaf) : 0
+  const expensesSampleMonths = summary?.typicalMonthlyExpensesMonths ?? 0
+  const expensesTypicalLabel = expensesSampleMonths === 0
+    ? "Aucun mois écoulé cette année — estimation indisponible"
+    : `Médiane TTC sur les ${expensesSampleMonths} derniers mois`
   const availableBeforeSalary = summary
     ? parseFloat(summary.availableFunds) + parseFloat(summary.nextMonthSalary)
     : 0
@@ -154,6 +158,17 @@ export default function BusinessAccount() {
                   <td className="px-3 text-right text-[13px] text-(--text-primary)">{summary ? formatCurrency(summary.pendingUrssaf) : '0 €'}</td>
                   <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.estimatedUrssaf) : '0 €'}</td>
                   <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{formatCurrency(totalUrssaf)}</td>
+                </tr>
+
+                <tr className="h-10 border-b border-(--border-default)">
+                  <td className="px-6">
+                    <span className="inline-flex h-5.5 items-center rounded-full bg-[#FEE2E2] px-2 text-[11px] font-semibold text-[#DC2626]" title={expensesTypicalLabel}>
+                      Dépenses (médiane {expensesSampleMonths || 6} mois)
+                    </span>
+                  </td>
+                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">—</td>
+                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €'}</td>
+                  <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €'}</td>
                 </tr>
               </tbody>
               <tfoot>
