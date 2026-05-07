@@ -49,7 +49,6 @@ export default function BusinessAccount() {
   const isAvailablePositive = availableFundsValue >= 0
   const totalTva = summary ? parseFloat(summary.pendingTva) + parseFloat(summary.estimatedTva) : 0
   const totalUrssaf = summary ? parseFloat(summary.pendingUrssaf) + parseFloat(summary.estimatedUrssaf) : 0
-  const totalIncomeTax = summary ? parseFloat(summary.pendingIncomeTax) + parseFloat(summary.estimatedIncomeTax) : 0
   const availableBeforeSalary = summary
     ? parseFloat(summary.availableFunds) + parseFloat(summary.nextMonthSalary)
     : 0
@@ -155,15 +154,6 @@ export default function BusinessAccount() {
                   <td className="px-3 text-right text-[13px] text-(--text-primary)">{summary ? formatCurrency(summary.pendingUrssaf) : '0 €'}</td>
                   <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.estimatedUrssaf) : '0 €'}</td>
                   <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{formatCurrency(totalUrssaf)}</td>
-                </tr>
-
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6">
-                    <span className="inline-flex h-5.5 items-center rounded-full bg-[#FEF3C7] px-2 text-[11px] font-semibold text-[#F59E0B]">Impôts</span>
-                  </td>
-                  <td className="px-3 text-right text-[13px] text-(--text-primary)">{summary ? formatCurrency(summary.pendingIncomeTax) : '0 €'}</td>
-                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.estimatedIncomeTax) : '0 €'}</td>
-                  <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{formatCurrency(totalIncomeTax)}</td>
                 </tr>
               </tbody>
               <tfoot>

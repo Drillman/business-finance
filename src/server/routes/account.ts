@@ -1,9 +1,22 @@
 import type { FastifyInstance, FastifyRequest, FastifyReply } from 'fastify'
 import { z } from 'zod'
-import { eq, and, sql, gte, lte, notInArray, inArray } from 'drizzle-orm'
+import { eq, and, sql, gte, lte } from 'drizzle-orm'
 import { db } from '../db'
-import { accountBalances, taxPayments, urssafPayments, incomeTaxPayments, settings, invoices, expenses } from '../db/schema'
+import { accountBalances, taxPayments, urssafPayments, settings, yearlyRates, invoices, expenses } from '../db/schema'
 import { requireAuth } from '../auth/middleware'
+
+async function getUrssafRateForYear(userId: string, year: number): Promise<number> {
+  const customRates = await db.query.yearlyRates.findFirst({
+    where: and(eq(yearlyRates.userId, userId), eq(yearlyRates.year, year)),
+  })
+  if (customRates) {
+    return parseFloat(customRates.urssafRate)
+  }
+  const userSettings = await db.query.settings.findFirst({
+    where: eq(settings.userId, userId),
+  })
+  return userSettings ? parseFloat(userSettings.urssafRate) : 22
+}
 
 const updateBalanceSchema = z.object({
   balance: z.number().min(0, 'Le solde ne peut pas être négatif'),
@@ -102,13 +115,15 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
       const currentBalance = parseFloat(balanceRecord.balance)
 
-      // Get user settings
+      // Get user settings (for monthly salary only — rates are resolved per year below)
       const userSettings = await db.query.settings.findFirst({
         where: eq(settings.userId, userId),
       })
       const monthlySalary = userSettings ? parseFloat(userSettings.monthlySalary) : 3000
-      const urssafRate = userSettings ? parseFloat(userSettings.urssafRate) : 22
-      const taxRate = userSettings ? parseFloat(userSettings.estimatedTaxRate) : 11
+
+      // Resolve per-year Urssaf rates (custom yearly rate falls back to default settings rate)
+      const previousYearUrssafRate = await getUrssafRateForYear(userId, currentYear - 1)
+      const currentYearUrssafRate = await getUrssafRateForYear(userId, currentYear)
 
       // Get pending TVA
       const pendingTvaResult = await db
@@ -137,20 +152,6 @@ export async function accountRoutes(fastify: FastifyInstance) {
           )
         )
       const pendingUrssaf = parseFloat(pendingUrssafResult[0].total)
-
-      // Get pending income tax
-      const pendingIncomeTaxResult = await db
-        .select({
-          total: sql<string>`COALESCE(SUM(${incomeTaxPayments.amount}::numeric), 0)`,
-        })
-        .from(incomeTaxPayments)
-        .where(
-          and(
-            eq(incomeTaxPayments.userId, userId),
-            eq(incomeTaxPayments.status, 'pending')
-          )
-        )
-      const pendingIncomeTax = parseFloat(pendingIncomeTaxResult[0].total)
 
       // Get all declared TVA period months (pending or paid)
       const declaredTvaMonths = await db
@@ -257,8 +258,8 @@ export async function accountRoutes(fastify: FastifyInstance) {
         return tvaCollected - tvaRecoverable
       }
 
-      // Helper function to calculate Urssaf for a specific trimester
-      const calculateUrssafForTrimester = async (trimester: number, year: number, maxMonth?: number) => {
+      // Helper function to calculate Urssaf for a specific trimester using the year's rate
+      const calculateUrssafForTrimester = async (trimester: number, year: number, rate: number, maxMonth?: number) => {
         const startMonth = (trimester - 1) * 3 + 1
         const endMonth = maxMonth !== undefined ? Math.min(trimester * 3, maxMonth) : trimester * 3
 
@@ -280,7 +281,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
             )
           )
 
-        return parseFloat(invoiceResult[0].totalHt) * (urssafRate / 100)
+        return parseFloat(invoiceResult[0].totalHt) * (rate / 100)
       }
 
       // Calculate estimated TVA for undeclared months (previous year + current year)
@@ -316,7 +317,7 @@ export async function accountRoutes(fastify: FastifyInstance) {
         const trimesterKey = `${previousYear}-T${trimester}`
         if (declaredUrssafSet.has(trimesterKey)) continue
 
-        estimatedUrssaf += await calculateUrssafForTrimester(trimester, previousYear)
+        estimatedUrssaf += await calculateUrssafForTrimester(trimester, previousYear, previousYearUrssafRate)
       }
 
       // Check current year (up to current trimester)
@@ -327,31 +328,11 @@ export async function accountRoutes(fastify: FastifyInstance) {
 
         // For current trimester, only count months up to current month
         const maxMonth = trimester === currentTrimester ? currentMonth : undefined
-        estimatedUrssaf += await calculateUrssafForTrimester(trimester, currentYear, maxMonth)
+        estimatedUrssaf += await calculateUrssafForTrimester(trimester, currentYear, currentYearUrssafRate, maxMonth)
       }
 
-      // Calculate estimated income tax for the current year
-      const yearStart = `${currentYear}-01-01`
-      const yearEnd = `${currentYear}-12-31`
-      const yearlyRevenueResult = await db
-        .select({
-          totalHt: sql<string>`COALESCE(SUM(${invoices.amountHt}::numeric), 0)`,
-        })
-        .from(invoices)
-        .where(
-          and(
-            eq(invoices.userId, userId),
-            eq(invoices.isCanceled, false),
-            gte(invoices.paymentDate, yearStart),
-            lte(invoices.paymentDate, yearEnd)
-          )
-        )
-
-      const yearlyRevenueHt = parseFloat(yearlyRevenueResult[0].totalHt)
-      const estimatedIncomeTax = yearlyRevenueHt * (taxRate / 100)
-
-      // Calculate totals (include both pending and estimated)
-      const totalObligations = pendingTva + estimatedTva + pendingUrssaf + estimatedUrssaf + pendingIncomeTax + estimatedIncomeTax
+      // Income tax is handled on the user's personal account — not a business obligation
+      const totalObligations = pendingTva + estimatedTva + pendingUrssaf + estimatedUrssaf
       const availableFunds = currentBalance - totalObligations - monthlySalary
 
       return {
@@ -360,8 +341,6 @@ export async function accountRoutes(fastify: FastifyInstance) {
         estimatedTva: estimatedTva.toFixed(2),
         pendingUrssaf: pendingUrssaf.toFixed(2),
         estimatedUrssaf: estimatedUrssaf.toFixed(2),
-        pendingIncomeTax: pendingIncomeTax.toFixed(2),
-        estimatedIncomeTax: estimatedIncomeTax.toFixed(2),
         totalObligations: totalObligations.toFixed(2),
         nextMonthSalary: monthlySalary.toFixed(2),
         availableFunds: availableFunds.toFixed(2),
