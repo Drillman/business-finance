@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react'
+import { Link } from 'react-router-dom'
 import {
   useExpenses,
   useCreateExpense,
@@ -679,7 +680,11 @@ export default function Expenses() {
             <KpiCard
               title="TVA recuperable"
               value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
-              description="Deduction possible"
+              description={
+                <Link to="/tva" className="font-medium text-(--color-primary) hover:underline">
+                  Voir la TVA à déclarer →
+                </Link>
+              }
               accentColor="#34D399"
               valueColor="#34D399"
             />

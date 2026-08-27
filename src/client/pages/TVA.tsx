@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { Link } from 'react-router-dom'
 import {
   useTaxPayments,
   useCreateTaxPayment,
@@ -16,6 +16,7 @@ import { useSnackbar } from '../contexts/SnackbarContext'
 import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
 import { AppButton } from '../components/ui/AppButton'
 import { KpiCard } from '../components/ui/KpiCard'
+import { TvaTabs } from '../components/TvaTabs'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -82,7 +83,6 @@ const paymentColumns: DataTableColumn[] = [
 ]
 
 export default function TVA() {
-  const navigate = useNavigate()
   const [selectedYear, setSelectedYear] = useState(currentYear)
   const [isModalOpen, setIsModalOpen] = useState(false)
   const [editingPayment, setEditingPayment] = useState<TaxPayment | null>(null)
@@ -197,12 +197,7 @@ export default function TVA() {
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
-        <div className="flex flex-wrap items-center gap-3">
-          <h1 className="text-3xl font-bold tracking-tight text-(--text-primary)">TVA</h1>
-          <AppButton variant="outline" onClick={() => navigate('/tva/declaration')}>
-            Assistant déclaration
-          </AppButton>
-        </div>
+        <h1 className="text-3xl font-bold tracking-tight text-(--text-primary)">TVA</h1>
         <div className="flex flex-wrap items-center gap-3">
           <YearSelect value={selectedYear} onChange={setSelectedYear} />
           <AppButton className="shadow-[0_8px_20px_-12px_rgba(37,99,235,0.75)]" onClick={openCreateModal}>
@@ -210,6 +205,8 @@ export default function TVA() {
           </AppButton>
         </div>
       </div>
+
+      <TvaTabs active="suivi" />
 
       {/* Annual Summary */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
@@ -227,7 +224,11 @@ export default function TVA() {
           value={
             isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.tvaRecoverable || '0')
           }
-          description="Sur les dépenses"
+          description={
+            <Link to="/expenses" className="font-medium text-(--color-primary) hover:underline">
+              Issue de vos dépenses — voir →
+            </Link>
+          }
           accentColor="var(--kpi-emerald, #34D399)"
           valueClassName="text-lg"
         />

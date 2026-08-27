@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTvaDeclaration } from '../hooks/useTva'
 import { ChevronDown, ChevronUp, Info } from 'lucide-react'
 import { MonthSelect } from '../components/PeriodSelect'
+import { TvaTabs } from '../components/TvaTabs'
 
 function formatCurrency(amount: number | string): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -144,13 +145,15 @@ export default function TvaDeclaration() {
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Assistant Declaration TVA</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">TVA</h1>
         <MonthSelect
           value={selectedMonth}
           onChange={setSelectedMonth}
           years={[currentYear + 1, currentYear, currentYear - 1, currentYear - 2]}
         />
       </div>
+
+      <TvaTabs active="assistant" />
 
       {isLoading && (
         <div className="flex justify-center py-12">

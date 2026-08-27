@@ -27,18 +27,38 @@ interface NavItem {
   icon: LucideIcon
 }
 
-const navItems: NavItem[] = [
-  { to: '/', label: 'Tableau de bord', icon: LayoutDashboard },
-  { to: '/invoices', label: 'Factures', icon: FileText },
-  { to: '/expenses', label: 'Dépenses', icon: Wallet },
-  { to: '/account', label: 'Compte entreprise', icon: Building2 },
-  { to: '/calculator', label: 'Calculateur', icon: Calculator },
-]
+interface NavSection {
+  label: string | null
+  items: NavItem[]
+}
 
-const taxItems: NavItem[] = [
-  { to: '/urssaf', label: 'Urssaf', icon: Landmark },
-  { to: '/tva', label: 'TVA', icon: Receipt },
-  { to: '/income-tax', label: 'Impôts', icon: ClipboardList },
+const navSections: NavSection[] = [
+  {
+    label: null,
+    items: [{ to: '/', label: 'Tableau de bord', icon: LayoutDashboard }],
+  },
+  {
+    label: 'Activité',
+    items: [
+      { to: '/invoices', label: 'Factures', icon: FileText },
+      { to: '/expenses', label: 'Dépenses', icon: Wallet },
+    ],
+  },
+  {
+    label: 'Déclarations & paiements',
+    items: [
+      { to: '/tva', label: 'TVA', icon: Receipt },
+      { to: '/urssaf', label: 'Urssaf', icon: Landmark },
+      { to: '/income-tax', label: 'Impôts', icon: ClipboardList },
+    ],
+  },
+  {
+    label: 'Trésorerie',
+    items: [
+      { to: '/account', label: 'Compte entreprise', icon: Building2 },
+      { to: '/calculator', label: 'Calculateur', icon: Calculator },
+    ],
+  },
 ]
 
 const settingsItems: NavItem[] = [
@@ -177,32 +197,30 @@ export default function Sidebar() {
 
       {/* Nav */}
       <div className="flex flex-1 flex-col overflow-y-auto">
-        <nav className="space-y-0.5">
-          {navItems.map((item) => (
-            <SidebarLink
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              icon={item.icon}
-              end={item.to === '/' || item.to === '/invoices'}
-              collapsed={collapsed}
-            />
-          ))}
-        </nav>
-
-        <div className="my-2 h-px w-full bg-white/20" />
-
-        <nav className="space-y-0.5">
-          {taxItems.map((item) => (
-            <SidebarLink
-              key={item.to}
-              to={item.to}
-              label={item.label}
-              icon={item.icon}
-              collapsed={collapsed}
-            />
-          ))}
-        </nav>
+        {navSections.map((section) => (
+          <nav key={section.label ?? 'main'} className="space-y-0.5">
+            {section.label !== null &&
+              (collapsed ? (
+                <div className="flex justify-center py-2">
+                  <span className="h-px w-8 bg-white/20" />
+                </div>
+              ) : (
+                <p className="px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-[0.08em] text-[#94A3B8]">
+                  {section.label}
+                </p>
+              ))}
+            {section.items.map((item) => (
+              <SidebarLink
+                key={item.to}
+                to={item.to}
+                label={item.label}
+                icon={item.icon}
+                end={item.to === '/' || item.to === '/invoices'}
+                collapsed={collapsed}
+              />
+            ))}
+          </nav>
+        ))}
       </div>
 
       <div ref={userMenuRef} className="relative">
