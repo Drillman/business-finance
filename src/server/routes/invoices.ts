@@ -415,7 +415,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // Get monthly summary
+  // Get monthly summary (revenue = collected amounts, based on payment date)
   fastify.get(
     '/api/invoices/summary/monthly',
     { preHandler: [requireAuth] },
@@ -450,8 +450,8 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
           and(
             eq(invoices.userId, userId),
             eq(invoices.isCanceled, false),
-            gte(invoices.invoiceDate, startDate),
-            lte(invoices.invoiceDate, endDate)
+            gte(invoices.paymentDate, startDate),
+            lte(invoices.paymentDate, endDate)
           )
         )
 
@@ -470,7 +470,7 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
     }
   )
 
-  // Get yearly summary
+  // Get yearly summary (revenue = collected amounts, based on payment date)
   fastify.get(
     '/api/invoices/summary/yearly',
     { preHandler: [requireAuth] },
@@ -503,8 +503,8 @@ export async function invoiceRoutes(fastify: FastifyInstance) {
           and(
             eq(invoices.userId, userId),
             eq(invoices.isCanceled, false),
-            gte(invoices.invoiceDate, startDate),
-            lte(invoices.invoiceDate, endDate)
+            gte(invoices.paymentDate, startDate),
+            lte(invoices.paymentDate, endDate)
           )
         )
 

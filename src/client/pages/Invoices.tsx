@@ -327,13 +327,13 @@ export default function Invoices() {
         <KpiCard
           title={`CA HT ${selectedYear}`}
           value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(calculatedSummary?.totalHt || 0)}
-          description={`${calculatedSummary?.count || 0} facture(s) - ${formatCurrency(invoiceMetrics.paidAmountTtc || 0)} ttc`}
+          description={`${calculatedSummary?.count || 0} facture(s) - ${formatCurrency(calculatedSummary?.totalTtc || 0)} ttc`}
           accentColor="#6366F1"
         />
         <KpiCard
           title="TVA collectée"
           value={isLoadingSummary ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(calculatedSummary?.taxTotal || 0)}
-          description={isLoadingSummary ? 'Chargement...' : `Encaissée: ${formatCurrency(invoiceMetrics.paidAmountTtc)}`}
+          description={isLoadingSummary ? 'Chargement...' : `Encaissée: ${formatCurrency(calculatedSummary?.totalTtc || 0)}`}
           accentColor="#3B82F6"
         />
         <KpiCard
