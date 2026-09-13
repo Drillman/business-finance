@@ -38,7 +38,13 @@ const monthlyColumns: DataTableColumn[] = [
   { key: 'income-tax', label: 'Impôts', className: 'text-right' },
   { key: 'tva', label: 'TVA', className: 'text-right' },
   { key: 'remaining', label: 'Restant', className: 'text-right' },
+  { key: 'remaining-before-tax', label: 'Avant impôts', className: 'text-right' },
 ]
+
+// Remaining already has the income tax subtracted: add it back
+function getRemainingBeforeTax(month: { remaining: string; incomeTax: string }): number {
+  return parseFloat(month.remaining) + parseFloat(month.incomeTax)
+}
 
 export default function Dashboard() {
   const currentYear = new Date().getFullYear()
@@ -62,6 +68,10 @@ export default function Dashboard() {
   // Calculate average remaining
   const averageRemaining = yearlyData?.months && yearlyData.months.length > 0
     ? yearlyData.months.reduce((sum, m) => sum + parseFloat(m.remaining), 0) / yearlyData.months.length
+    : 0
+
+  const averageRemainingBeforeTax = yearlyData?.months && yearlyData.months.length > 0
+    ? yearlyData.months.reduce((sum, m) => sum + getRemainingBeforeTax(m), 0) / yearlyData.months.length
     : 0
 
   return (
@@ -124,7 +134,7 @@ export default function Dashboard() {
             <h2 className="mb-4 text-lg font-semibold">Détail mensuel</h2>
             <DataTable
               columns={monthlyColumns}
-              minWidthClassName="min-w-[920px]"
+              minWidthClassName="min-w-[1080px]"
               footer={
                 <tr className="h-11 border-t border-(--border-default) bg-(--card-bg)">
                   <td className="px-4 text-sm font-semibold text-(--text-primary)">Moyenne</td>
@@ -136,11 +146,15 @@ export default function Dashboard() {
                   <td className={`px-4 text-right text-sm font-semibold ${averageRemaining >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
                     {formatCurrency(averageRemaining)}
                   </td>
+                  <td className={`px-4 text-right text-sm font-semibold ${averageRemainingBeforeTax >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                    {formatCurrency(averageRemainingBeforeTax)}
+                  </td>
                 </tr>
               }
             >
               {sortedMonths.map((month, index) => {
                 const isCurrentMonth = month.month === yearlyData?.currentMonth
+                const remainingBeforeTax = getRemainingBeforeTax(month)
                 return (
                   <tr
                     key={month.month}
@@ -171,6 +185,9 @@ export default function Dashboard() {
                     </td>
                     <td className={`px-4 text-right text-sm font-medium ${parseFloat(month.remaining) >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
                       {formatCurrency(month.remaining)}
+                    </td>
+                    <td className={`px-4 text-right text-sm font-medium ${remainingBeforeTax >= 0 ? 'text-(--color-success)' : 'text-(--color-error)'}`}>
+                      {formatCurrency(remainingBeforeTax)}
                     </td>
                   </tr>
                 )
