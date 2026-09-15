@@ -97,7 +97,6 @@ export default function Dashboard() {
         </span>
       ),
     },
-    { key: 'income-tax', header: 'Impôts', align: 'right', className: 'text-text-secondary', cell: (month) => formatCurrency(month.incomeTax) },
     {
       key: 'tva',
       header: 'TVA',
@@ -110,23 +109,24 @@ export default function Dashboard() {
       ),
     },
     {
-      key: 'remaining',
-      header: 'Restant',
-      align: 'right',
-      cell: (month) => (
-        <span className={`font-medium ${amountTone(parseFloat(month.remaining))}`}>{formatCurrency(month.remaining)}</span>
-      ),
-      footer: <span className={amountTone(averageRemaining)}>{formatCurrency(averageRemaining)}</span>,
-    },
-    {
       key: 'remaining-before-tax',
-      header: 'Avant impôts',
+      header: 'Restant',
       align: 'right',
       cell: (month) => {
         const remainingBeforeTax = getRemainingBeforeTax(month)
         return <span className={`font-medium ${amountTone(remainingBeforeTax)}`}>{formatCurrency(remainingBeforeTax)}</span>
       },
       footer: <span className={amountTone(averageRemainingBeforeTax)}>{formatCurrency(averageRemainingBeforeTax)}</span>,
+    },
+    { key: 'income-tax', header: 'Impôts', align: 'right', className: 'text-text-secondary', cell: (month) => formatCurrency(month.incomeTax) },
+    {
+      key: 'remaining',
+      header: 'Après impôts',
+      align: 'right',
+      cell: (month) => (
+        <span className={`font-medium ${amountTone(parseFloat(month.remaining))}`}>{formatCurrency(month.remaining)}</span>
+      ),
+      footer: <span className={amountTone(averageRemaining)}>{formatCurrency(averageRemaining)}</span>,
     },
   ]
 
@@ -189,7 +189,6 @@ export default function Dashboard() {
               columns={monthlyColumns}
               rows={sortedMonths}
               getRowKey={(month) => month.month}
-              isRowHighlighted={(month) => month.month === yearlyData?.currentMonth}
               footerLabel="Moyenne"
               minWidth="min-w-270"
             />

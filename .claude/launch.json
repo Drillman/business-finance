@@ -1,0 +1,41 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "bf-api-test-db",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "DATABASE_URL=postgresql://test:test@localhost:55433/business_finance_test npm run dev:server"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "bf-web",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["run", "dev:client"],
+      "port": 5173
+    },
+    {
+      "name": "pf-api-dev-db",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": [
+        "-c",
+        "cd /Users/lav/Code/Personal/personal-finance && PORT=3000 DATABASE_URL=postgresql://personal_finance:dev@localhost:55432/personal_finance_db DATABASE_SCHEMA=dev npm run dev:api"
+      ],
+      "port": 3000
+    },
+    {
+      "name": "pf-web",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/lav/Code/Personal/personal-finance && npm run dev:web"],
+      "port": 5173
+    },
+    {
+      "name": "dui-playground",
+      "runtimeExecutable": "sh",
+      "runtimeArgs": ["-c", "cd /Users/lav/Code/Personal/dashboard-ui && npm run playground"],
+      "port": 5199
+    }
+  ]
+}
