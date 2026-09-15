@@ -2,8 +2,8 @@ import { useMemo, useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import { Info } from 'lucide-react'
 import { api } from '../api/client'
-import { YearSelect } from '../components/PeriodSelect'
-import { AppButton } from '../components/ui/AppButton'
+import { YEARS } from '../utils/years'
+import { Badge, Button, Card, Field, Input, Select, Spinner, StatCard, TabSwitch, YearSwitch } from '@drillman/dashboard-ui'
 
 type InputMode = 'ht' | 'ttc'
 
@@ -27,6 +27,13 @@ function formatPercent(value: number): string {
     maximumFractionDigits: 1,
   }).format(value)
 }
+
+const TAX_RATE_OPTIONS = [
+  { value: '0', label: '0 % (exonéré)' },
+  { value: '5.5', label: '5,5 %' },
+  { value: '10', label: '10 %' },
+  { value: '20', label: '20 % (taux normal)' },
+]
 
 export default function Calculator() {
   const [inputMode, setInputMode] = useState<InputMode>('ht')
@@ -103,8 +110,8 @@ export default function Calculator() {
 
   if (isLoadingRates) {
     return (
-      <div className="flex h-64 items-center justify-center">
-        <span className="loading loading-spinner loading-lg"></span>
+      <div className="flex h-64 items-center justify-center text-accent">
+        <Spinner size="lg" />
       </div>
     )
   }
@@ -113,203 +120,145 @@ export default function Calculator() {
   const netRate = calculations.amountHt > 0
     ? (calculations.netRemaining / calculations.amountHt) * 100
     : 100 - totalRate
+  const modeLabel = inputMode === 'ht' ? 'HT' : 'TTC'
 
   return (
     <div>
       <div className="mb-7 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
-        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Calculateur</h1>
-        <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-center">
-          <YearSelect value={selectedYear} onChange={setSelectedYear} />
-        </div>
+        <h1 className="font-display text-2xl font-semibold tracking-tight text-text-primary">Calculateur</h1>
+        <YearSwitch years={[...YEARS]} value={selectedYear} onChange={setSelectedYear} align="end" />
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-7 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <h2 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Saisie</h2>
+        <Card padding="lg">
+          <h2 className="font-display text-lg font-semibold text-text-primary">Saisie</h2>
 
-          <div className="mt-6 space-y-6">
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">Mode de saisie</label>
-              <div className="flex h-10 w-full rounded-lg border border-(--border-default) bg-(--color-base-200) p-1">
-                <button
-                  type="button"
-                  className={[
-                    'flex-1 rounded-md text-[13px] font-medium transition-colors',
-                    inputMode === 'ht'
-                      ? 'bg-(--card-bg) font-semibold text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
-                      : 'text-(--text-secondary) hover:text-(--text-primary)',
-                  ].join(' ')}
-                  onClick={() => handleInputModeChange('ht')}
-                >
-                  Montant HT
-                </button>
-                <button
-                  type="button"
-                  className={[
-                    'flex-1 rounded-md text-[13px] font-medium transition-colors',
-                    inputMode === 'ttc'
-                      ? 'bg-(--card-bg) font-semibold text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
-                      : 'text-(--text-secondary) hover:text-(--text-primary)',
-                  ].join(' ')}
-                  onClick={() => handleInputModeChange('ttc')}
-                >
-                  Montant TTC
-                </button>
-              </div>
-            </div>
-
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">
-                Montant {inputMode === 'ht' ? 'HT' : 'TTC'} (EUR)
-              </label>
-              <input
-                type="number"
-                step="0.01"
-                min="0"
-                placeholder="0.00"
-                className="h-10.5 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3.5 text-[15px] text-(--text-primary) focus:border-(--border-focus) focus:outline-none"
-                value={amount}
-                onChange={(e) => setAmount(e.target.value)}
-                autoFocus
+          <div className="mt-6 flex flex-col gap-5">
+            <Field label="Mode de saisie">
+              <TabSwitch<InputMode>
+                aria-label="Mode de saisie"
+                value={inputMode}
+                onChange={handleInputModeChange}
+                options={[
+                  { value: 'ht', label: 'Montant HT' },
+                  { value: 'ttc', label: 'Montant TTC' },
+                ]}
               />
-            </div>
+            </Field>
 
-            <div>
-              <label className="mb-2 block text-[13px] font-medium text-(--text-secondary)">Taux de TVA</label>
-              <select
-                className="h-10.5 w-full rounded-lg border border-(--border-default) bg-(--card-bg) px-3.5 text-sm text-(--text-primary) focus:border-(--border-focus) focus:outline-none"
-                value={taxRate}
-                onChange={(e) => setTaxRate(e.target.value)}
-              >
-                <option value="0">0% (Exonere)</option>
-                <option value="5.5">5.5%</option>
-                <option value="10">10%</option>
-                <option value="20">20% (Taux normal)</option>
-              </select>
-            </div>
+            <Input
+              label={`Montant ${modeLabel}`}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0,00"
+              suffix="€"
+              value={amount}
+              onChange={(e) => setAmount(e.target.value)}
+              autoFocus
+            />
 
-            <div>
-              <AppButton variant="outline" className="w-full" onClick={handleReset}>
-                Reinitialiser
-              </AppButton>
-            </div>
+            <Select
+              label="Taux de TVA"
+              value={taxRate}
+              onChange={(e) => setTaxRate(e.target.value)}
+              options={TAX_RATE_OPTIONS}
+            />
+
+            <Button variant="secondary" fullWidth onClick={handleReset}>
+              Réinitialiser
+            </Button>
           </div>
-        </section>
+        </Card>
 
-        <section className="rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
-          <div className="space-y-3 p-7">
-            <h2 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Conversion HT / TTC</h2>
+        <Card padding="none" className="overflow-hidden">
+          <div className="flex flex-col gap-4 p-6">
+            <h2 className="font-display text-lg font-semibold text-text-primary">Conversion HT / TTC</h2>
 
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-              <div className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
-                <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">MONTANT HT</p>
-                <p className="mt-1 font-['Space_Grotesk'] text-[22px] font-semibold text-(--text-primary)">
-                  {formatCurrency(calculations.amountHt)}
-                </p>
-              </div>
-
-              <div className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
-                <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">MONTANT TTC</p>
-                <p className="mt-1 font-['Space_Grotesk'] text-[22px] font-semibold text-(--text-primary)">
-                  {formatCurrency(calculations.amountTtc)}
-                </p>
-              </div>
+              <StatCard label="Montant HT" value={formatCurrency(calculations.amountHt)} />
+              <StatCard label="Montant TTC" value={formatCurrency(calculations.amountTtc)} />
             </div>
 
-            <div className="flex items-center justify-between pt-2">
-              <span className="text-sm text-(--text-secondary)">TVA ({taxRate}%)</span>
-              <span className="text-sm font-semibold text-(--text-primary)">{formatCurrency(calculations.tvaAmount)}</span>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-text-secondary">TVA ({formatPercent(parseFloat(taxRate) || 0)} %)</span>
+              <span className="text-sm font-semibold text-text-primary">{formatCurrency(calculations.tvaAmount)}</span>
             </div>
           </div>
 
-          <div className="h-px w-full bg-(--border-default)"></div>
-
-          <div className="space-y-4 p-7">
-            <h3 className="font-['Space_Grotesk'] text-[18px] font-semibold text-(--text-primary)">Deductions</h3>
+          <div className="flex flex-col gap-4 border-t border-border p-6">
+            <h3 className="font-display text-lg font-semibold text-text-primary">Déductions</h3>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-(--text-secondary)">Urssaf ({calculations.urssafRate}%)</span>
-              <span className="text-sm font-semibold text-(--color-error)">- {formatCurrency(calculations.urssafAmount)}</span>
+              <span className="text-sm text-text-secondary">Urssaf ({formatPercent(calculations.urssafRate)} %)</span>
+              <span className="text-sm font-semibold text-danger">- {formatCurrency(calculations.urssafAmount)}</span>
             </div>
 
             <div className="flex items-center justify-between">
-              <span className="text-sm text-(--text-secondary)">Impot estime ({calculations.estimatedTaxRate}%)</span>
-              <span className="text-sm font-semibold text-(--color-error)">- {formatCurrency(calculations.estimatedTax)}</span>
+              <span className="text-sm text-text-secondary">Impôt estimé ({formatPercent(calculations.estimatedTaxRate)} %)</span>
+              <span className="text-sm font-semibold text-danger">- {formatCurrency(calculations.estimatedTax)}</span>
             </div>
 
-            <div className="h-px w-full bg-(--border-default)"></div>
-
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-(--text-primary)">Total deductions</span>
-              <span className="text-sm font-bold text-(--color-error)">- {formatCurrency(calculations.totalDeductions)}</span>
+            <div className="flex items-center justify-between border-t border-border pt-4">
+              <span className="text-sm font-semibold text-text-primary">Total déductions</span>
+              <span className="text-sm font-bold text-danger">- {formatCurrency(calculations.totalDeductions)}</span>
             </div>
           </div>
 
-          <div className="rounded-b-[10px] bg-[#ECFDF5] p-7">
+          <div className="bg-success-soft p-6">
             <div className="flex items-center justify-between">
-              <span className="text-sm font-semibold text-(--color-success)">Net restant</span>
-              <span className="font-['Space_Grotesk'] text-[26px] font-bold text-(--color-success)">
+              <span className="text-sm font-semibold text-success-strong">Net restant</span>
+              <span className="font-display text-kpi font-semibold text-success-strong">
                 {formatCurrency(calculations.netRemaining)}
               </span>
             </div>
-            <p className="text-right text-[13px] text-(--color-success)">
-              {formatPercent(calculations.amountHt > 0 ? (calculations.netRemaining / calculations.amountHt) * 100 : 0)}% du montant HT
+            <p className="mt-1 text-right text-compact text-success-strong">
+              {formatPercent(calculations.amountHt > 0 ? (calculations.netRemaining / calculations.amountHt) * 100 : 0)} % du montant HT
             </p>
           </div>
-        </section>
+        </Card>
       </div>
 
-      <section className="mt-6 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-7 shadow-[0_1px_3px_rgba(0,0,0,0.06)]">
+      <Card padding="lg" className="mt-6">
         <div className="flex flex-wrap items-center gap-3">
-          <Info className="h-4.5 w-4.5 text-(--color-info)" />
-          <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">
-            Taux configures pour {selectedYear}
+          <Info className="size-4.5 text-info" />
+          <h2 className="font-display text-base font-semibold text-text-primary">
+            Taux configurés pour {selectedYear}
           </h2>
           {yearlyRates?.isCustom ? (
-            <span className="inline-flex h-6 items-center rounded-full bg-[#EEF2FF] px-2.5 text-[11px] font-semibold text-(--color-info)">
-              Personnalise
-            </span>
+            <Badge tone="accent" size="md">Personnalisé</Badge>
           ) : (
-            <span className="inline-flex h-6 items-center rounded-full bg-[#F5F7FB] px-2.5 text-[11px] font-semibold text-(--text-secondary)">
-              Defaut
-            </span>
+            <Badge size="md">Défaut</Badge>
           )}
         </div>
 
         <div className="mt-5 grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
-          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TAUX URSSAF</p>
-            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
-              {formatPercent(calculations.urssafRate)}%
-            </p>
-            <p className="mt-1 text-xs text-(--text-secondary)">Cotisations sociales</p>
-          </article>
-
-          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TAUX IMPOT ESTIME</p>
-            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--text-primary)">
-              {formatPercent(calculations.estimatedTaxRate)}%
-            </p>
-            <p className="mt-1 text-xs text-(--text-secondary)">Versement liberatoire</p>
-          </article>
-
-          <article className="rounded-lg border border-(--border-default) bg-[#FAFAFA] p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">TOTAL PRELEVE</p>
-            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--color-error)">
-              {formatPercent(totalRate)}%
-            </p>
-            <p className="mt-1 text-xs text-(--text-secondary)">Sur le montant HT</p>
-          </article>
-
-          <article className="rounded-lg border border-(--border-default) bg-[#F0FDF4] p-4">
-            <p className="text-[11px] font-semibold tracking-[0.08em] text-(--text-tertiary)">NET RESTANT</p>
-            <p className="mt-1 font-['Space_Grotesk'] text-xl font-semibold text-(--color-success)">
-              {formatPercent(netRate)}%
-            </p>
-            <p className="mt-1 text-xs text-(--text-secondary)">Du montant HT</p>
-          </article>
+          <StatCard
+            label="Taux Urssaf"
+            color="var(--dui-series-3)"
+            value={`${formatPercent(calculations.urssafRate)} %`}
+            description="Cotisations sociales"
+          />
+          <StatCard
+            label="Taux impôt estimé"
+            color="var(--dui-series-5)"
+            value={`${formatPercent(calculations.estimatedTaxRate)} %`}
+            description="Versement libératoire"
+          />
+          <StatCard
+            label="Total prélevé"
+            tone="danger"
+            value={`${formatPercent(totalRate)} %`}
+            description="Sur le montant HT"
+          />
+          <StatCard
+            label="Net restant"
+            tone="success"
+            value={`${formatPercent(netRate)} %`}
+            description="Du montant HT"
+          />
         </div>
-      </section>
+      </Card>
     </div>
   )
 }

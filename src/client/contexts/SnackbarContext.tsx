@@ -1,5 +1,5 @@
 import { createContext, useContext, useState, useCallback, ReactNode } from 'react';
-import { CheckCircle, XCircle, AlertTriangle, Info, X } from 'lucide-react';
+import { Alert, type AlertTone } from '@drillman/dashboard-ui';
 
 type SnackbarType = 'success' | 'error' | 'warning' | 'info';
 
@@ -18,6 +18,13 @@ interface SnackbarContextType {
 }
 
 const SnackbarContext = createContext<SnackbarContextType | null>(null);
+
+const TONES: Record<SnackbarType, AlertTone> = {
+  success: 'success',
+  error: 'danger',
+  warning: 'warning',
+  info: 'info',
+};
 
 export function useSnackbar() {
   const context = useContext(SnackbarContext);
@@ -49,38 +56,19 @@ export function SnackbarProvider({ children }: SnackbarProviderProps) {
   const showWarning = useCallback((message: string) => showSnackbar(message, 'warning'), [showSnackbar]);
   const showInfo = useCallback((message: string) => showSnackbar(message, 'info'), [showSnackbar]);
 
-  const iconMap = {
-    success: <CheckCircle size={20} />,
-    error: <XCircle size={20} />,
-    warning: <AlertTriangle size={20} />,
-    info: <Info size={20} />,
-  };
-
-  const alertStyles = {
-    success: 'alert-success',
-    error: 'alert-error',
-    warning: 'alert-warning',
-    info: 'alert-info',
-  };
-
   return (
     <SnackbarContext.Provider value={{ showSnackbar, showSuccess, showError, showWarning, showInfo }}>
       {children}
-      <div className="toast toast-end toast-bottom z-50">
+      <div className="pointer-events-none fixed right-4 bottom-4 z-60 flex w-[min(24rem,calc(100vw-2rem))] flex-col gap-2">
         {snackbars.map((snackbar) => (
-          <div
+          <Alert
             key={snackbar.id}
-            className={`alert ${alertStyles[snackbar.type]} shadow-lg flex items-center gap-2 animate-fade-in`}
+            tone={TONES[snackbar.type]}
+            onClose={() => removeSnackbar(snackbar.id)}
+            className="pointer-events-auto bg-surface shadow-dropdown"
           >
-            {iconMap[snackbar.type]}
-            <span className="flex-1">{snackbar.message}</span>
-            <button
-              className="btn btn-ghost btn-xs btn-square"
-              onClick={() => removeSnackbar(snackbar.id)}
-            >
-              <X size={14} />
-            </button>
-          </div>
+            {snackbar.message}
+          </Alert>
         ))}
       </div>
     </SnackbarContext.Provider>

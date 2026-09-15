@@ -4,7 +4,8 @@ A full-stack web application for tracking business finances, replacing an Excel-
 
 ## Tech Stack
 
-- **Frontend**: React 19 + TypeScript + TailwindCSS v4 + DaisyUI + TanStack Query
+- **Frontend**: React 19 + TypeScript + TailwindCSS v4 + TanStack Query
+- **UI**: shared design system `@drillman/dashboard-ui` (private GitHub dev dependency; blue accent set in `src/client/index.css`). Use its components (Button, Input, Textarea, Select, DatePicker, Modal, ConfirmDialog, StatCard, Badge, Alert, Spinner, PageTabs, MonthSwitch/YearSwitch, DataTable/TableCellInput, AppShell/Sidebar…) and tokens (`text-text-secondary`, `border-border`, `bg-surface`…) instead of local primitives, hex colors or arbitrary sizes. No DaisyUI. Docker builds need a `GITHUB_TOKEN` build arg.
 - **Backend**: Fastify 5 + TypeScript
 - **Database**: PostgreSQL + Drizzle ORM
 - **Authentication**: JWT (access + refresh tokens) + Passkeys/WebAuthn

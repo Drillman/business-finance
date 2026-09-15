@@ -21,6 +21,9 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Read access to the private Drillman/dashboard-ui repository (npm dev dependency)
+        GITHUB_TOKEN: ${GITHUB_TOKEN}
     container_name: business-finance-app
     restart: unless-stopped
     ports:

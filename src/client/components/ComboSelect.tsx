@@ -151,7 +151,7 @@ export function ComboSelect({
         ref={inputRef}
         type="text"
         className={[
-          'h-9.5 w-full rounded-lg border border-(--border-default) bg-(--card-bg) pr-9 pl-3 text-sm text-(--text-primary) outline-none transition-colors placeholder:text-(--text-tertiary) focus:border-(--border-focus) focus-visible:ring-2 focus-visible:ring-(--border-focus) focus-visible:ring-offset-1',
+          'h-control w-full rounded-lg border border-border bg-surface pr-9 pl-3 text-sm text-text-primary outline-none transition-colors placeholder:text-text-muted focus:border-accent focus-visible:ring-2 focus-visible:ring-accent focus-visible:ring-offset-1',
           className,
         ].join(' ')}
         value={inputValue}
@@ -174,7 +174,7 @@ export function ComboSelect({
             inputRef.current?.focus()
           }
         }}
-        className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-(--text-secondary)"
+        className="absolute inset-y-0 right-0 flex w-9 items-center justify-center text-text-secondary"
         aria-label="Afficher les options"
       >
         <ChevronDown
@@ -189,11 +189,11 @@ export function ComboSelect({
         <div
           id={listboxId}
           ref={listRef}
-          className="absolute top-[calc(100%+6px)] z-40 max-h-56 w-full overflow-y-auto rounded-[10px] border border-(--border-default) bg-(--card-bg) p-1 shadow-[0_8px_24px_-10px_rgba(0,0,0,0.28),0_2px_6px_rgba(0,0,0,0.1)]"
+          className="absolute top-[calc(100%+6px)] z-40 max-h-56 w-full overflow-y-auto rounded-card border border-border bg-surface p-1 shadow-dropdown"
           role="listbox"
         >
           {!filteredOptions.length ? (
-            <div className="px-3 py-2 text-[13px] text-(--text-tertiary)">Aucune option</div>
+            <div className="px-3 py-2 text-compact text-text-muted">Aucune option</div>
           ) : (
             filteredOptions.map((option, index) => {
               const selected = option === value
@@ -209,12 +209,12 @@ export function ComboSelect({
                   onMouseEnter={() => setHighlightedIndex(index)}
                   onClick={() => commitValue(option)}
                   className={[
-                    'flex h-9.5 w-full cursor-pointer items-center justify-between rounded-md px-3 text-left text-[13px] transition-colors',
+                    'flex h-control w-full cursor-pointer items-center justify-between rounded-md px-3 text-left text-compact transition-colors',
                     selected
-                      ? 'bg-(--color-primary)/10 font-semibold text-(--color-primary)'
+                      ? 'bg-accent/10 font-semibold text-accent'
                       : highlighted
-                        ? 'bg-(--bg-hover) text-(--text-primary)'
-                        : 'text-(--text-primary) hover:bg-(--bg-hover)',
+                        ? 'bg-surface-hover text-text-primary'
+                        : 'text-text-primary hover:bg-surface-hover',
                   ].join(' ')}
                 >
                   <span className="truncate">{option}</span>
@@ -228,7 +228,7 @@ export function ComboSelect({
             <button
               type="button"
               onClick={() => commitValue(inputValue.trim())}
-              className="mt-1 flex h-9.5 w-full cursor-pointer items-center rounded-md border border-dashed border-(--border-default) px-3 text-left text-[13px] font-medium text-(--text-secondary) transition-colors hover:bg-(--bg-hover)"
+              className="mt-1 flex h-control w-full cursor-pointer items-center rounded-md border border-dashed border-border px-3 text-left text-compact font-medium text-text-secondary transition-colors hover:bg-surface-hover"
             >
               + Ajouter "{inputValue.trim()}"
             </button>
