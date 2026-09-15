@@ -7,13 +7,9 @@ import {
 } from '../hooks/useUrssaf'
 import type { UrssafPayment, CreateUrssafPaymentInput } from '@shared/types'
 import { Check, Pencil, Trash2, X } from 'lucide-react'
-import { ConfirmDialog } from '../components/ConfirmDialog'
-import { YearSelect, YEARS } from '../components/PeriodSelect'
+import { YEARS } from '../utils/years'
 import { useSnackbar } from '../contexts/SnackbarContext'
-import { AppButton } from '../components/ui/AppButton'
-import { Select } from '../components/ui/Select'
-import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
-import { KpiCard } from '../components/ui/KpiCard'
+import { Badge, Button, ConfirmDialog, DataTable, Select, Spinner, StatCard, YearSwitch, type DataTableColumn } from '@drillman/dashboard-ui'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -40,15 +36,6 @@ const trimesterOptions = [1, 2, 3, 4].map((trimester) => ({
 const statusOptions = [
   { value: 'pending', label: 'En attente' },
   { value: 'paid', label: 'Payé' },
-]
-
-const quarterlyColumns: DataTableColumn[] = [
-  { key: 'trimester', label: 'Trimestre', className: 'w-34' },
-  { key: 'actual-revenue', label: 'CA réel', className: 'w-34 text-right' },
-  { key: 'estimated', label: 'Cotisation estimée', className: 'w-40 text-right' },
-  { key: 'declared', label: 'Cotisation déclarée', className: 'w-40 text-right' },
-  { key: 'status', label: 'Statut', className: 'w-30 text-center' },
-  { key: 'actions', label: 'Actions', className: 'w-20 text-center' },
 ]
 
 interface UrssafFormData {
@@ -183,173 +170,159 @@ export default function Urssaf() {
   const calculatedAmount = parsedRevenue * (urssafRate / 100)
   const modalTitle = editingPayment ? 'Modifier la cotisation Urssaf' : 'Nouvelle cotisation Urssaf'
   const submitLabel = editingPayment ? 'Enregistrer' : 'Déclarer'
+  type Trimester = NonNullable<typeof summary>['trimesters'][number]
+
+  const quarterlyColumns: DataTableColumn<Trimester>[] = [
+    { key: 'trimester', header: 'Trimestre', width: 'w-36', className: 'font-semibold', cell: (trimester) => trimesterLabels[trimester.trimester] },
+    {
+      key: 'actual-revenue',
+      header: 'CA réel',
+      align: 'right',
+      width: 'w-36',
+      cell: (trimester) => (parseFloat(trimester.actualRevenue) > 0 ? formatCurrency(trimester.actualRevenue) : '-'),
+      footer: formatCurrency(summary?.trimesters.reduce((acc, t) => acc + parseFloat(t.actualRevenue), 0) || 0),
+    },
+    {
+      key: 'estimated',
+      header: 'Cotisation estimée',
+      align: 'right',
+      width: 'w-40',
+      className: 'text-text-secondary',
+      cell: (trimester) => (parseFloat(trimester.estimatedAmount) > 0 ? formatCurrency(trimester.estimatedAmount) : '-'),
+      footer: formatCurrency(summary?.trimesters.reduce((acc, t) => acc + parseFloat(t.estimatedAmount), 0) || 0),
+    },
+    {
+      key: 'declared',
+      header: 'Cotisation déclarée',
+      align: 'right',
+      width: 'w-40',
+      className: 'font-semibold',
+      cell: (trimester) => (trimester.payment ? formatCurrency(trimester.payment.amount) : '-'),
+      footer: formatCurrency(summary?.totals.totalAmount || '0'),
+    },
+    {
+      key: 'status',
+      header: 'Statut',
+      align: 'center',
+      width: 'w-32',
+      cell: (trimester) =>
+        trimester.payment ? (
+          <Badge tone={trimester.payment.status === 'paid' ? 'success' : 'warning'}>
+            {trimester.payment.status === 'paid' ? 'Payé' : 'En attente'}
+          </Badge>
+        ) : (
+          <Badge>Non déclaré</Badge>
+        ),
+    },
+    {
+      key: 'actions',
+      header: 'Actions',
+      align: 'center',
+      width: 'w-28',
+      cell: (trimester) => {
+        const payment = trimester.payment
+        return (
+          <div className="flex justify-center gap-1">
+            {payment ? (
+              <>
+                <Button variant="ghost" size="sm" iconOnly className="size-7 text-text-secondary"
+                  onClick={() => openEditModal(payment)}
+                  title="Modifier"
+                >
+                  <Pencil className="h-4 w-4" />
+                </Button>
+                <Button variant="ghost" size="sm" iconOnly className="size-7 text-danger"
+                  onClick={() => setDeleteConfirmId(payment.id)}
+                  title="Supprimer"
+                >
+                  <Trash2 className="h-4 w-4" />
+                </Button>
+              </>
+            ) : (
+              <Button size="sm" onClick={() => openCreateModal(trimester.trimester)}>
+                Déclarer
+              </Button>
+            )}
+          </div>
+        )
+      },
+    },
+  ]
+
   const isSubmitting = createMutation.isPending || updateMutation.isPending
 
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Urssaf</h1>
+          <h1 className="text-3xl font-semibold tracking-tight text-text-primary">Urssaf</h1>
         </div>
 
         <div className="flex flex-wrap items-center gap-3">
-          <YearSelect value={selectedYear} onChange={setSelectedYear} />
-          <AppButton
-            className="shadow-[0_8px_20px_-12px_rgba(37,99,235,0.75)]"
+          <YearSwitch years={[...YEARS]} value={selectedYear} onChange={setSelectedYear} />
+          <Button
+            className=""
             onClick={() => openCreateModal()}
           >
             Ajouter une cotisation
-          </AppButton>
+          </Button>
         </div>
       </div>
 
       {/* Annual Summary */}
       <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <KpiCard
-          title="CA déclaré"
-          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.totals.totalRevenue || '0')}
+        <StatCard
+          label="CA déclaré"
+          value={isLoadingSummary ? <Spinner size="sm" /> : formatCurrency(summary?.totals.totalRevenue || '0')}
           description="Chiffre d'affaires total"
-          accentColor="#818CF8"
+          color="var(--dui-series-1)"
         />
-        <KpiCard
-          title="Cotisations dues"
-          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.totals.totalAmount || '0')}
+        <StatCard
+          label="Cotisations dues"
+          value={isLoadingSummary ? <Spinner size="sm" /> : formatCurrency(summary?.totals.totalAmount || '0')}
           description={`Taux: ${summary?.urssafRate || 22}%`}
-          accentColor="#FBBF24"
+          color="var(--dui-series-3)"
         />
-        <KpiCard
-          title="Cotisations payées"
-          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.totals.totalPaid || '0')}
+        <StatCard
+          label="Cotisations payées"
+          value={isLoadingSummary ? <Spinner size="sm" /> : formatCurrency(summary?.totals.totalPaid || '0')}
           description="Paiements validés"
-          accentColor="#34D399"
+          color="var(--dui-series-2)"
         />
-        <KpiCard
-          title="Reste à payer"
-          value={isLoadingSummary ? <span className="loading loading-spinner loading-sm"></span> : formatCurrency(summary?.totals.totalPending || '0')}
+        <StatCard
+          label="Reste à payer"
+          value={isLoadingSummary ? <Spinner size="sm" /> : formatCurrency(summary?.totals.totalPending || '0')}
           description="Montant à régulariser"
-          accentColor="#A78BFA"
-          valueClassName={summary && parseFloat(summary.totals.totalPending) <= 0 ? 'text-[#34D399]' : ''}
+          color="var(--dui-series-5)"
+          valueClassName={summary && parseFloat(summary.totals.totalPending) <= 0 ? 'text-success' : ''}
         />
       </div>
 
       {/* Quarterly Breakdown */}
       <section className="space-y-3">
-        <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">
+        <h2 className="font-display text-base font-semibold text-text-primary">
           Cotisations trimestrielles {selectedYear}
         </h2>
 
         {isLoadingSummary ? (
-          <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-            <span className="loading loading-spinner loading-lg"></span>
+          <div className="rounded-card border border-border bg-surface py-8 text-center ">
+            <Spinner size="lg" />
           </div>
         ) : (
           <DataTable
             columns={quarterlyColumns}
-            minWidthClassName=""
-            tableClassName="mx-auto w-full"
-            footer={(
-              <tr className="h-11 border-t border-(--border-default) bg-(--card-bg)">
-                <td className="px-4 text-sm font-semibold text-(--text-primary)">
-                  Total {selectedYear}
-                </td>
-                <td className="px-4 text-right font-mono text-sm font-semibold text-(--text-primary)">
-                  {formatCurrency(
-                    summary?.trimesters.reduce((acc, t) => acc + parseFloat(t.actualRevenue), 0) || 0,
-                  )}
-                </td>
-                <td className="px-4 text-right font-mono text-sm font-semibold text-(--text-secondary)">
-                  {formatCurrency(
-                    summary?.trimesters.reduce((acc, t) => acc + parseFloat(t.estimatedAmount), 0) || 0,
-                  )}
-                </td>
-                <td className="px-4 text-right font-mono text-sm font-semibold text-(--text-primary)">
-                  {formatCurrency(summary?.totals.totalAmount || '0')}
-                </td>
-                <td colSpan={2} />
-              </tr>
-            )}
-          >
-            {summary?.trimesters.map((trimester, index) => {
-              const hasPayment = trimester.payment !== null
-              const actualRevenue = parseFloat(trimester.actualRevenue)
-              const estimatedAmount = parseFloat(trimester.estimatedAmount)
-
-              return (
-                <tr
-                  key={trimester.trimester}
-                  className={[
-                    'h-12 border-b border-(--border-default)',
-                    index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
-                  ].join(' ')}
-                >
-                  <td className="px-4 text-sm font-semibold text-(--text-primary)">
-                    {trimesterLabels[trimester.trimester]}
-                  </td>
-                  <td className="px-4 text-right font-mono text-sm text-(--text-primary)">
-                    {actualRevenue > 0 ? formatCurrency(actualRevenue) : '-'}
-                  </td>
-                  <td className="px-4 text-right font-mono text-sm text-(--text-secondary)">
-                    {estimatedAmount > 0 ? formatCurrency(estimatedAmount) : '-'}
-                  </td>
-                  <td className="px-4 text-right font-mono text-sm font-semibold text-(--text-primary)">
-                    {hasPayment ? formatCurrency(trimester.payment!.amount) : '-'}
-                  </td>
-                  <td className="px-4 text-center">
-                    {hasPayment ? (
-                      <span
-                        className={[
-                          'badge h-5.5 min-h-5.5 border-0 px-2 text-[10px] font-semibold',
-                          trimester.payment!.status === 'paid'
-                            ? 'bg-[#ECFDF5] text-[#16A34A]'
-                            : 'bg-[#FFFBEB] text-[#B45309]',
-                        ].join(' ')}
-                      >
-                        {trimester.payment!.status === 'paid' ? 'Payé' : 'En attente'}
-                      </span>
-                    ) : (
-                      <span className="badge h-5.5 min-h-5.5 border-0 bg-base-200 px-2 text-[10px] font-semibold text-(--text-secondary)">
-                        Non déclaré
-                      </span>
-                    )}
-                  </td>
-                  <td className="px-4">
-                    <div className="flex justify-center gap-1">
-                      {hasPayment ? (
-                        <>
-                          <button
-                            className="btn btn-ghost btn-xs h-6 min-h-6 w-6 p-0 text-(--text-secondary) hover:bg-transparent"
-                            onClick={() => openEditModal(trimester.payment!)}
-                            title="Modifier"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="btn btn-ghost btn-xs h-6 min-h-6 w-6 p-0 text-error hover:bg-transparent"
-                            onClick={() => setDeleteConfirmId(trimester.payment!.id)}
-                            title="Supprimer"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
-                        </>
-                      ) : (
-                        <AppButton size="sm" onClick={() => openCreateModal(trimester.trimester)}>
-                          Déclarer
-                        </AppButton>
-                      )}
-                    </div>
-                  </td>
-                </tr>
-              )
-            })}
-
-          </DataTable>
+            rows={summary?.trimesters ?? []}
+            getRowKey={(trimester) => trimester.trimester}
+            footerLabel={`Total ${selectedYear}`}
+            minWidth="min-w-190"
+          />
         )}
       </section>
 
       {/* Info Card */}
-      <section className="rounded-[10px] border border-(--border-default) bg-[#EEF2FF] px-6 py-5 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-        <h3 className="font-['Space_Grotesk'] text-base font-semibold text-[#4338CA]">Information</h3>
-        <p className="mt-2 text-sm text-(--text-primary)">
+      <section className="rounded-card border border-border bg-accent-soft px-6 py-5 ">
+        <h3 className="font-display text-base font-semibold text-accent-strong">Information</h3>
+        <p className="mt-2 text-sm text-text-primary">
             Le <strong>CA réel</strong> est calculé automatiquement à partir des factures payées sur chaque trimestre.
             La <strong>cotisation estimée</strong> est basée sur votre taux Urssaf ({summary?.urssafRate || 22}%).
             Vous pouvez ajuster le montant lors de la déclaration si nécessaire.
@@ -366,13 +339,13 @@ export default function Urssaf() {
             aria-label="Fermer"
           />
 
-          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-(--border-default) bg-(--card-bg) shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
+          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-border bg-surface shadow-modal">
             <div className="flex items-center justify-between px-7 pt-6 pb-0">
               <div>
-                <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold tracking-[-0.02em] text-(--text-primary)">
+                <h3 className="font-display text-kpi-sm font-semibold tracking-[-0.02em] text-text-primary">
                   {modalTitle}
                 </h3>
-                <p className="mt-1 text-[13px] text-(--text-secondary)">
+                <p className="mt-1 text-compact text-text-secondary">
                   Déclarez vos cotisations trimestrielles
                 </p>
               </div>
@@ -380,7 +353,7 @@ export default function Urssaf() {
               <button
                 type="button"
                 onClick={closeModal}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
                 aria-label="Fermer"
               >
                 <X className="h-4 w-4" />
@@ -390,14 +363,14 @@ export default function Urssaf() {
             <form onSubmit={handleSubmit}>
               <div className="max-h-[65vh] space-y-4 overflow-y-auto px-7 py-5">
                 {error && (
-                  <div className="rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                  <div className="rounded-lg border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
                     {error}
                   </div>
                 )}
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-(--text-primary)">Trimestre *</label>
+                    <label className="block text-compact font-medium text-text-primary">Trimestre *</label>
                     <Select
                       className="h-10"
                       value={formData.trimester}
@@ -408,7 +381,7 @@ export default function Urssaf() {
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-(--text-primary)">Année *</label>
+                    <label className="block text-compact font-medium text-text-primary">Année *</label>
                     <Select
                       className="h-10"
                       value={formData.year}
@@ -420,14 +393,14 @@ export default function Urssaf() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">
+                  <label className="block text-compact font-medium text-text-primary">
                     Chiffre d'affaires (€) *
                   </label>
                   <input
                     type="number"
                     step="0.01"
                     min="0"
-                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                    className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                     value={formData.revenue}
                     onChange={(e) => updateFormField('revenue', e.target.value)}
                     required
@@ -436,25 +409,25 @@ export default function Urssaf() {
 
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_180px]">
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-(--text-primary)">
+                    <label className="block text-compact font-medium text-text-primary">
                       Montant cotisation (€) *
                     </label>
                     <input
                       type="number"
                       step="0.01"
                       min="0"
-                      className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                      className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                       value={formData.amount}
                       onChange={(e) => updateFormField('amount', e.target.value)}
                       required
                     />
-                    <p className="text-[11px] text-(--text-tertiary)">
+                    <p className="text-[11px] text-text-muted">
                       Estimation : {urssafRate}% du CA
                     </p>
                   </div>
 
                   <div className="space-y-1.5">
-                    <label className="block text-[13px] font-medium text-(--text-primary)">Statut *</label>
+                    <label className="block text-compact font-medium text-text-primary">Statut *</label>
                     <Select
                       className="h-10"
                       value={formData.status}
@@ -465,22 +438,22 @@ export default function Urssaf() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">Date de paiement</label>
+                  <label className="block text-compact font-medium text-text-primary">Date de paiement</label>
                   <input
                     type="date"
-                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                    className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                     value={formData.paymentDate}
                     onChange={(e) => updateFormField('paymentDate', e.target.value)}
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">
-                    Référence <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
+                  <label className="block text-compact font-medium text-text-primary">
+                    Référence <span className="text-xs font-normal text-text-muted">(optionnel)</span>
                   </label>
                   <input
                     type="text"
-                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
+                    className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
                     value={formData.reference}
                     onChange={(e) => updateFormField('reference', e.target.value)}
                     placeholder="Numéro de déclaration..."
@@ -488,11 +461,11 @@ export default function Urssaf() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">
-                    Note <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
+                  <label className="block text-compact font-medium text-text-primary">
+                    Note <span className="text-xs font-normal text-text-muted">(optionnel)</span>
                   </label>
                   <textarea
-                    className="min-h-16 w-full rounded-lg border border-(--border-default) bg-white px-3 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
+                    className="min-h-16 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
                     placeholder="Notes supplémentaires..."
@@ -500,41 +473,41 @@ export default function Urssaf() {
                   />
                 </div>
 
-                <div className="space-y-2 rounded-lg bg-[#EEF2FF] px-4 py-3.5">
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-(--text-secondary)">Chiffre d'affaires :</span>
-                    <span className="font-medium text-(--text-primary)">{formatCurrency(parsedRevenue)}</span>
+                <div className="space-y-2 rounded-lg bg-accent-soft px-4 py-3.5">
+                  <div className="flex items-center justify-between text-compact">
+                    <span className="text-text-secondary">Chiffre d'affaires :</span>
+                    <span className="font-medium text-text-primary">{formatCurrency(parsedRevenue)}</span>
                   </div>
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-(--text-secondary)">Taux Urssaf :</span>
-                    <span className="font-medium text-(--text-primary)">{urssafRate}%</span>
+                  <div className="flex items-center justify-between text-compact">
+                    <span className="text-text-secondary">Taux Urssaf :</span>
+                    <span className="font-medium text-text-primary">{urssafRate}%</span>
                   </div>
-                  <div className="h-px w-full bg-(--border-default)" />
-                  <div className="flex items-center justify-between text-[13px]">
-                    <span className="text-(--text-secondary)">Cotisation due :</span>
-                    <span className="font-['Space_Grotesk'] text-base font-semibold text-(--color-primary)">
+                  <div className="h-px w-full bg-border" />
+                  <div className="flex items-center justify-between text-compact">
+                    <span className="text-text-secondary">Cotisation due :</span>
+                    <span className="font-display text-base font-semibold text-accent">
                       {formatCurrency(formData.amount ? parsedAmount : calculatedAmount)}
                     </span>
                   </div>
                 </div>
               </div>
 
-              <div className="h-px w-full bg-(--border-default)" />
+              <div className="h-px w-full bg-border" />
               <div className="flex items-center justify-end gap-3 px-7 pt-4 pb-6">
-                <AppButton type="button" variant="outline" onClick={closeModal}>
+                <Button type="button" variant="secondary" onClick={closeModal}>
                   Annuler
-                </AppButton>
-                <AppButton
+                </Button>
+                <Button
                   type="submit"
                   startIcon={isSubmitting ? null : <Check className="h-4 w-4" />}
                   disabled={isSubmitting}
                 >
                   {isSubmitting ? (
-                    <span className="loading loading-spinner loading-sm" />
+                    <Spinner size="sm" />
                   ) : (
                     submitLabel
                   )}
-                </AppButton>
+                </Button>
               </div>
             </form>
           </div>
@@ -543,13 +516,13 @@ export default function Urssaf() {
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={deleteConfirmId !== null}
+        open={deleteConfirmId !== null}
         title="Supprimer la cotisation Urssaf"
         message="Êtes-vous sûr de vouloir supprimer cette cotisation ? Cette action est irréversible."
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
-        variant="danger"
-        isLoading={deleteMutation.isPending}
+        tone="danger"
+        loading={deleteMutation.isPending}
         onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
         onCancel={() => setDeleteConfirmId(null)}
       />

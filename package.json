@@ -50,6 +50,7 @@
     "zod": "^4.2.1"
   },
   "devDependencies": {
+    "@drillman/dashboard-ui": "github:Drillman/dashboard-ui#v0.6.0",
     "@playwright/test": "^1.58.2",
     "@tailwindcss/postcss": "^4.1.18",
     "@testing-library/jest-dom": "^6.9.1",
@@ -63,7 +64,6 @@
     "@vitest/coverage-v8": "^4.0.18",
     "autoprefixer": "^10.4.23",
     "concurrently": "^9.2.1",
-    "daisyui": "^5.5.14",
     "drizzle-kit": "^0.31.8",
     "esbuild": "^0.27.2",
     "jsdom": "^28.0.0",

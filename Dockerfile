@@ -1,14 +1,23 @@
 # Build stage
 FROM node:22-alpine AS builder
 
+# git is needed to install @drillman/dashboard-ui, a private GitHub dependency (dev only)
+RUN apk add --no-cache git
+
 WORKDIR /app
 
 # Copy package files
 COPY package*.json ./
 
+# GitHub token with read access to Drillman/dashboard-ui (build stage only, not in the final image)
+ARG GITHUB_TOKEN
+
 # Install all dependencies (including dev for building)
 # Coolify/build environments may set NODE_ENV=production, so force dev deps here.
-RUN npm ci --include=dev
+RUN git config --global url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "ssh://git@github.com/" \
+  && git config --global --add url."https://x-access-token:${GITHUB_TOKEN}@github.com/".insteadOf "git@github.com:" \
+  && npm ci --include=dev \
+  && rm ~/.gitconfig
 
 # Copy source code
 COPY . .

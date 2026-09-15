@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react'
+import { Input } from '@drillman/dashboard-ui'
 import { evaluateMathExpression, isValidMathExpression } from '../utils/mathExpression'
 
 interface MathInputProps {
@@ -86,29 +87,19 @@ export function MathInput({
     : null
 
   return (
-    <div className="relative">
-      <input
-        type="text"
-        inputMode="decimal"
-        className={`input input-bordered w-full ${error ? 'input-error' : ''} ${className}`}
-        value={inputValue}
-        onChange={handleChange}
-        onFocus={handleFocus}
-        onBlur={handleBlur}
-        onKeyDown={handleKeyDown}
-        placeholder={placeholder}
-        disabled={disabled}
-      />
-      {isEditing && previewValue !== null && (
-        <div className="absolute right-3 top-1/2 -translate-y-1/2 text-sm text-base-content/60 pointer-events-none">
-          = {previewValue.toFixed(2)}
-        </div>
-      )}
-      {error && (
-        <div className="absolute -bottom-5 left-0 text-xs text-error">
-          {error}
-        </div>
-      )}
-    </div>
+    <Input
+      type="text"
+      inputMode="decimal"
+      className={className}
+      value={inputValue}
+      onChange={handleChange}
+      onFocus={handleFocus}
+      onBlur={handleBlur}
+      onKeyDown={handleKeyDown}
+      placeholder={placeholder}
+      disabled={disabled}
+      error={error ?? undefined}
+      suffix={isEditing && previewValue !== null ? `= ${previewValue.toFixed(2)}` : undefined}
+    />
   )
 }

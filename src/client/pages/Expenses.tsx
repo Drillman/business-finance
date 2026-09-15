@@ -9,16 +9,8 @@ import {
 } from '../hooks/useExpenses'
 import type { Expense, CreateExpenseInput, ExpenseCategory, RecurrencePeriod } from '@shared/types'
 import { ArrowUpDown, Check, ChevronDown, ChevronUp, Pencil, Plus, Repeat2, Trash2, Wallet, X } from 'lucide-react'
-import { ConfirmDialog } from '../components/ConfirmDialog'
 import { useSnackbar } from '../contexts/SnackbarContext'
-import { MonthSelect } from '../components/PeriodSelect'
-import { AppButton } from '../components/ui/AppButton'
-import { Checkbox } from '../components/ui/Checkbox'
-import { KpiCard } from '../components/ui/KpiCard'
-import { Radio } from '../components/ui/Radio'
-import { Select } from '../components/ui/Select'
-import { Switch } from '../components/ui/Switch'
-import { DataTable, type DataTableColumn } from '../components/ui/DataTable'
+import { Badge, Button, Checkbox, ConfirmDialog, DataTable, MonthSwitch, PageTabs, Radio, Select, Spinner, StatCard, Switch, type DataTableColumn } from '@drillman/dashboard-ui'
 
 function formatDate(dateString: string): string {
   return new Date(dateString).toLocaleDateString('fr-FR', {
@@ -85,20 +77,17 @@ const taxRecoveryRateOptions = [
   { value: '0', label: '0% (Non recuperable)' },
 ]
 
-const fixedExpenseColumns: DataTableColumn[] = [
-  { key: 'description', label: 'Description', className: 'w-[320px]' },
-  { key: 'payment-day', label: 'Jour', className: 'w-[92px] text-center' },
-  { key: 'amount-ht', label: 'Montant HT', className: 'w-[170px] text-right' },
-  { key: 'amount-ttc', label: 'Montant TTC', className: 'w-[170px] text-right' },
-]
-
-const variableExpenseColumns: DataTableColumn[] = [
-  { key: 'description', label: 'Description', className: 'w-[150px]' },
-  { key: 'date', label: 'Date', className: 'w-[100px]' },
-  { key: 'amount-ht', label: 'Montant HT', className: 'w-[110px] text-right' },
-  { key: 'tax', label: 'TVA', className: 'w-[80px] text-right' },
-  { key: 'recoverable', label: 'Recuperable', className: 'w-[100px] text-right' },
-  { key: 'actions', label: 'Actions', className: 'w-[80px] text-right' },
+const fixedExpenseColumns: DataTableColumn<Expense>[] = [
+  { key: 'description', header: 'Description', className: 'font-medium', cell: (expense) => expense.description },
+  { key: 'payment-day', header: 'Jour', align: 'center', numeric: true, width: 'w-24', cell: (expense) => expense.paymentDay },
+  { key: 'amount-ht', header: 'Montant HT', align: 'right', width: 'w-40', cell: (expense) => formatCurrency(expense.amountHt) },
+  {
+    key: 'amount-ttc',
+    header: 'Montant TTC',
+    align: 'right',
+    width: 'w-40',
+    cell: (expense) => formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)),
+  },
 ]
 
 type FixedExpenseStatus = 'termine' | 'en-cours' | 'a-venir'
@@ -364,90 +353,127 @@ export default function Expenses() {
 
   const renderSortIcon = (key: FixedSortKey) => {
     if (fixedSort.key !== key) {
-      return <ArrowUpDown className="h-3.5 w-3.5 text-(--text-tertiary)" />
+      return <ArrowUpDown className="h-3.5 w-3.5 text-text-muted" />
     }
 
     return fixedSort.direction === 'asc'
-      ? <ChevronUp className="h-3.5 w-3.5 text-(--text-secondary)" />
-      : <ChevronDown className="h-3.5 w-3.5 text-(--text-secondary)" />
+      ? <ChevronUp className="h-3.5 w-3.5 text-text-secondary" />
+      : <ChevronDown className="h-3.5 w-3.5 text-text-secondary" />
   }
 
-  const fixedLibraryColumns: DataTableColumn[] = [
+  const sortHeader = (key: FixedSortKey, label: string) => (
+    <button type="button" className="inline-flex items-center gap-1 uppercase" onClick={() => toggleFixedSort(key)}>
+      {label}
+      {renderSortIcon(key)}
+    </button>
+  )
+
+  const renderExpenseDescription = (expense: Expense) => (
+    <>
+      <div className="font-medium">{expense.description}</div>
+      {expense.note && <div className="max-w-xs truncate text-xs text-text-secondary">{expense.note}</div>}
+    </>
+  )
+
+  const renderExpenseActions = (expense: Expense) => (
+    <div className="flex justify-end gap-1">
+      <Button
+        size="sm" iconOnly
+        variant="ghost"
+        onClick={() => openEditModal(expense)}
+        title="Modifier"
+      >
+        <Pencil className="h-4 w-4" />
+      </Button>
+      <Button
+        size="sm" iconOnly
+        variant="ghost"
+        onClick={() => setDeleteConfirmId(expense.id)}
+        title="Supprimer"
+        className="text-danger hover:bg-danger-soft"
+      >
+        <Trash2 className="h-4 w-4" />
+      </Button>
+    </div>
+  )
+
+  const variableExpenseColumns: DataTableColumn<Expense>[] = [
+    { key: 'description', header: 'Description', cell: renderExpenseDescription },
+    { key: 'date', header: 'Date', width: 'w-32', className: 'whitespace-nowrap', cell: (expense) => formatDate(expense.date) },
     {
-      key: 'description',
-      label: (
-        <button
-          type="button"
-          className="inline-flex items-center gap-1"
-          onClick={() => toggleFixedSort('description')}
-        >
-          Description
-          {renderSortIcon('description')}
-        </button>
-      ),
-      className: 'w-55',
+      key: 'amount-ht',
+      header: 'Montant HT',
+      align: 'right',
+      width: 'w-32',
+      cell: (expense) => formatCurrency(expense.amountHt),
+      footer: formatCurrency(variableExpensesSummary.totalHt),
     },
+    {
+      key: 'tax',
+      header: 'TVA',
+      align: 'right',
+      width: 'w-28',
+      cell: (expense) => <span className="text-text-secondary">{formatCurrency(expense.taxAmount)}</span>,
+      footer: formatCurrency(variableExpensesSummary.totalTax),
+    },
+    {
+      key: 'recoverable',
+      header: 'Recuperable',
+      align: 'right',
+      width: 'w-40',
+      cell: (expense) => (
+        <>
+          <span className="text-success-strong">
+            {formatCurrency(parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100))}
+          </span>
+          <span className="ml-1 text-xs text-text-muted">({parseFloat(expense.taxRecoveryRate)}%)</span>
+        </>
+      ),
+      footer: <span className="text-success-strong">{formatCurrency(variableExpensesSummary.totalRecoverable)}</span>,
+    },
+    { key: 'actions', header: 'Actions', align: 'right', width: 'w-24', cell: renderExpenseActions },
+  ]
+
+  const fixedLibraryColumns: DataTableColumn<Expense>[] = [
+    { key: 'description', header: sortHeader('description', 'Description'), cell: renderExpenseDescription },
     {
       key: 'amount-ttc',
-      label: (
-        <button
-          type="button"
-          className="ml-auto inline-flex items-center gap-1"
-          onClick={() => toggleFixedSort('amountTtc')}
-        >
-          Montant TTC
-          {renderSortIcon('amountTtc')}
-        </button>
-      ),
-      className: 'w-30 text-right',
+      header: sortHeader('amountTtc', 'Montant TTC'),
+      align: 'right',
+      width: 'w-36',
+      cell: (expense) => formatCurrency(parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)),
     },
-    {
-      key: 'payment-day',
-      label: (
-        <button
-          type="button"
-          className="mx-auto inline-flex items-center gap-1"
-          onClick={() => toggleFixedSort('paymentDay')}
-        >
-          Jour
-          {renderSortIcon('paymentDay')}
-        </button>
-      ),
-      className: 'w-18 text-center',
-    },
+    { key: 'payment-day', header: sortHeader('paymentDay', 'Jour'), align: 'center', numeric: true, width: 'w-24', cell: (expense) => expense.paymentDay },
     {
       key: 'status',
-      label: (
-        <button
-          type="button"
-          className="inline-flex items-center gap-1"
-          onClick={() => toggleFixedSort('status')}
-        >
-          Statut
-          {renderSortIcon('status')}
-        </button>
-      ),
-      className: 'w-48',
+      header: sortHeader('status', 'Statut'),
+      width: 'w-40',
+      cell: (expense) => {
+        const status = getFixedExpenseStatus(expense, currentMonthKey)
+        const label = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
+        const tone = status === 'termine' ? 'neutral' : status === 'a-venir' ? 'warning' : 'success'
+        return (
+          <span className="group relative inline-flex">
+            <Badge tone={tone} className="cursor-help">
+              {label}
+            </Badge>
+            <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-text-primary px-2 py-1 text-2xs font-medium text-white opacity-0 shadow-dropdown transition-opacity group-hover:visible group-hover:opacity-100">
+              {getFixedExpenseStatusTooltip(expense)}
+            </span>
+          </span>
+        )
+      },
     },
     {
       key: 'recurrence',
-      label: (
-        <button
-          type="button"
-          className="inline-flex items-center gap-1"
-          onClick={() => toggleFixedSort('recurrence')}
-        >
-          Periodicite
-          {renderSortIcon('recurrence')}
-        </button>
-      ),
-      className: 'w-30',
+      header: sortHeader('recurrence', 'Periodicite'),
+      width: 'w-32',
+      cell: (expense) =>
+        expense.recurrencePeriod && (
+          <Badge tone="accent">{recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}</Badge>
+        ),
     },
-    {
-      key: 'actions',
-      label: 'Actions',
-      className: 'w-24 text-right',
-    },
+    { key: 'actions', header: 'Actions', align: 'right', width: 'w-24', cell: renderExpenseActions },
   ]
 
   const openCreateModal = (isFixed: boolean = false) => {
@@ -619,227 +645,145 @@ export default function Expenses() {
     <div className="space-y-7">
       <div className="flex flex-wrap items-start justify-between gap-4">
         <div className="min-w-0">
-          <h1 className="font-['Space_Grotesk'] text-[32px] font-bold leading-tight tracking-[-0.02em] text-(--text-primary)">
+          <h1 className="font-display text-kpi-lg font-bold leading-tight tracking-[-0.02em] text-text-primary">
             Dépenses
           </h1>
         </div>
 
         <div className="ml-auto flex shrink-0 flex-wrap items-center gap-3 self-start">
           {activeTab === 'monthly' ? (
-            <MonthSelect
+            <MonthSwitch
               value={selectedMonth}
               onChange={setSelectedMonth}
-              years={[2027, 2026, 2025, 2024]}
+              min="2024-01"
+              max="2027-12"
             />
           ) : null}
-          <AppButton
+          <Button
             startIcon={<Plus className="h-4 w-4" />}
             onClick={() => openCreateModal(activeTab === 'fixed')}
           >
             {activeTab === 'fixed' ? 'Ajouter une charge fixe' : 'Ajouter une dépense'}
-          </AppButton>
+          </Button>
         </div>
       </div>
 
-      <div className="inline-flex h-10 items-center gap-1 rounded-lg border border-(--border-default) bg-(--color-base-200) p-1">
-        <button
-          type="button"
-          className={[
-            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
-            activeTab === 'monthly'
-              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
-              : 'text-(--text-secondary) hover:text-(--text-primary)',
-          ].join(' ')}
-          onClick={() => setActiveTab('monthly')}
-        >
-          Par mois
-        </button>
-        <button
-          type="button"
-          className={[
-            'inline-flex h-8 items-center rounded-md px-3 text-sm font-medium transition-colors',
-            activeTab === 'fixed'
-              ? 'bg-(--card-bg) text-(--text-primary) shadow-[0_1px_2px_rgba(0,0,0,0.08)]'
-              : 'text-(--text-secondary) hover:text-(--text-primary)',
-          ].join(' ')}
-          onClick={() => setActiveTab('fixed')}
-        >
-          Charges fixes ({allFixedSummary?.count || 0})
-        </button>
-      </div>
+      <PageTabs<'monthly' | 'fixed'>
+        aria-label="Vue des dépenses"
+        value={activeTab}
+        onChange={setActiveTab}
+        tabs={[
+          { value: 'monthly', label: 'Par mois' },
+          { value: 'fixed', label: 'Charges fixes', count: allFixedSummary?.count || 0 },
+        ]}
+      />
 
       {activeTab === 'monthly' && (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-4 xl:grid-cols-4">
-            <KpiCard
-              title="Total TTC du mois"
-              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalTtc)}
+            <StatCard
+              label="Total TTC du mois"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <Spinner size="sm" /> : formatCurrency(combinedSummary.totalTtc)}
               description={`${combinedSummary.count} depense(s)`}
-              accentColor="#818CF8"
+              color="var(--dui-series-1)"
             />
-            <KpiCard
-              title="TVA recuperable"
-              value={isLoadingExpenses || isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
+            <StatCard
+              label="TVA recuperable"
+              value={isLoadingExpenses || isLoadingActiveFixed ? <Spinner size="sm" /> : formatCurrency(combinedSummary.totalRecoverable)}
               description={
-                <Link to="/tva" className="font-medium text-(--color-primary) hover:underline">
+                <Link to="/tva" className="font-medium text-accent hover:underline">
                   Voir la TVA à déclarer →
                 </Link>
               }
-              accentColor="#34D399"
-              valueColor="#34D399"
+              color="var(--dui-series-2)"
             />
-            <KpiCard
-              title="Charges fixes actives"
-              value={isLoadingActiveFixed ? <span className="loading loading-spinner loading-sm" /> : fixedExpensesSummary.count}
+            <StatCard
+              label="Charges fixes actives"
+              value={isLoadingActiveFixed ? <Spinner size="sm" /> : fixedExpensesSummary.count}
               description={isLoadingActiveFixed ? 'Chargement...' : `${formatCurrency(fixedExpensesSummary.totalTtc)} TTC`}
-              accentColor="#A78BFA"
+              color="var(--dui-series-5)"
             />
-            <KpiCard
-              title="Dépenses ponctuelles"
-              value={isLoadingExpenses ? <span className="loading loading-spinner loading-sm" /> : nonFixedExpenses.length}
+            <StatCard
+              label="Dépenses ponctuelles"
+              value={isLoadingExpenses ? <Spinner size="sm" /> : nonFixedExpenses.length}
               description={isLoadingExpenses ? 'Chargement...' : `${formatCurrency(variableExpensesSummary.totalTtc)} TTC`}
-              accentColor="#FBBF24"
-              valueClassName="text-[#B45309]"
+              color="var(--dui-series-3)"
+              valueClassName="text-warning-strong"
             />
           </div>
 
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3 px-1">
               <div>
-                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                <h2 className="font-display text-xl font-semibold tracking-[-0.01em] text-text-primary">
                   Charges fixes du mois
                 </h2>
-                <p className="text-xs text-(--text-secondary)">
+                <p className="text-xs text-text-secondary">
                   {formatMonth(`${selectedMonth}-01`)} - {fixedExpensesSummary.count} charge(s) active(s)
                 </p>
               </div>
               <div className="text-right">
-                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                <div className="font-display text-lg font-semibold text-text-primary">
                   {formatCurrency(fixedExpensesSummary.totalTtc)} TTC
                 </div>
-                <div className="text-xs text-(--text-secondary)">{formatCurrency(fixedExpensesSummary.totalHt)} HT</div>
+                <div className="text-xs text-text-secondary">{formatCurrency(fixedExpensesSummary.totalHt)} HT</div>
               </div>
             </div>
 
             {isLoadingActiveFixed ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <span className="loading loading-spinner loading-lg" />
+              <div className="rounded-card border border-border bg-surface py-8 text-center ">
+                <Spinner size="lg" />
               </div>
             ) : fixedExpensesSummary.count === 0 ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <p className="text-sm text-(--text-secondary)">Aucune charge fixe active pour cette période.</p>
+              <div className="rounded-card border border-border bg-surface p-8 text-center ">
+                <p className="text-sm text-text-secondary">Aucune charge fixe active pour cette période.</p>
               </div>
             ) : (
-              <DataTable columns={fixedExpenseColumns} minWidthClassName="min-w-[780px]">
-                {activeFixedData?.data.map((expense, index) => {
-                  const ht = parseFloat(expense.amountHt)
-                  const ttc = ht + parseFloat(expense.taxAmount)
-                  return (
-                    <tr
-                      key={expense.id}
-                      className={[
-                        'h-12 border-b border-(--border-default) align-middle',
-                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
-                      ].join(' ')}
-                    >
-                      <td className="px-3 text-sm font-medium text-(--text-primary) md:px-4">{expense.description}</td>
-                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ht)}</td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
-                    </tr>
-                  )
-                })}
-              </DataTable>
+              <DataTable
+                columns={fixedExpenseColumns}
+                rows={activeFixedData?.data ?? []}
+                getRowKey={(expense) => expense.id}
+                minWidth="min-w-150"
+              />
             )}
           </section>
 
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3 px-1">
               <div>
-                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                <h2 className="font-display text-xl font-semibold tracking-[-0.01em] text-text-primary">
                   Dépenses ponctuelles
                 </h2>
-                <p className="text-xs text-(--text-secondary)">
+                <p className="text-xs text-text-secondary">
                   {nonFixedExpenses.length} dépense(s) sur la période sélectionnée
                 </p>
               </div>
               <div className="text-right">
-                <div className="font-['Space_Grotesk'] text-lg font-semibold text-(--text-primary)">
+                <div className="font-display text-lg font-semibold text-text-primary">
                   {formatCurrency(variableExpensesSummary.totalTtc)} TTC
                 </div>
-                <div className="text-xs text-(--text-secondary)">
+                <div className="text-xs text-text-secondary">
                   {formatCurrency(variableExpensesSummary.totalRecoverable)} récupérable
                 </div>
               </div>
             </div>
 
             {isLoadingExpenses ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <span className="loading loading-spinner loading-lg" />
+              <div className="rounded-card border border-border bg-surface py-8 text-center ">
+                <Spinner size="lg" />
               </div>
             ) : !nonFixedExpenses.length ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <p className="text-sm text-(--text-secondary)">Aucune dépense ponctuelle pour cette période.</p>
+              <div className="rounded-card border border-border bg-surface p-8 text-center ">
+                <p className="text-sm text-text-secondary">Aucune dépense ponctuelle pour cette période.</p>
               </div>
             ) : (
-              <DataTable columns={variableExpenseColumns} minWidthClassName="min-w-[980px]">
-                {nonFixedExpenses.map((expense, index) => {
-                  const taxRecovery = parseFloat(expense.taxAmount) * (parseFloat(expense.taxRecoveryRate) / 100)
-                  return (
-                    <tr
-                      key={expense.id}
-                      className={[
-                        'h-12 border-b border-(--border-default) align-middle',
-                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
-                      ].join(' ')}
-                    >
-                      <td className="px-3 md:px-4">
-                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
-                        {expense.note && (
-                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">
-                            {expense.note}
-                          </div>
-                        )}
-                      </td>
-                      <td className="px-3 text-sm text-(--text-primary) md:px-4">{formatDate(expense.date)}</td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(expense.amountHt)}</td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-secondary) md:px-4">{formatCurrency(expense.taxAmount)}</td>
-                      <td className="px-3 text-right font-mono text-sm md:px-4">
-                        <span className="text-[#15803D]">{formatCurrency(taxRecovery)}</span>
-                        <span className="ml-1 text-[11px] text-(--text-tertiary)">({parseFloat(expense.taxRecoveryRate)}%)</span>
-                      </td>
-                      <td className="px-3 md:px-4">
-                        <div className="flex justify-end gap-1">
-                          <AppButton
-                            size="icon-sm"
-                            variant="ghost"
-                            onClick={() => openEditModal(expense)}
-                            title="Modifier"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </AppButton>
-                          <AppButton
-                            size="icon-sm"
-                            variant="ghost"
-                            onClick={() => setDeleteConfirmId(expense.id)}
-                            title="Supprimer"
-                            className="text-(--color-error) hover:bg-[#FEE2E2]"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </AppButton>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-                <tr className="h-12 border-t-2 border-(--border-default) bg-(--card-bg) font-semibold">
-                  <td colSpan={2} className="px-3 text-sm text-(--text-primary) md:px-4">Total</td>
-                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalHt)}</td>
-                  <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(variableExpensesSummary.totalTax)}</td>
-                  <td className="px-3 text-right font-mono text-sm text-[#15803D] md:px-4">{formatCurrency(variableExpensesSummary.totalRecoverable)}</td>
-                  <td className="px-3 md:px-4" />
-                </tr>
-              </DataTable>
+              <DataTable
+                columns={variableExpenseColumns}
+                rows={nonFixedExpenses}
+                getRowKey={(expense) => expense.id}
+                footerLabel="Total"
+                minWidth="min-w-200"
+              />
             )}
           </section>
         </>
@@ -848,122 +792,59 @@ export default function Expenses() {
       {activeTab === 'fixed' && (
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
-            <KpiCard
-              title="Charges fixes"
-              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : allFixedSummary?.count || 0}
+            <StatCard
+              label="Charges fixes"
+              value={isLoadingAllFixed ? <Spinner size="sm" /> : allFixedSummary?.count || 0}
               description="Actives dans votre plan de charges"
-              accentColor="#A78BFA"
+              color="var(--dui-series-5)"
             />
-            <KpiCard
-              title="Coût mensuel estime"
-              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.monthlyTotal || 0)}
+            <StatCard
+              label="Coût mensuel estime"
+              value={isLoadingAllFixed ? <Spinner size="sm" /> : formatCurrency(allFixedSummary?.monthlyTotal || 0)}
               description="Projection TTC"
-              accentColor="#3B82F6"
+              color="var(--dui-series-1)"
             />
-            <KpiCard
-              title="Coût annuel estime"
-              value={isLoadingAllFixed ? <span className="loading loading-spinner loading-sm" /> : formatCurrency(allFixedSummary?.yearlyTotal || 0)}
+            <StatCard
+              label="Coût annuel estime"
+              value={isLoadingAllFixed ? <Spinner size="sm" /> : formatCurrency(allFixedSummary?.yearlyTotal || 0)}
               description="Projection TTC"
-              accentColor="#F59E0B"
-              valueClassName="text-[#B45309]"
+              color="var(--dui-warning)"
+              valueClassName="text-warning-strong"
             />
           </div>
 
           <section className="space-y-3">
             <div className="flex flex-wrap items-center justify-between gap-3 px-1">
               <div>
-                <h2 className="font-['Space_Grotesk'] text-xl font-semibold tracking-[-0.01em] text-(--text-primary)">
+                <h2 className="font-display text-xl font-semibold tracking-[-0.01em] text-text-primary">
                   Bibliothèque des charges fixes
                 </h2>
-                <p className="text-xs text-(--text-secondary)">
+                <p className="text-xs text-text-secondary">
                   Visualisez et modifiez toutes les charges récurrentes
                 </p>
               </div>
-              <div className="inline-flex items-center gap-2 rounded-full bg-[#EEF2FF] px-3 py-1 text-xs font-semibold text-[#4338CA]">
+              <div className="inline-flex items-center gap-2 rounded-full bg-accent-soft px-3 py-1 text-xs font-semibold text-accent-strong">
                 <Repeat2 className="h-3.5 w-3.5" />
                 {allFixedSummary?.count || 0} actif(s)
               </div>
             </div>
 
             {isLoadingAllFixed ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) py-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <span className="loading loading-spinner loading-lg" />
+              <div className="rounded-card border border-border bg-surface py-8 text-center ">
+                <Spinner size="lg" />
               </div>
             ) : !allFixedData?.data.length ? (
-              <div className="rounded-[10px] border border-(--border-default) bg-(--card-bg) p-8 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-                <Wallet className="mx-auto h-8 w-8 text-(--text-tertiary)" />
-                <p className="mt-3 text-sm text-(--text-secondary)">Aucune charge fixe enregistrée.</p>
+              <div className="rounded-card border border-border bg-surface p-8 text-center ">
+                <Wallet className="mx-auto h-8 w-8 text-text-muted" />
+                <p className="mt-3 text-sm text-text-secondary">Aucune charge fixe enregistrée.</p>
               </div>
             ) : (
-              <DataTable columns={fixedLibraryColumns} minWidthClassName="">
-                {sortedFixedExpenses.map((expense, index) => {
-                  const ttc = parseFloat(expense.amountHt) + parseFloat(expense.taxAmount)
-                  const status = getFixedExpenseStatus(expense, currentMonthKey)
-                  const statusTooltip = getFixedExpenseStatusTooltip(expense)
-                  const statusLabel = status === 'termine' ? 'Terminé' : status === 'a-venir' ? 'A venir' : 'En cours'
-                  const statusClassName =
-                    status === 'termine'
-                      ? 'bg-[#F3F4F6] text-[#6B7280]'
-                      : status === 'a-venir'
-                        ? 'bg-[#FEF3C7] text-[#92400E]'
-                        : 'bg-[#DCFCE7] text-[#15803D]'
-
-                  return (
-                    <tr
-                      key={expense.id}
-                      className={[
-                        'h-12 border-b border-(--border-default) align-middle',
-                        index % 2 === 1 ? 'bg-(--color-base-200)/45' : 'bg-(--card-bg)',
-                      ].join(' ')}
-                    >
-                      <td className="px-3 md:px-4">
-                        <div className="font-medium text-sm text-(--text-primary)">{expense.description}</div>
-                        {expense.note && (
-                          <div className="max-w-xs truncate text-xs text-(--text-secondary)">{expense.note}</div>
-                        )}
-                      </td>
-                      <td className="px-3 text-right font-mono text-sm text-(--text-primary) md:px-4">{formatCurrency(ttc)}</td>
-                      <td className="px-3 text-center text-sm text-(--text-primary) md:px-4">{expense.paymentDay}</td>
-                      <td className="px-3 text-sm md:px-4">
-                        <span className="group relative inline-flex">
-                          <span className={`inline-flex w-fit cursor-help rounded-full px-2 py-1 text-[11px] font-semibold ${statusClassName}`}>
-                            {statusLabel}
-                          </span>
-                          <span className="pointer-events-none invisible absolute left-0 top-[calc(100%+6px)] z-20 whitespace-nowrap rounded-md bg-[#111827] px-2 py-1 text-[10px] font-medium text-white opacity-0 shadow-lg transition-opacity group-hover:visible group-hover:opacity-100">
-                            {statusTooltip}
-                          </span>
-                        </span>
-                      </td>
-                      <td className="px-3 md:px-4">
-                        <span className="inline-flex rounded-full bg-[#EEF2FF] px-2 py-1 text-[11px] font-semibold text-[#4338CA]">
-                          {expense.recurrencePeriod && recurrenceLabels[expense.recurrencePeriod as RecurrencePeriod]}
-                        </span>
-                      </td>
-                      <td className="px-3 md:px-4">
-                        <div className="flex justify-end gap-1">
-                          <AppButton
-                            size="icon-sm"
-                            variant="ghost"
-                            onClick={() => openEditModal(expense)}
-                            title="Modifier"
-                          >
-                            <Pencil className="h-4 w-4" />
-                          </AppButton>
-                          <AppButton
-                            size="icon-sm"
-                            variant="ghost"
-                            onClick={() => setDeleteConfirmId(expense.id)}
-                            title="Supprimer"
-                            className="text-(--color-error) hover:bg-[#FEE2E2]"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </AppButton>
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </DataTable>
+              <DataTable
+                columns={fixedLibraryColumns}
+                rows={sortedFixedExpenses}
+                getRowKey={(expense) => expense.id}
+                minWidth="min-w-190"
+              />
             )}
           </section>
         </>
@@ -979,19 +860,19 @@ export default function Expenses() {
             aria-label="Fermer"
           />
 
-          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-(--border-default) bg-(--card-bg) shadow-[0_8px_32px_-4px_rgba(0,0,0,0.15)]">
+          <div className="relative w-full max-w-140 overflow-hidden rounded-2xl border border-border bg-surface shadow-modal">
             <div className="flex items-center justify-between px-7 pt-6 pb-0">
               <div>
-                <h3 className="font-['Space_Grotesk'] text-[22px] font-semibold tracking-[-0.02em] text-(--text-primary)">
+                <h3 className="font-display text-kpi-sm font-semibold tracking-[-0.02em] text-text-primary">
                   {modalTitle}
                 </h3>
-                <p className="mt-1 text-[13px] text-(--text-secondary)">{modalSubtitle}</p>
+                <p className="mt-1 text-compact text-text-secondary">{modalSubtitle}</p>
               </div>
 
               <button
                 type="button"
                 onClick={closeModal}
-                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-(--text-secondary) transition-colors hover:bg-(--bg-hover) hover:text-(--text-primary)"
+                className="inline-flex h-8 w-8 items-center justify-center rounded-lg text-text-secondary transition-colors hover:bg-surface-hover hover:text-text-primary"
                 aria-label="Fermer"
               >
                 <X className="h-4.5 w-4.5" />
@@ -1001,16 +882,16 @@ export default function Expenses() {
             <form onSubmit={handleSubmit}>
               <div className="max-h-[65vh] space-y-4.5 overflow-y-auto px-7 py-5">
                 {error && (
-                  <div className="rounded-lg border border-[#FCA5A5] bg-[#FEF2F2] px-3 py-2 text-sm text-[#B91C1C]">
+                  <div className="rounded-lg border border-danger/40 bg-danger-soft px-3 py-2 text-sm text-danger-strong">
                     {error}
                   </div>
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">Description *</label>
+                  <label className="block text-compact font-medium text-text-primary">Description *</label>
                   <input
                     type="text"
-                    className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
+                    className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
                     value={formData.description}
                     onChange={(e) => updateFormField('description', e.target.value)}
                     placeholder="Description de la depense..."
@@ -1032,10 +913,10 @@ export default function Expenses() {
                 {!formData.isRecurring ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Date *</label>
+                      <label className="block text-compact font-medium text-text-primary">Date *</label>
                       <input
                         type="date"
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                         value={formData.date}
                         onChange={(e) => updateFormField('date', e.target.value)}
                         required
@@ -1043,7 +924,7 @@ export default function Expenses() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
+                      <label className="block text-compact font-medium text-text-primary">Categorie *</label>
                       <Select
                         value={formData.category}
                         onChange={(e) => updateFormField('category', e.target.value)}
@@ -1055,7 +936,7 @@ export default function Expenses() {
                   <>
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de debut *</label>
+                        <label className="block text-compact font-medium text-text-primary">Mois de debut *</label>
                         <Select
                           value={formData.startMonth}
                           onChange={(e) => updateFormField('startMonth', e.target.value)}
@@ -1065,7 +946,7 @@ export default function Expenses() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-(--text-primary)">Mois de fin</label>
+                        <label className="block text-compact font-medium text-text-primary">Mois de fin</label>
                         <Select
                           value={formData.endMonth}
                           onChange={(e) => updateFormField('endMonth', e.target.value)}
@@ -1076,7 +957,7 @@ export default function Expenses() {
 
                     <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-(--text-primary)">Jour de paiement *</label>
+                        <label className="block text-compact font-medium text-text-primary">Jour de paiement *</label>
                         <Select
                           value={formData.paymentDay}
                           onChange={(e) => updateFormField('paymentDay', e.target.value)}
@@ -1086,7 +967,7 @@ export default function Expenses() {
                       </div>
 
                       <div className="space-y-1.5">
-                        <label className="block text-[13px] font-medium text-(--text-primary)">Periodicite *</label>
+                        <label className="block text-compact font-medium text-text-primary">Periodicite *</label>
                         <Select
                           value={formData.recurrencePeriod}
                           onChange={(e) => updateFormField('recurrencePeriod', e.target.value)}
@@ -1097,7 +978,7 @@ export default function Expenses() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Categorie *</label>
+                      <label className="block text-compact font-medium text-text-primary">Categorie *</label>
                       <Select
                         value={formData.category}
                         onChange={(e) => updateFormField('category', e.target.value)}
@@ -1124,7 +1005,7 @@ export default function Expenses() {
                 )}
 
                 <div className="space-y-2">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">Mode de saisie</label>
+                  <label className="block text-compact font-medium text-text-primary">Mode de saisie</label>
                   <div className="flex flex-wrap items-center gap-4">
                     <Radio
                       name="inputMode"
@@ -1144,12 +1025,12 @@ export default function Expenses() {
                 {formData.inputMode === 'ttc' ? (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-[1fr_160px]">
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TTC (EUR) *</label>
+                      <label className="block text-compact font-medium text-text-primary">Montant TTC (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                         value={formData.amountTtc}
                         onChange={(e) => updateFormField('amountTtc', e.target.value)}
                         required
@@ -1157,7 +1038,7 @@ export default function Expenses() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Taux TVA</label>
+                      <label className="block text-compact font-medium text-text-primary">Taux TVA</label>
                       <Select
                         value={formData.taxRate}
                         onChange={(e) => updateFormField('taxRate', e.target.value)}
@@ -1168,12 +1049,12 @@ export default function Expenses() {
                 ) : (
                   <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant HT (EUR) *</label>
+                      <label className="block text-compact font-medium text-text-primary">Montant HT (EUR) *</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                         value={formData.amountHt}
                         onChange={(e) => updateFormField('amountHt', e.target.value)}
                         required
@@ -1181,12 +1062,12 @@ export default function Expenses() {
                     </div>
 
                     <div className="space-y-1.5">
-                      <label className="block text-[13px] font-medium text-(--text-primary)">Montant TVA (EUR)</label>
+                      <label className="block text-compact font-medium text-text-primary">Montant TVA (EUR)</label>
                       <input
                         type="number"
                         step="0.01"
                         min="0"
-                        className="h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 text-sm text-(--text-primary) focus:border-(--color-primary) focus:outline-none"
+                        className="h-10 w-full rounded-lg border border-border bg-white px-3 text-sm text-text-primary focus:border-accent focus:outline-none"
                         value={formData.taxAmount}
                         onChange={(e) => updateFormField('taxAmount', e.target.value)}
                       />
@@ -1195,7 +1076,7 @@ export default function Expenses() {
                 )}
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">Taux de recuperation TVA</label>
+                  <label className="block text-compact font-medium text-text-primary">Taux de recuperation TVA</label>
                   <Select
                     value={formData.taxRecoveryRate}
                     onChange={(e) => updateFormField('taxRecoveryRate', e.target.value)}
@@ -1204,11 +1085,11 @@ export default function Expenses() {
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="block text-[13px] font-medium text-(--text-primary)">
-                    Note <span className="text-xs font-normal text-(--text-tertiary)">(optionnel)</span>
+                  <label className="block text-compact font-medium text-text-primary">
+                    Note <span className="text-xs font-normal text-text-muted">(optionnel)</span>
                   </label>
                   <textarea
-                    className="min-h-10 w-full rounded-lg border border-(--border-default) bg-white px-3 py-2.5 text-sm text-(--text-primary) placeholder:text-(--text-tertiary) focus:border-(--color-primary) focus:outline-none"
+                    className="min-h-10 w-full rounded-lg border border-border bg-white px-3 py-2.5 text-sm text-text-primary placeholder:text-text-muted focus:border-accent focus:outline-none"
                     value={formData.note}
                     onChange={(e) => updateFormField('note', e.target.value)}
                     placeholder="Notes supplementaires..."
@@ -1217,25 +1098,25 @@ export default function Expenses() {
                 </div>
 
                 {(formData.inputMode === 'ttc' ? formData.amountTtc : formData.amountHt) && (
-                  <div className="space-y-2 rounded-lg bg-[#EEF2FF] px-4 py-3.5">
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-(--text-secondary)">Montant HT :</span>
-                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.ht)}</span>
+                  <div className="space-y-2 rounded-lg bg-accent-soft px-4 py-3.5">
+                    <div className="flex items-center justify-between text-compact">
+                      <span className="text-text-secondary">Montant HT :</span>
+                      <span className="font-medium text-text-primary">{formatCurrency(calculatedValues.ht)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-(--text-secondary)">TVA :</span>
-                      <span className="font-medium text-(--text-primary)">{formatCurrency(calculatedValues.tax)}</span>
+                    <div className="flex items-center justify-between text-compact">
+                      <span className="text-text-secondary">TVA :</span>
+                      <span className="font-medium text-text-primary">{formatCurrency(calculatedValues.tax)}</span>
                     </div>
-                    <div className="flex items-center justify-between text-[13px]">
-                      <span className="text-(--text-secondary)">Total TTC :</span>
-                      <span className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">{formatCurrency(calculatedValues.ttc)}</span>
+                    <div className="flex items-center justify-between text-compact">
+                      <span className="text-text-secondary">Total TTC :</span>
+                      <span className="font-display text-base font-semibold text-text-primary">{formatCurrency(calculatedValues.ttc)}</span>
                     </div>
                     {calculatedValues.tax > 0 && (
                       <>
-                        <div className="h-px w-full bg-(--border-default)" />
-                        <div className="flex items-center justify-between text-[13px]">
-                          <span className="text-(--text-secondary)">TVA recuperable :</span>
-                          <span className="font-['Space_Grotesk'] text-base font-semibold text-(--color-success)">{formatCurrency(calculatedRecovery)}</span>
+                        <div className="h-px w-full bg-border" />
+                        <div className="flex items-center justify-between text-compact">
+                          <span className="text-text-secondary">TVA recuperable :</span>
+                          <span className="font-display text-base font-semibold text-success">{formatCurrency(calculatedRecovery)}</span>
                         </div>
                       </>
                     )}
@@ -1243,22 +1124,22 @@ export default function Expenses() {
                 )}
               </div>
 
-              <div className="h-px w-full bg-(--border-default)" />
+              <div className="h-px w-full bg-border" />
               <div className="flex items-center justify-end gap-3 px-7 pt-4 pb-6">
-                <AppButton type="button" variant="outline" onClick={closeModal}>
+                <Button type="button" variant="secondary" onClick={closeModal}>
                   Annuler
-                </AppButton>
-                <AppButton
+                </Button>
+                <Button
                   type="submit"
                   startIcon={createMutation.isPending || updateMutation.isPending ? null : <Check className="h-4 w-4" />}
                   disabled={createMutation.isPending || updateMutation.isPending}
                 >
                   {createMutation.isPending || updateMutation.isPending ? (
-                    <span className="loading loading-spinner loading-sm" />
+                    <Spinner size="sm" />
                   ) : (
                     submitLabel
                   )}
-                </AppButton>
+                </Button>
               </div>
             </form>
           </div>
@@ -1267,13 +1148,13 @@ export default function Expenses() {
 
       {/* Delete Confirmation Dialog */}
       <ConfirmDialog
-        isOpen={deleteConfirmId !== null}
+        open={deleteConfirmId !== null}
         title="Supprimer la dépense"
         message="Êtes-vous sûr de vouloir supprimer cette dépense ? Cette action est irréversible."
         confirmLabel="Supprimer"
         cancelLabel="Annuler"
-        variant="danger"
-        isLoading={deleteMutation.isPending}
+        tone="danger"
+        loading={deleteMutation.isPending}
         onConfirm={() => deleteConfirmId && handleDelete(deleteConfirmId)}
         onCancel={() => setDeleteConfirmId(null)}
       />

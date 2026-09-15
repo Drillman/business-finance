@@ -1,5 +1,6 @@
-import { useState, useEffect } from 'react'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useAccountBalance, useUpdateAccountBalance, useAccountSummary } from '../hooks/useAccount'
+import { Badge, DataTable, Spinner, type DataTableColumn } from '@drillman/dashboard-ui'
 
 function formatCurrency(amount: string | number): string {
   const num = typeof amount === 'string' ? parseFloat(amount) : amount
@@ -7,6 +8,23 @@ function formatCurrency(amount: string | number): string {
     style: 'currency',
     currency: 'EUR',
   }).format(num)
+}
+
+interface ObligationRow {
+  key: string
+  type: ReactNode
+  pending: ReactNode
+  estimated: ReactNode
+  total: ReactNode
+}
+
+interface FundsRow {
+  key: string
+  label: string
+  value: string
+  labelClassName?: string
+  valueClassName?: string
+  subtotal?: boolean
 }
 
 export default function BusinessAccount() {
@@ -60,21 +78,100 @@ export default function BusinessAccount() {
   if (isLoading) {
     return (
       <div className="flex justify-center py-12">
-        <span className="loading loading-spinner loading-lg"></span>
+        <Spinner size="lg" />
       </div>
     )
   }
 
+  const obligationRows: ObligationRow[] = [
+    {
+      key: 'tva',
+      type: <Badge tone="accent">TVA</Badge>,
+      pending: summary ? formatCurrency(summary.pendingTva) : '0 €',
+      estimated: summary ? formatCurrency(summary.estimatedTva) : '0 €',
+      total: formatCurrency(totalTva),
+    },
+    {
+      key: 'urssaf',
+      type: <Badge tone="info">Urssaf</Badge>,
+      pending: summary ? formatCurrency(summary.pendingUrssaf) : '0 €',
+      estimated: summary ? formatCurrency(summary.estimatedUrssaf) : '0 €',
+      total: formatCurrency(totalUrssaf),
+    },
+    {
+      key: 'expenses',
+      type: (
+        <Badge tone="danger" title={expensesTypicalLabel}>
+          Dépenses (médiane {expensesSampleMonths || 6} mois)
+        </Badge>
+      ),
+      pending: <span className="text-text-secondary">—</span>,
+      estimated: summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €',
+      total: summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €',
+    },
+  ]
+
+  const obligationColumns: DataTableColumn<ObligationRow>[] = [
+    { key: 'type', header: 'Type', cell: (row) => row.type },
+    { key: 'pending', header: 'En attente', align: 'right', width: 'w-32', cell: (row) => row.pending },
+    { key: 'estimated', header: 'Estimé', align: 'right', width: 'w-32', className: 'text-text-secondary', cell: (row) => row.estimated },
+    {
+      key: 'total',
+      header: 'Total',
+      align: 'right',
+      width: 'w-32',
+      cell: (row) => <span className="font-medium">{row.total}</span>,
+      footer: <span className="font-bold text-warning">{summary ? formatCurrency(summary.totalObligations) : '0 €'}</span>,
+    },
+  ]
+
+  const fundsRows: FundsRow[] = [
+    { key: 'balance', label: 'Solde du compte', value: summary ? formatCurrency(summary.currentBalance) : '0 €' },
+    {
+      key: 'obligations',
+      label: '- Total des obligations',
+      value: summary ? formatCurrency(summary.totalObligations) : '0 €',
+      labelClassName: 'text-danger',
+      valueClassName: 'text-danger',
+    },
+    {
+      key: 'before-salary',
+      label: '= Fonds hors salaire',
+      value: formatCurrency(availableBeforeSalary),
+      valueClassName: availableBeforeSalary >= 0 ? 'text-success' : 'text-danger',
+      subtotal: true,
+    },
+    {
+      key: 'salary',
+      label: '- Salaire réservé',
+      value: summary ? formatCurrency(summary.nextMonthSalary) : '0 €',
+      labelClassName: 'text-info',
+      valueClassName: 'text-info',
+    },
+    {
+      key: 'available',
+      label: '= Fonds disponibles',
+      value: summary ? formatCurrency(summary.availableFunds) : '0 €',
+      valueClassName: `font-bold ${isAvailablePositive ? 'text-success' : 'text-danger'}`,
+      subtotal: true,
+    },
+  ]
+
+  const fundsColumns: DataTableColumn<FundsRow>[] = [
+    { key: 'label', cell: (row) => <span className={row.labelClassName}>{row.label}</span> },
+    { key: 'value', align: 'right', width: 'w-40', cell: (row) => <span className={row.valueClassName}>{row.value}</span> },
+  ]
+
   return (
     <div className="flex flex-col gap-7">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <h1 className="text-3xl font-semibold tracking-tight text-(--text-primary)">Compte entreprise</h1>
+        <h1 className="text-3xl font-semibold tracking-tight text-text-primary">Compte entreprise</h1>
       </div>
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
-        <section className="min-h-44 rounded-[10px] border border-(--border-default) bg-(--card-bg) p-6 shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
-          <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">Solde actuel</h2>
-          <p className="mt-3 text-[13px] text-(--text-secondary)">
+        <section className="min-h-44 rounded-card border border-border bg-surface p-6 ">
+          <h2 className="font-display text-base font-semibold text-text-primary">Solde actuel</h2>
+          <p className="mt-3 text-compact text-text-secondary">
             Entrez le solde actuel de votre compte bancaire professionnel
           </p>
 
@@ -84,150 +181,76 @@ export default function BusinessAccount() {
               step="0.01"
               min="0"
               placeholder="0,00"
-              className="h-10 w-full rounded-l-lg border-y border-l border-(--border-default) px-3 text-sm text-(--text-primary) outline-none focus:border-(--color-primary)"
+              className="h-10 w-full rounded-l-lg border-y border-l border-border px-3 text-sm text-text-primary outline-none focus:border-accent"
               value={inputBalance}
               onChange={(e) => setInputBalance(e.target.value)}
             />
             <button
-              className="inline-flex h-10 min-w-34 items-center justify-center rounded-r-lg bg-(--color-primary) px-4 text-[13px] font-semibold text-white transition-colors hover:bg-[#1D4ED8] disabled:cursor-not-allowed disabled:opacity-60"
+              className="inline-flex h-10 min-w-34 items-center justify-center rounded-r-lg bg-accent px-4 text-compact font-semibold text-white transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:opacity-60"
               onClick={handleUpdateBalance}
               disabled={updateBalance.isPending}
             >
-              {updateBalance.isPending ? <span className="loading loading-spinner loading-sm" /> : 'Mettre à jour'}
+              {updateBalance.isPending ? <Spinner size="sm" /> : 'Mettre à jour'}
             </button>
           </div>
 
           {error ? (
-            <p className="mt-2 text-xs text-(--color-error)">{error}</p>
+            <p className="mt-2 text-xs text-danger">{error}</p>
           ) : null}
           {successMessage ? (
-            <p className="mt-2 text-xs text-(--color-success)">{successMessage}</p>
+            <p className="mt-2 text-xs text-success">{successMessage}</p>
           ) : null}
 
           {balance ? (
-            <p className="mt-3 text-[11px] text-(--text-tertiary)">
+            <p className="mt-3 text-[11px] text-text-muted">
               Dernière mise à jour : {new Date(balance.updatedAt).toLocaleDateString('fr-FR')}
             </p>
           ) : null}
         </section>
 
         <section
-          className="flex min-h-44 flex-col items-center justify-center rounded-[10px] border border-(--border-default) border-l-[3px] bg-(--card-bg) px-6 py-6 text-center shadow-[0_1px_4px_rgba(0,0,0,0.06)]"
-          style={{ borderLeftColor: isAvailablePositive ? '#34D399' : 'var(--color-error)' }}
+          className="flex min-h-44 flex-col items-center justify-center rounded-card border border-border border-l-[3px] bg-surface px-6 py-6 text-center "
+          style={{ borderLeftColor: isAvailablePositive ? 'var(--dui-success)' : 'var(--dui-danger)' }}
         >
-          <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">Fonds disponibles</h2>
-          <p className={`mt-3 font-['Space_Grotesk'] text-[36px] leading-none font-bold tracking-[-0.03em] ${isAvailablePositive ? 'text-[#34D399]' : 'text-(--color-error)'}`}>
+          <h2 className="font-display text-base font-semibold text-text-primary">Fonds disponibles</h2>
+          <p className={`mt-3 font-display text-[36px] leading-none font-bold tracking-[-0.03em] ${isAvailablePositive ? 'text-success' : 'text-danger'}`}>
             {summary ? formatCurrency(summary.availableFunds) : '0 €'}
           </p>
-          <p className="mt-3 text-[13px] text-(--text-secondary)">
+          <p className="mt-3 text-compact text-text-secondary">
             Après déduction de toutes les obligations et du salaire réservé
           </p>
         </section>
       </div>
 
       <div className="grid grid-cols-1 gap-6">
-        <section className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <section className="overflow-hidden rounded-card border border-border bg-surface ">
           <div className="px-6 py-4">
-            <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">Détail des obligations</h2>
+            <h2 className="font-display text-base font-semibold text-text-primary">Détail des obligations</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-155 table-fixed border-collapse">
-              <thead>
-                <tr className="h-10.5 border-b border-(--border-default) bg-(--color-base-200)">
-                  <th className="px-6 text-left text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Type</th>
-                  <th className="w-30 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">En attente</th>
-                  <th className="w-30 px-3 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Estimé</th>
-                  <th className="w-30 px-6 text-right text-[11px] font-semibold uppercase tracking-[0.08em] text-(--text-tertiary)">Total</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6">
-                    <span className="inline-flex h-5.5 items-center rounded-full bg-[#DBEAFE] px-2 text-[11px] font-semibold text-[#3B82F6]">TVA</span>
-                  </td>
-                  <td className="px-3 text-right text-[13px] text-(--text-primary)">{summary ? formatCurrency(summary.pendingTva) : '0 €'}</td>
-                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.estimatedTva) : '0 €'}</td>
-                  <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{formatCurrency(totalTva)}</td>
-                </tr>
-
-                <tr className="h-10 border-b border-(--border-default) bg-(--color-base-200)/45">
-                  <td className="px-6">
-                    <span className="inline-flex h-5.5 items-center rounded-full bg-[#E0F2FE] px-2 text-[11px] font-semibold text-[#0284C7]">Urssaf</span>
-                  </td>
-                  <td className="px-3 text-right text-[13px] text-(--text-primary)">{summary ? formatCurrency(summary.pendingUrssaf) : '0 €'}</td>
-                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.estimatedUrssaf) : '0 €'}</td>
-                  <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{formatCurrency(totalUrssaf)}</td>
-                </tr>
-
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6">
-                    <span className="inline-flex h-5.5 items-center rounded-full bg-[#FEE2E2] px-2 text-[11px] font-semibold text-[#DC2626]" title={expensesTypicalLabel}>
-                      Dépenses (médiane {expensesSampleMonths || 6} mois)
-                    </span>
-                  </td>
-                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">—</td>
-                  <td className="px-3 text-right text-[13px] text-(--text-secondary)">{summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €'}</td>
-                  <td className="px-6 text-right text-[13px] font-medium text-(--text-primary)">{summary ? formatCurrency(summary.typicalMonthlyExpenses) : '0 €'}</td>
-                </tr>
-              </tbody>
-              <tfoot>
-                <tr className="h-11 bg-(--color-base-200)">
-                  <td className="px-6 text-[13px] font-semibold text-(--text-primary)">Total des obligations</td>
-                  <td className="px-3" />
-                  <td className="px-3" />
-                  <td className="px-6 text-right text-sm font-bold text-[#FBBF24]">{summary ? formatCurrency(summary.totalObligations) : '0 €'}</td>
-                </tr>
-              </tfoot>
-            </table>
-          </div>
+          <DataTable
+            variant="plain"
+            columns={obligationColumns}
+            rows={obligationRows}
+            getRowKey={(row) => row.key}
+            footerLabel="Total des obligations"
+            minWidth="min-w-155"
+          />
         </section>
 
-        <section className="overflow-hidden rounded-[10px] border border-(--border-default) bg-(--card-bg) shadow-[0_1px_4px_rgba(0,0,0,0.06)]">
+        <section className="overflow-hidden rounded-card border border-border bg-surface ">
           <div className="px-6 py-4">
-            <h2 className="font-['Space_Grotesk'] text-base font-semibold text-(--text-primary)">Calcul des fonds disponibles</h2>
+            <h2 className="font-display text-base font-semibold text-text-primary">Calcul des fonds disponibles</h2>
           </div>
 
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-105 table-fixed border-collapse">
-              <tbody>
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6 text-sm text-(--text-primary)">Solde du compte</td>
-                  <td className="w-30 px-6 text-right text-sm text-(--text-primary)">
-                    {summary ? formatCurrency(summary.currentBalance) : '0 €'}
-                  </td>
-                </tr>
-
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6 text-sm text-(--color-error)">- Total des obligations</td>
-                  <td className="w-30 px-6 text-right text-sm text-(--color-error)">
-                    {summary ? formatCurrency(summary.totalObligations) : '0 €'}
-                  </td>
-                </tr>
-
-                <tr className="h-11 border-y border-(--border-default) border-t-2 bg-(--color-base-200)">
-                  <td className="px-6 text-sm font-semibold text-(--text-primary)">= Fonds hors salaire</td>
-                  <td className={`w-30 px-6 text-right text-sm font-semibold ${availableBeforeSalary >= 0 ? 'text-[#34D399]' : 'text-(--color-error)'}`}>
-                    {formatCurrency(availableBeforeSalary)}
-                  </td>
-                </tr>
-
-                <tr className="h-10 border-b border-(--border-default)">
-                  <td className="px-6 text-sm text-[#3B82F6]">- Salaire réservé</td>
-                  <td className="w-30 px-6 text-right text-sm text-[#3B82F6]">
-                    {summary ? formatCurrency(summary.nextMonthSalary) : '0 €'}
-                  </td>
-                </tr>
-
-                <tr className="h-11 border-t-2 border-(--border-default) bg-(--color-base-200)">
-                  <td className="px-6 text-sm font-semibold text-(--text-primary)">= Fonds disponibles</td>
-                  <td className={`w-30 px-6 text-right text-sm font-bold ${isAvailablePositive ? 'text-[#34D399]' : 'text-(--color-error)'}`}>
-                    {summary ? formatCurrency(summary.availableFunds) : '0 €'}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <DataTable
+            variant="plain"
+            columns={fundsColumns}
+            rows={fundsRows}
+            getRowKey={(row) => row.key}
+            rowClassName={(row) => (row.subtotal ? 'bg-surface-subtle font-semibold' : undefined)}
+            minWidth="min-w-105"
+          />
         </section>
       </div>
     </div>

@@ -3,7 +3,8 @@ import { useNavigate, Link } from 'react-router-dom'
 import { useRegister } from '../hooks/useAuth'
 import { signupWithPasskey, isPasskeySupported } from '../utils/passkey'
 import { useQueryClient } from '@tanstack/react-query'
-import { XCircle, Fingerprint } from 'lucide-react'
+import { Fingerprint } from 'lucide-react'
+import { Alert, Button, Card, Input } from '@drillman/dashboard-ui'
 
 export default function Register() {
   const [email, setEmail] = useState('')
@@ -66,117 +67,82 @@ export default function Register() {
   const supportsPasskey = isPasskeySupported()
 
   return (
-    <div className="min-h-screen bg-base-200 flex items-center justify-center p-4">
-      <div className="card w-full max-w-md bg-base-100 shadow-xl">
-        <div className="card-body">
-          <h2 className="card-title text-2xl justify-center mb-4">Créer un compte</h2>
+    <div className="flex min-h-screen items-center justify-center bg-page p-4">
+      <Card padding="lg" className="w-full max-w-md">
+        <h2 className="mb-6 text-center font-display text-2xl font-semibold tracking-tight text-text-primary">
+          Créer un compte
+        </h2>
 
-          {error && (
-            <div className="alert alert-error mb-4">
-              <XCircle className="h-6 w-6 shrink-0" />
-              <span>{error}</span>
-            </div>
-          )}
+        {error && (
+          <Alert tone="danger" className="mb-4">
+            {error}
+          </Alert>
+        )}
 
-          <form onSubmit={handleSubmit}>
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
-              </label>
-              <input
-                type="email"
-                placeholder="email@exemple.com"
-                className="input input-bordered w-full"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                autoComplete="email"
-              />
-            </div>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <Input
+            label="Email"
+            type="email"
+            placeholder="email@exemple.com"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            autoComplete="email"
+          />
+          <Input
+            label="Mot de passe"
+            type="password"
+            placeholder="••••••••"
+            hint="Minimum 8 caractères"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            required
+            autoComplete="new-password"
+          />
+          <Input
+            label="Confirmer le mot de passe"
+            type="password"
+            placeholder="••••••••"
+            value={confirmPassword}
+            onChange={(e) => setConfirmPassword(e.target.value)}
+            required
+            autoComplete="new-password"
+          />
+          <Button type="submit" fullWidth loading={registerMutation.isPending} className="mt-2">
+            S'inscrire
+          </Button>
+        </form>
 
-            <div className="form-control mt-4">
-              <label className="label">
-                <span className="label-text">Mot de passe</span>
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input input-bordered w-full"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-              />
-              <label className="label">
-                <span className="label-text-alt">Minimum 8 caractères</span>
-              </label>
-            </div>
-
-            <div className="form-control mt-2">
-              <label className="label">
-                <span className="label-text">Confirmer le mot de passe</span>
-              </label>
-              <input
-                type="password"
-                placeholder="••••••••"
-                className="input input-bordered w-full"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                required
-                autoComplete="new-password"
-              />
+        {supportsPasskey && (
+          <>
+            <div className="my-5 flex items-center gap-3 text-xs text-text-muted">
+              <div className="h-px flex-1 bg-border" />
+              ou
+              <div className="h-px flex-1 bg-border" />
             </div>
 
-            <div className="form-control mt-6">
-              <button
-                type="submit"
-                className="btn btn-primary"
-                disabled={registerMutation.isPending}
-              >
-                {registerMutation.isPending ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  "S'inscrire"
-                )}
-              </button>
-            </div>
-          </form>
+            <Button
+              variant="secondary"
+              fullWidth
+              onClick={handlePasskeySignup}
+              loading={isPasskeyLoading}
+              startIcon={<Fingerprint className="size-4" />}
+            >
+              S'inscrire avec Passkey
+            </Button>
+            <p className="mt-2 text-center text-sm text-text-secondary">
+              Inscription sans mot de passe avec votre appareil
+            </p>
+          </>
+        )}
 
-          {supportsPasskey && (
-            <>
-              <div className="divider">ou</div>
-
-              <button
-                type="button"
-                className="btn btn-outline gap-2"
-                onClick={handlePasskeySignup}
-                disabled={isPasskeyLoading}
-              >
-                {isPasskeyLoading ? (
-                  <span className="loading loading-spinner loading-sm"></span>
-                ) : (
-                  <>
-                    <Fingerprint className="h-5 w-5" />
-                    S'inscrire avec Passkey
-                  </>
-                )}
-              </button>
-              <p className="text-sm text-base-content/70 text-center mt-2">
-                Inscription sans mot de passe avec votre appareil
-              </p>
-            </>
-          )}
-
-          <div className="text-center mt-4">
-            <span className="text-sm text-base-content/70">
-              Déjà un compte ?{' '}
-              <Link to="/login" className="link link-primary">
-                Se connecter
-              </Link>
-            </span>
-          </div>
-        </div>
-      </div>
+        <p className="mt-5 text-center text-sm text-text-secondary">
+          Déjà un compte ?{' '}
+          <Link to="/login" className="font-medium text-accent hover:underline">
+            Se connecter
+          </Link>
+        </p>
+      </Card>
     </div>
   )
 }
